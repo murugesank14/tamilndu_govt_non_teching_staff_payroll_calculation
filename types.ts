@@ -1,3 +1,11 @@
+export interface Promotion {
+  id: string; // for key prop
+  date: string;
+  post: string;
+  gradePay?: number; // for pre-2016
+  level?: string; // for post-2016
+}
+
 export interface EmployeeInput {
   employeeName: string;
   cpsGpfNo: string;
@@ -5,15 +13,17 @@ export interface EmployeeInput {
   retirementAge: '58' | '60';
   dateOfJoining: string;
 
-  basicPay2005: number;
-  scaleId: string;
-  
+  // Pay at time of joining
+  basicPay2005?: number; // For pre-2006 joiners
+  joiningPayInPayBand?: number; // For 6th PC joiners
+  joiningScaleId?: string; // For pre-2006 OR 6th PC joiners
+  joiningLevel?: string; // For 7th PC joiners
+
   selectionGradeDate: string;
   specialGradeDate: string;
+  superGradeDate: string;
 
-  promotionDate: string;
-  promotionPost: string;
-  promotionLevel: string;
+  promotions: Promotion[];
 
   cityGrade: CityGrade;
   
@@ -59,21 +69,20 @@ export interface EmployeeDetails {
     dateOfBirth: string;
     dateOfJoining: string;
     retirementDate: string;
-    promotionDate?: string;
-    promotionPost?: string;
+    promotions: { post: string; date: string }[];
 }
 
 
 export interface PayrollResult {
   employeeDetails: EmployeeDetails;
-  fixation6thPC: {
+  fixation6thPC?: {
     basicPay2005: number;
     multipliedPay: number;
     initialPayInPayBand: number;
     initialGradePay: number;
     initialRevisedBasicPay: number;
   };
-  fixation7thPC: {
+  fixation7thPC?: {
     oldBasicPay: number;
     multipliedPay: number;
     initialRevisedPay: number;

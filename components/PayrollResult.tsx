@@ -1,5 +1,5 @@
 import React from 'react';
-import { PayrollResult as PayrollResultType } from '../types';
+import { PayrollResult as PayrollResultType, Promotion } from '../types';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/Card';
 import { Button } from './ui/Button';
 
@@ -7,10 +7,10 @@ import { Button } from './ui/Button';
 declare global {
     interface Window {
         jspdf: any;
+        htmlToDocx: any;
     }
 }
 declare const XLSX: any;
-declare const htmlToDocx: any;
 
 
 interface PayrollResultProps {
@@ -37,36 +37,47 @@ const PayrollResult: React.FC<PayrollResultProps> = ({ result }) => {
         doc.text('Payroll Calculation Report', 14, 22);
 
         // Employee Summary
+        let summaryBody = [
+            ['Employee Name', employeeDetails.employeeName],
+            ['CPS / GPF No.', employeeDetails.cpsGpfNo],
+            ['Date of Birth', employeeDetails.dateOfBirth],
+            ['Date of Joining', employeeDetails.dateOfJoining],
+            ['Date of Retirement', employeeDetails.retirementDate],
+        ];
+
+        employeeDetails.promotions.forEach((promo, i) => {
+            summaryBody.push([`Promotion ${i+1} Post`, promo.post || 'N/A']);
+            summaryBody.push([`Promotion ${i+1} Date`, promo.date || 'N/A']);
+        });
+
         doc.setFontSize(12);
         doc.text('Employee Summary', 14, 32);
         doc.autoTable({
             startY: 36,
-            body: [
-                ['Employee Name', employeeDetails.employeeName],
-                ['CPS / GPF No.', employeeDetails.cpsGpfNo],
-                ['Date of Birth', employeeDetails.dateOfBirth],
-                ['Date of Joining', employeeDetails.dateOfJoining],
-                ['Date of Retirement', employeeDetails.retirementDate],
-                ['Promotion Post', employeeDetails.promotionPost || 'N/A'],
-                ['Promotion Date', employeeDetails.promotionDate || 'N/A'],
-            ],
+            body: summaryBody,
             theme: 'striped',
             styles: { fontSize: 8 },
         });
 
         // Pay Fixations
         let lastTableY = (doc as any).lastAutoTable.finalY + 10;
-        doc.text('Initial Pay Fixations', 14, lastTableY);
-        doc.autoTable({
-            startY: lastTableY + 4,
-            head: [['Commission', 'Old Basic Pay', 'Factor', 'Intermediate Pay', 'New Basic Pay']],
-            body: [
-                [`6th PC (01-01-2006)`, formatCurrencyForExport(fixation6thPC.basicPay2005), 'x 1.86', `${formatCurrencyForExport(fixation6thPC.initialPayInPayBand)} (PIPB)`, `${formatCurrencyForExport(fixation6thPC.initialRevisedBasicPay)}`],
-                [`7th PC (01-01-2016)`, formatCurrencyForExport(fixation7thPC.oldBasicPay), 'x 2.57', formatCurrencyForExport(fixation7thPC.multipliedPay), `${formatCurrencyForExport(fixation7thPC.initialRevisedPay)} (Lvl ${fixation7thPC.level})`],
-            ],
-            theme: 'grid',
-            styles: { fontSize: 8 },
-        });
+        if (fixation6thPC || fixation7thPC) {
+            doc.text('Initial Pay Fixations', 14, lastTableY);
+            const fixationBody = [];
+            if(fixation6thPC) {
+                fixationBody.push([`6th PC (01-01-2006)`, formatCurrencyForExport(fixation6thPC.basicPay2005), 'x 1.86', `${formatCurrencyForExport(fixation6thPC.initialPayInPayBand)} (PIPB)`, `${formatCurrencyForExport(fixation6thPC.initialRevisedBasicPay)}`]);
+            }
+            if(fixation7thPC) {
+                 fixationBody.push([`7th PC (01-01-2016)`, formatCurrencyForExport(fixation7thPC.oldBasicPay), 'x 2.57', formatCurrencyForExport(fixation7thPC.multipliedPay), `${formatCurrencyForExport(fixation7thPC.initialRevisedPay)} (Lvl ${fixation7thPC.level})`]);
+            }
+            doc.autoTable({
+                startY: lastTableY + 4,
+                head: [['Commission', 'Old Basic Pay', 'Factor', 'Intermediate Pay', 'New Basic Pay']],
+                body: fixationBody,
+                theme: 'grid',
+                styles: { fontSize: 8 },
+            });
+        }
 
         // Yearly Calculations
         yearlyCalculations.forEach(yearData => {
@@ -92,28 +103,34 @@ const PayrollResult: React.FC<PayrollResultProps> = ({ result }) => {
       const wb = XLSX.utils.book_new();
       
       // Summary Sheet
-      const summaryData = [
+      let summaryData = [
         ['Employee Name', employeeDetails.employeeName],
         ['CPS / GPF No.', employeeDetails.cpsGpfNo],
         ['Date of Birth', employeeDetails.dateOfBirth],
         ['Date of Joining', employeeDetails.dateOfJoining],
         ['Date of Retirement', employeeDetails.retirementDate],
-        ['Promotion Post', employeeDetails.promotionPost || 'N/A'],
-        ['Promotion Date', employeeDetails.promotionDate || 'N/A'],
       ];
-      const fixationData = [
-        [],
-        ['Pay Fixation Details'],
-        ['Commission', 'Old Basic Pay', 'Factor', 'Intermediate Pay', 'New Basic Pay'],
-        [`6th PC (01-01-2006)`, fixation6thPC.basicPay2005, 'x 1.86', `${fixation6thPC.initialPayInPayBand} (PIPB)`, fixation6thPC.initialRevisedBasicPay],
-        [`7th PC (01-01-2016)`, fixation7thPC.oldBasicPay, 'x 2.57', fixation7thPC.multipliedPay, `${fixation7thPC.initialRevisedPay} (Lvl ${fixation7thPC.level})`],
-      ]
-      const ws_summary = XLSX.utils.aoa_to_sheet([...summaryData, ...fixationData]);
+      employeeDetails.promotions.forEach((promo, i) => {
+            summaryData.push([`Promotion ${i+1} Post`, promo.post || 'N/A']);
+            summaryData.push([`Promotion ${i+1} Date`, promo.date || 'N/A']);
+      });
+
+      const fixationHeader = [ [], ['Pay Fixation Details'], ['Commission', 'Old Basic Pay', 'Factor', 'Intermediate Pay', 'New Basic Pay']];
+      const fixationData = [];
+       if(fixation6thPC) {
+            fixationData.push([`6th PC (01-01-2006)`, fixation6thPC.basicPay2005, 'x 1.86', `${fixation6thPC.initialPayInPayBand} (PIPB)`, fixation6thPC.initialRevisedBasicPay]);
+        }
+        if(fixation7thPC) {
+            fixationData.push([`7th PC (01-01-2016)`, fixation7thPC.oldBasicPay, 'x 2.57', fixation7thPC.multipliedPay, `${fixation7thPC.initialRevisedPay} (Lvl ${fixation7thPC.level})`]);
+        }
+      
+      const ws_summary = XLSX.utils.aoa_to_sheet([...summaryData, ...fixationHeader, ...fixationData]);
       XLSX.utils.book_append_sheet(wb, ws_summary, 'Summary');
 
       // Yearly Data
-      yearlyCalculations.forEach(yearData => {
-        const yearSheetData = yearData.periods.map(p => ({
+      const allPeriods = yearlyCalculations.flatMap(yearData => 
+        yearData.periods.map(p => ({
+          'Year': yearData.year,
           'Period': p.period,
           'Basic Pay': p.basicPay,
           'DA Rate (%)': p.daRate,
@@ -121,15 +138,36 @@ const PayrollResult: React.FC<PayrollResultProps> = ({ result }) => {
           'HRA': p.hra,
           'Gross Pay': p.grossPay,
           'Remarks': p.remarks.join(' '),
-        }));
-        const ws_year = XLSX.utils.json_to_sheet(yearSheetData);
-        XLSX.utils.book_append_sheet(wb, ws_year, `Year ${yearData.year}`);
-      });
+        }))
+      );
+      const ws_details = XLSX.utils.json_to_sheet(allPeriods);
+      XLSX.utils.book_append_sheet(wb, ws_details, 'Detailed Payroll');
+
 
       XLSX.writeFile(wb, `Payroll_Report_${employeeDetails.employeeName.replace(' ', '_')}.xlsx`);
     };
 
     const handleExportWord = async () => {
+        let promotionHtml = employeeDetails.promotions.map((p,i) => `
+            <tr><td>Promotion ${i+1} Post</td><td>${p.post || 'N/A'}</td></tr>
+            <tr><td>Promotion ${i+1} Date</td><td>${p.date || 'N/A'}</td></tr>
+        `).join('');
+
+        let fixationHtml = '';
+        if (fixation6thPC || fixation7thPC) {
+            fixationHtml += `<h2>Initial Pay Fixations</h2>
+          <table>
+            <thead><tr><th>Commission</th><th>Old Basic Pay</th><th>Factor</th><th>Intermediate Pay</th><th>New Basic Pay</th></tr></thead>
+            <tbody>`;
+            if (fixation6thPC) {
+                 fixationHtml += `<tr><td>6th PC (01-01-2006)</td><td>${formatCurrencyForExport(fixation6thPC.basicPay2005)}</td><td>x 1.86</td><td>${formatCurrencyForExport(fixation6thPC.initialPayInPayBand)} (PIPB)</td><td>${formatCurrencyForExport(fixation6thPC.initialRevisedBasicPay)}</td></tr>`;
+            }
+            if (fixation7thPC) {
+                fixationHtml += `<tr><td>7th PC (01-01-2016)</td><td>${formatCurrencyForExport(fixation7thPC.oldBasicPay)}</td><td>x 2.57</td><td>${formatCurrencyForExport(fixation7thPC.multipliedPay)}</td><td>${formatCurrencyForExport(fixation7thPC.initialRevisedPay)} (Lvl ${fixation7thPC.level})</td></tr>`;
+            }
+            fixationHtml += '</tbody></table>';
+        }
+
         let htmlString = `
           <style>
             body { font-family: Arial, sans-serif; font-size: 10pt; }
@@ -148,18 +186,9 @@ const PayrollResult: React.FC<PayrollResultProps> = ({ result }) => {
             <tr><td>Date of Birth</td><td>${employeeDetails.dateOfBirth}</td></tr>
             <tr><td>Date of Joining</td><td>${employeeDetails.dateOfJoining}</td></tr>
             <tr><td>Date of Retirement</td><td>${employeeDetails.retirementDate}</td></tr>
-            <tr><td>Promotion Post</td><td>${employeeDetails.promotionPost || 'N/A'}</td></tr>
-            <tr><td>Promotion Date</td><td>${employeeDetails.promotionDate || 'N/A'}</td></tr>
+            ${promotionHtml}
           </table>
-
-          <h2>Initial Pay Fixations</h2>
-          <table>
-            <thead><tr><th>Commission</th><th>Old Basic Pay</th><th>Factor</th><th>Intermediate Pay</th><th>New Basic Pay</th></tr></thead>
-            <tbody>
-              <tr><td>6th PC (01-01-2006)</td><td>${formatCurrencyForExport(fixation6thPC.basicPay2005)}</td><td>x 1.86</td><td>${formatCurrencyForExport(fixation6thPC.initialPayInPayBand)} (PIPB)</td><td>${formatCurrencyForExport(fixation6thPC.initialRevisedBasicPay)}</td></tr>
-              <tr><td>7th PC (01-01-2016)</td><td>${formatCurrencyForExport(fixation7thPC.oldBasicPay)}</td><td>x 2.57</td><td>${formatCurrencyForExport(fixation7thPC.multipliedPay)}</td><td>${formatCurrencyForExport(fixation7thPC.initialRevisedPay)} (Lvl ${fixation7thPC.level})</td></tr>
-            </tbody>
-          </table>
+          ${fixationHtml}
         `;
         
         yearlyCalculations.forEach(yearData => {
@@ -179,7 +208,7 @@ const PayrollResult: React.FC<PayrollResultProps> = ({ result }) => {
             htmlString += `</tbody></table>`;
         });
         
-        const blob = await htmlToDocx.asBlob(htmlString);
+        const blob = await window.htmlToDocx.asBlob(htmlString);
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -200,98 +229,60 @@ const PayrollResult: React.FC<PayrollResultProps> = ({ result }) => {
           </div>
         </CardHeader>
         <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-2 text-sm">
-            <div>
-                <p className="text-gray-500">Employee Name</p>
-                <p className="font-semibold">{employeeDetails.employeeName || 'N/A'}</p>
-            </div>
-             <div>
-                <p className="text-gray-500">CPS / GPF No.</p>
-                <p className="font-semibold">{employeeDetails.cpsGpfNo || 'N/A'}</p>
-            </div>
-             <div>
-                <p className="text-gray-500">Date of Birth</p>
-                <p className="font-semibold">{employeeDetails.dateOfBirth || 'N/A'}</p>
-            </div>
-             <div>
-                <p className="text-gray-500">Date of Joining</p>
-                <p className="font-semibold">{employeeDetails.dateOfJoining || 'N/A'}</p>
-            </div>
-            <div>
-                <p className="text-gray-500">Date of Retirement</p>
-                <p className="font-semibold">{employeeDetails.retirementDate || 'N/A'}</p>
-            </div>
-            {employeeDetails.promotionDate && (
-                 <div>
-                    <p className="text-gray-500">Promotion Post</p>
-                    <p className="font-semibold">{employeeDetails.promotionPost || 'N/A'}</p>
-                </div>
-            )}
-             {employeeDetails.promotionDate && (
-                 <div>
-                    <p className="text-gray-500">Promotion Date</p>
-                    <p className="font-semibold">{employeeDetails.promotionDate}</p>
-                </div>
-            )}
+            <div><p className="text-gray-500">Employee Name</p><p className="font-semibold">{employeeDetails.employeeName || 'N/A'}</p></div>
+            <div><p className="text-gray-500">CPS / GPF No.</p><p className="font-semibold">{employeeDetails.cpsGpfNo || 'N/A'}</p></div>
+            <div><p className="text-gray-500">Date of Birth</p><p className="font-semibold">{employeeDetails.dateOfBirth || 'N/A'}</p></div>
+            <div><p className="text-gray-500">Date of Joining</p><p className="font-semibold">{employeeDetails.dateOfJoining || 'N/A'}</p></div>
+            <div><p className="text-gray-500">Date of Retirement</p><p className="font-semibold">{employeeDetails.retirementDate || 'N/A'}</p></div>
+            {employeeDetails.promotions.map((promo, index) => (
+                <React.Fragment key={index}>
+                    <div>
+                        <p className="text-gray-500">Promotion {index + 1} Post</p>
+                        <p className="font-semibold">{promo.post || 'N/A'}</p>
+                    </div>
+                    <div>
+                        <p className="text-gray-500">Promotion {index + 1} Date</p>
+                        <p className="font-semibold">{promo.date}</p>
+                    </div>
+                </React.Fragment>
+            ))}
         </CardContent>
       </Card>
       
-      <Card>
-        <CardHeader>
-          <CardTitle>Initial Pay Fixations</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-           <div>
-              <h4 className="font-semibold text-md text-gray-600 mb-3 border-b pb-2">6th Pay Commission Fixation (as on 01-01-2006)</h4>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                <div>
-                  <p className="text-gray-500">Old Basic Pay</p>
-                  <p className="font-semibold text-lg">{formatCurrency(fixation6thPC.basicPay2005)}</p>
-                </div>
-                <div>
-                  <p className="text-gray-500">x 1.86 Factor</p>
-                  <p className="font-semibold text-lg">{formatCurrency(fixation6thPC.multipliedPay)}</p>
-                </div>
-                 <div>
-                  <p className="text-gray-500">Pay in Pay Band</p>
-                  <p className="font-semibold text-lg">{formatCurrency(fixation6thPC.initialPayInPayBand)}</p>
-                </div>
-                <div>
-                  <p className="text-gray-500">Revised Basic Pay</p>
-                  <p className="font-semibold text-lg text-green-600">{formatCurrency(fixation6thPC.initialRevisedBasicPay)}</p>
-                  <p className="text-xs text-gray-500"> (PIPB + {formatCurrency(fixation6thPC.initialGradePay)} GP)</p>
-                </div>
+      {(fixation6thPC || fixation7thPC) && (
+        <Card>
+          <CardHeader><CardTitle>Initial Pay Fixations</CardTitle></CardHeader>
+          <CardContent className="space-y-6">
+            {fixation6thPC && (
+              <div>
+                  <h4 className="font-semibold text-md text-gray-600 mb-3 border-b pb-2">6th Pay Commission Fixation</h4>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    <div><p className="text-gray-500">Old Basic Pay</p><p className="font-semibold text-lg">{formatCurrency(fixation6thPC.basicPay2005)}</p></div>
+                    <div><p className="text-gray-500">x 1.86 Factor</p><p className="font-semibold text-lg">{formatCurrency(fixation6thPC.multipliedPay)}</p></div>
+                    <div><p className="text-gray-500">Pay in Pay Band</p><p className="font-semibold text-lg">{formatCurrency(fixation6thPC.initialPayInPayBand)}</p></div>
+                    <div><p className="text-gray-500">Revised Basic Pay</p><p className="font-semibold text-lg text-green-600">{formatCurrency(fixation6thPC.initialRevisedBasicPay)}</p><p className="text-xs text-gray-500"> (PIPB + {formatCurrency(fixation6thPC.initialGradePay)} GP)</p></div>
+                  </div>
               </div>
-          </div>
-           <div>
-              <h4 className="font-semibold text-md text-gray-600 mb-3 border-b pb-2">7th Pay Commission Fixation (as on 01-01-2016)</h4>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                <div>
-                  <p className="text-gray-500">Old Basic Pay</p>
-                  <p className="font-semibold text-lg">{formatCurrency(fixation7thPC.oldBasicPay)}</p>
-                </div>
-                <div>
-                  <p className="text-gray-500">x 2.57 Fitment</p>
-                  <p className="font-semibold text-lg">{formatCurrency(fixation7thPC.multipliedPay)}</p>
-                </div>
-                <div>
-                  <p className="text-gray-500">New Pay Level</p>
-                  <p className="font-semibold text-lg">{fixation7thPC.level}</p>
-                </div>
-                <div>
-                  <p className="text-gray-500">Revised Basic Pay</p>
-                  <p className="font-semibold text-lg text-green-600">{formatCurrency(fixation7thPC.initialRevisedPay)}</p>
-                </div>
+            )}
+            {fixation7thPC && (
+              <div>
+                  <h4 className="font-semibold text-md text-gray-600 mb-3 border-b pb-2">7th Pay Commission Fixation</h4>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    <div><p className="text-gray-500">Old Basic Pay</p><p className="font-semibold text-lg">{formatCurrency(fixation7thPC.oldBasicPay)}</p></div>
+                    <div><p className="text-gray-500">x 2.57 Fitment</p><p className="font-semibold text-lg">{formatCurrency(fixation7thPC.multipliedPay)}</p></div>
+                    <div><p className="text-gray-500">New Pay Level</p><p className="font-semibold text-lg">{fixation7thPC.level}</p></div>
+                    <div><p className="text-gray-500">Revised Basic Pay</p><p className="font-semibold text-lg text-green-600">{formatCurrency(fixation7thPC.initialRevisedPay)}</p></div>
+                  </div>
               </div>
-          </div>
-        </CardContent>
-      </Card>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       <div className="space-y-6">
         {yearlyCalculations.map(yearData => (
           <Card key={yearData.year}>
-            <CardHeader>
-              <CardTitle>Payroll for {yearData.year}</CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle>Payroll for {yearData.year}</CardTitle></CardHeader>
             <CardContent>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm text-left">
@@ -311,7 +302,7 @@ const PayrollResult: React.FC<PayrollResultProps> = ({ result }) => {
                         <td className="px-4 py-4 font-medium">{period.period}</td>
                         <td className="px-4 py-4">
                           {formatCurrency(period.basicPay)}
-                           {period.payInPayBand && <p className="text-xs text-gray-500">({formatCurrency(period.payInPayBand)} + {formatCurrency(period.gradePay || 0)} GP)</p>}
+                           {period.payInPayBand != null && <p className="text-xs text-gray-500">({formatCurrency(period.payInPayBand)} + {formatCurrency(period.gradePay || 0)} GP)</p>}
                         </td>
                         <td className="px-4 py-4">{formatCurrency(period.daAmount)} ({period.daRate}%)</td>
                         <td className="px-4 py-4">{formatCurrency(period.hra)}</td>
