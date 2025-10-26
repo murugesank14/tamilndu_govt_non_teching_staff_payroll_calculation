@@ -8,6 +8,7 @@ import { Label } from './ui/Label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/Card';
 import { TrashIcon } from './ui/Icons';
 import { useLanguage } from './LanguageProvider';
+import { AutocompleteInput } from './ui/AutocompleteInput';
 
 interface PayrollFormProps {
   onCalculate: (data: EmployeeInput) => void;
@@ -61,10 +62,18 @@ const PayrollForm: React.FC<PayrollFormProps> = ({ onCalculate, isLoading }) => 
       { id: Date.now().toString(), effectiveDate: '', incrementMonth: 'jul' }
   ]);
   const [breaksInService, setBreaksInService] = useState<BreakInService[]>([]);
+  const [duplicatePromotionError, setDuplicatePromotionError] = useState<{[key: string]: string | null}>({});
   const { t } = useLanguage();
   
   const isCustomPost = formData.joiningPostId === 'custom';
   
+  const promotionPostSuggestions = [
+      ...new Set([
+          ...POSTS.map(p => p.name), 
+          ...promotions.map(p => p.post).filter(Boolean)
+      ])
+  ];
+
   useEffect(() => {
     setAnnualIncrementChanges(prev => {
         const newChanges = [...prev];
@@ -105,15 +114,33 @@ const PayrollForm: React.FC<PayrollFormProps> = ({ onCalculate, isLoading }) => 
   };
 
   const handlePromotionChange = (id: string, field: keyof Promotion, value: string | number) => {
+    if (field === 'post' && typeof value === 'string') {
+        const isDuplicate = promotions.some(p => 
+            p.id !== id && 
+            p.post.trim().toLowerCase() === value.trim().toLowerCase() &&
+            value.trim() !== ''
+        );
+        setDuplicatePromotionError(prev => ({
+            ...prev,
+            [id]: isDuplicate ? '⚠️ Entry already exists / பதிவை ஏற்கனவே சேர்த்துள்ளீர்கள்.' : null
+        }));
+    }
     setPromotions(prev => prev.map(p => p.id === id ? { ...p, [field]: value } : p));
   };
   
   const addPromotion = () => {
-    setPromotions(prev => [...prev, { id: Date.now().toString(), date: '', post: '', level: '12' }]);
+    const newId = Date.now().toString();
+    setPromotions(prev => [...prev, { id: newId, date: '', post: '', level: '12' }]);
+    setDuplicatePromotionError(prev => ({...prev, [newId]: null}));
   };
   
   const removePromotion = (id: string) => {
     setPromotions(prev => prev.filter(p => p.id !== id));
+    setDuplicatePromotionError(prev => {
+        const newErrors = {...prev};
+        delete newErrors[id];
+        return newErrors;
+    });
   };
 
   const handleIncrementChange = (id: string, field: keyof AnnualIncrementChange, value: string) => {
@@ -161,6 +188,7 @@ const PayrollForm: React.FC<PayrollFormProps> = ({ onCalculate, isLoading }) => 
       setPromotions([]);
       setBreaksInService([]);
       setAnnualIncrementChanges([{ id: Date.now().toString(), effectiveDate: '', incrementMonth: 'jul' }]);
+      setDuplicatePromotionError({});
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -172,6 +200,8 @@ const PayrollForm: React.FC<PayrollFormProps> = ({ onCalculate, isLoading }) => 
   const joiningPeriod = joiningDate 
       ? (joiningDate < new Date('2006-01-01') ? 'pre2006' : (joiningDate < new Date('2016-01-01') ? '6thPC' : '7thPC')) 
       : null;
+  
+  const hasDuplicateErrors = Object.values(duplicatePromotionError).some(error => error !== null);
 
   return (
     <form onSubmit={handleSubmit} onReset={handleReset} className="space-y-6">
@@ -413,8 +443,17 @@ const PayrollForm: React.FC<PayrollFormProps> = ({ onCalculate, isLoading }) => 
                   <div key={promo.id} className="p-3 border rounded-md bg-gray-50/80 space-y-3">
                       <div className="flex justify-between items-start">
                          <div className="flex-1 space-y-1">
-                           <Label htmlFor={`promo_post_${promo.id}`}>{t('postOfPromotion')}</Label>
-                           <Input type="text" id={`promo_post_${promo.id}`} value={promo.post} onChange={e => handlePromotionChange(promo.id, 'post', e.target.value)} />
+                            <Label htmlFor={`promo_post_${promo.id}`}>{t('postOfPromotion')}</Label>
+                            <AutocompleteInput
+                                id={`promo_post_${promo.id}`}
+                                value={promo.post}
+                                onValueChange={value => handlePromotionChange(promo.id, 'post', value)}
+                                suggestions={promotionPostSuggestions}
+                                placeholder={t('typeOrSelectPost')}
+                            />
+                            {duplicatePromotionError[promo.id] && (
+                                <p className="text-sm text-red-600 mt-1">{duplicatePromotionError[promo.id]}</p>
+                            )}
                          </div>
                          <Button type="button" onClick={() => removePromotion(promo.id)} variant="destructive" size="icon" className="ml-2 mt-5"><TrashIcon /></Button>
                       </div>
@@ -493,7 +532,7 @@ const PayrollForm: React.FC<PayrollFormProps> = ({ onCalculate, isLoading }) => 
         <Button type="reset" variant="outline">
           {t('resetForm')}
         </Button>
-        <Button type="submit" disabled={isLoading}>
+        <Button type="submit" disabled={isLoading || hasDuplicateErrors}>
           {isLoading ? t('calculating') : t('calculatePayroll')}
         </Button>
       </div>

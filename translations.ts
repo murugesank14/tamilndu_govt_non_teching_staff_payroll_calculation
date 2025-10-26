@@ -74,6 +74,7 @@ export const translations = {
     incrementScheduleHelpText: "First entry defaults to joining date. Add changes if the schedule is modified.",
     newEntrantHelpText: "Pay will be fixed at the minimum of this Level for new entrants.",
     selectDatePrompt: "Please select a Date of Joining to enter pay details.",
+    typeOrSelectPost: "Type or select a post",
 
     // Form Buttons
     addChange: "+ Add Change / + மாற்றம் சேர்",
@@ -182,6 +183,7 @@ export const translations = {
     incrementScheduleHelpText: "முதல் பதிவு சேரும் தேதியாக இருக்கும். அட்டவணை மாற்றப்பட்டால் மாற்றங்களைச் சேர்க்கவும்.",
     newEntrantHelpText: "புதிய பணியாளர்களுக்கு இந்த நிலையின் குறைந்தபட்ச ஊதியம் நிர்ணயிக்கப்படும்.",
     selectDatePrompt: "ஊதிய விவரங்களை உள்ளிட, பணியில் சேரும் தேதியைத் தேர்ந்தெடுக்கவும்.",
+    typeOrSelectPost: "ஒரு பதவியைத் தட்டச்சு செய்யவும் அல்லது தேர்ந்தெடுக்கவும்",
 
     // Form Buttons
     addChange: "+ மாற்றம் சேர் / + Add Change",

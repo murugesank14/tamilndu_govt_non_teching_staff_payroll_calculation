@@ -20,7 +20,10 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
   const [language, setLanguage] = useState<Language>('en');
 
   const t = (key: TranslationKey, vars?: { [key: string]: string | number }): string => {
-    let text = (translations[language] && translations[language][key]) || translations['en'][key];
+    // The type of translations[language] is a union, which TypeScript can't safely index with a key from only one part of the union ('en').
+    // We assert that the selected language object has the same shape as the 'en' object.
+    let text = (translations[language] as typeof translations['en'])[key] || translations['en'][key];
+    
     if (vars) {
         Object.keys(vars).forEach(varKey => {
             const regex = new RegExp(`{${varKey}}`, 'g');

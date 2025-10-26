@@ -13,6 +13,7 @@ declare global {
     interface Window {
         jspdf: any;
         htmlDocx: any;
+        saveAs: (blob: Blob, filename: string) => void;
     }
 }
 declare const XLSX: any;
@@ -304,9 +305,9 @@ const PayrollResult: React.FC<PayrollResultProps> = ({ result }) => {
     };
 
     const handleExportWord = async () => {
-        if (!window.htmlDocx) {
-            alert("The Word export library failed to load. Please check your internet connection and try again.");
-            console.error("`window.htmlDocx` is not available. The html-to-docx script might have failed to load.");
+        if (!window.htmlDocx || !window.saveAs) {
+            alert("A required library (html-to-docx or FileSaver) failed to load. Please check your internet connection and try again.");
+            console.error("`window.htmlDocx` or `window.saveAs` is not available. The scripts might have failed to load.");
             return;
         }
 
@@ -378,12 +379,7 @@ const PayrollResult: React.FC<PayrollResultProps> = ({ result }) => {
         });
         
         const blob = await window.htmlDocx.asBlob(htmlString);
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `Payroll_Report_${employeeDetails.employeeName.replace(' ', '_')}.docx`;
-        a.click();
-        URL.revokeObjectURL(url);
+        window.saveAs(blob, `Payroll_Report_${employeeDetails.employeeName.replace(' ', '_')}.docx`);
     };
 
   return (
