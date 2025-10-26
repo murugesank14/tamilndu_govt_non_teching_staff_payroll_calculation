@@ -4,6 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from './ui/Card';
 import { Button } from './ui/Button';
 import { PayProgressionChart } from './PayProgressionChart';
 import { CareerTimeline } from './CareerTimeline';
+import { ExcelIcon, FileCogIcon, PdfIcon, WordIcon } from './ui/Icons';
+import { YearlyPayrollAccordion } from './YearlyPayrollAccordion';
+import { useLanguage } from './LanguageProvider';
 
 // Declare global variables from CDN scripts to satisfy TypeScript
 declare global {
@@ -30,6 +33,70 @@ const formatCurrencyForExport = (amount: number) => {
 
 const PayrollResult: React.FC<PayrollResultProps> = ({ result }) => {
   const { employeeDetails, fixation6thPC, fixation7thPC, yearlyCalculations } = result;
+  const { t } = useLanguage();
+
+    const handleExportFixationPDF = () => {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        doc.setFont('times', 'bold');
+        doc.setFontSize(16);
+        doc.text('PAY FIXATION STATEMENT', 105, 15, { align: 'center' });
+
+        doc.setFont('times', 'normal');
+        doc.setFontSize(12);
+        const introText = `As per the Tamil Nadu Revised Pay Rules, 2017 (G.O.Ms.No.303, Dated 11th October 2017), the pay for Thiru/Tmt. ${employeeDetails.employeeName}, ${employeeDetails.joiningPost}, is fixed as follows:`;
+        const splitIntro = doc.splitTextToSize(introText, 180);
+        doc.text(splitIntro, 14, 25);
+        
+        let lastY = 45;
+
+        if (fixation6thPC) {
+            doc.setFont('times', 'bold');
+            doc.text('1. Fixation into 6th Pay Commission (w.e.f. 01.01.2006)', 14, lastY);
+            const body = [
+                ['Basic Pay as on 31.12.2005', formatCurrencyForExport(fixation6thPC.basicPay2005)],
+                ['Pay after multiplication by Fitment Factor of 1.86', formatCurrencyForExport(fixation6thPC.multipliedPay)],
+                ['Pay in the revised Pay Band (PB)', formatCurrencyForExport(fixation6thPC.initialPayInPayBand)],
+                ['Applicable Grade Pay (GP)', formatCurrencyForExport(fixation6thPC.initialGradePay)],
+                [{ content: 'Revised Basic Pay (PB + GP)', styles: { fontStyle: 'bold' } }, { content: formatCurrencyForExport(fixation6thPC.initialRevisedBasicPay), styles: { fontStyle: 'bold' } }],
+            ];
+             doc.autoTable({
+                startY: lastY + 4,
+                body: body,
+                theme: 'striped',
+                styles: { fontSize: 10, cellPadding: 2.5 },
+                columnStyles: { 0: { fontStyle: 'bold', cellWidth: 80 } }
+            });
+            lastY = (doc as any).lastAutoTable.finalY;
+        }
+        
+        if (fixation7thPC) {
+            const startY = lastY + 12;
+            doc.setFont('times', 'bold');
+            doc.text('2. Fixation into 7th Pay Commission (w.e.f. 01.01.2016)', 14, startY);
+            const body = [
+                ['Basic Pay as on 31.12.2015', formatCurrencyForExport(fixation7thPC.oldBasicPay)],
+                ['Pay after multiplication by Fitment Factor of 2.57', formatCurrencyForExport(fixation7thPC.multipliedPay)],
+                ['Applicable Level in Pay Matrix', `Level ${fixation7thPC.level}`],
+                [{ content: 'Revised Pay in the applicable Level', styles: { fontStyle: 'bold' } }, { content: formatCurrencyForExport(fixation7thPC.initialRevisedPay), styles: { fontStyle: 'bold' } }],
+            ];
+            doc.autoTable({
+                startY: startY + 4,
+                body: body,
+                theme: 'striped',
+                styles: { fontSize: 10, cellPadding: 2.5 },
+                columnStyles: { 0: { fontStyle: 'bold', cellWidth: 80 } }
+            });
+            lastY = (doc as any).lastAutoTable.finalY;
+        }
+
+        doc.setFont('times', 'normal');
+        doc.text('Signature of Head of Office / Department', 195, lastY + 30, { align: 'right' });
+
+        doc.save(`PayFixation_${employeeDetails.employeeName.replace(' ', '_')}.pdf`);
+    };
+
 
     const handleExportPDF = () => {
         const { jsPDF } = window.jspdf;
@@ -106,6 +173,79 @@ const PayrollResult: React.FC<PayrollResultProps> = ({ result }) => {
         });
 
         doc.save(`Payroll_Report_${employeeDetails.employeeName.replace(' ', '_')}.pdf`);
+    };
+
+    const handleExportLPC = () => {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        const { festivalAdvance, carAdvance, twoWheelerAdvance, computerAdvance, otherPayables } = employeeDetails;
+
+        doc.setFont('times', 'bold');
+        doc.setFontSize(14);
+        doc.text('LAST PAY CERTIFICATE', 105, 15, { align: 'center' });
+        
+        doc.setFont('times', 'normal');
+        doc.setFontSize(12);
+        const introText = `Certified that the following are the particulars of Pay and Allowances drawn by Thiru/Tmt. ${employeeDetails.employeeName}, ${employeeDetails.joiningPost}, who has been relieved from this office on the afternoon of ${employeeDetails.dateOfRelief} to join another post.`;
+        const splitIntro = doc.splitTextToSize(introText, 180);
+        doc.text(splitIntro, 14, 25);
+        
+        let lastY = 40;
+
+        // Pay and Allowances drawn
+        const lastYear = yearlyCalculations[yearlyCalculations.length - 1];
+        const lastPeriod = lastYear.periods[lastYear.periods.length - 1];
+        
+        doc.setFont('times', 'bold');
+        doc.text('1. Rate of Pay and Allowances Drawn:', 14, lastY + 10);
+        const payBody = [
+            ['Basic Pay', formatCurrencyForExport(lastPeriod.basicPay)],
+            ['Dearness Allowance', `${formatCurrencyForExport(lastPeriod.daAmount)} (${lastPeriod.daRate}%)`],
+            ['House Rent Allowance', formatCurrencyForExport(lastPeriod.hra)],
+            [{ content: 'Gross Pay', styles: { fontStyle: 'bold' } }, { content: formatCurrencyForExport(lastPeriod.grossPay), styles: { fontStyle: 'bold' } }],
+        ];
+        doc.autoTable({
+            startY: lastY + 14,
+            body: payBody,
+            theme: 'striped',
+            styles: { fontSize: 10, cellPadding: 2 },
+            columnStyles: { 0: { fontStyle: 'bold', cellWidth: 60 } }
+        });
+        lastY = (doc as any).lastAutoTable.finalY;
+        
+        // Deductions/Advances
+        doc.setFont('times', 'bold');
+        doc.text('2. Outstanding Long Term Advances:', 14, lastY + 10);
+        const advancesBody = [];
+        if (festivalAdvance) advancesBody.push(['Festival Advance', formatCurrencyForExport(festivalAdvance)]);
+        if (carAdvance) advancesBody.push(['Car Advance', formatCurrencyForExport(carAdvance)]);
+        if (twoWheelerAdvance) advancesBody.push(['Two-Wheeler Advance', formatCurrencyForExport(twoWheelerAdvance)]);
+        if (computerAdvance) advancesBody.push(['Computer Advance', formatCurrencyForExport(computerAdvance)]);
+        if (otherPayables) advancesBody.push(['Other Payables / Dues', formatCurrencyForExport(otherPayables)]);
+        
+        if (advancesBody.length > 0) {
+            doc.autoTable({
+                startY: lastY + 14,
+                head: [['Advance / Payable Type', 'Outstanding Amount']],
+                body: advancesBody,
+                theme: 'grid',
+                styles: { fontSize: 10, cellPadding: 2 },
+            });
+            lastY = (doc as any).lastAutoTable.finalY;
+        } else {
+            doc.setFont('times', 'normal');
+            doc.text('NIL', 20, lastY + 20);
+            lastY += 20;
+        }
+
+        const conclusionText = `He/She has been paid up to ${employeeDetails.dateOfRelief}. The details of deductions towards GPF/CPS, Professional Tax, and other subscriptions are recorded in his/her Service Book.`;
+        const splitConclusion = doc.splitTextToSize(conclusionText, 180);
+        doc.setFont('times', 'normal');
+        doc.text(splitConclusion, 14, lastY + 15);
+        
+        doc.text('Signature of Drawing and Disbursing Officer', 195, lastY + 45, { align: 'right' });
+
+        doc.save(`LPC_${employeeDetails.employeeName.replace(' ', '_')}.pdf`);
     };
 
     const handleExportExcel = () => {
@@ -249,44 +389,46 @@ const PayrollResult: React.FC<PayrollResultProps> = ({ result }) => {
   return (
     <div className="space-y-6">
        <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Employee Summary</CardTitle>
-          <div className="flex space-x-2">
-            <Button onClick={handleExportPDF} className="text-xs py-1 px-2">PDF</Button>
-            <Button onClick={handleExportExcel} className="text-xs py-1 px-2">Excel</Button>
-            <Button onClick={handleExportWord} className="text-xs py-1 px-2">Word</Button>
+        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <CardTitle>{t('employeeSummary')}</CardTitle>
+          <div className="flex flex-wrap gap-2">
+            {employeeDetails.dateOfRelief && (
+                <Button onClick={handleExportLPC} size="sm" className="bg-green-600 hover:bg-green-700">{t('exportLPC')}</Button>
+            )}
+             <Button onClick={handleExportFixationPDF} variant="outline" size="sm"><FileCogIcon />{t('exportFixation')}</Button>
+             <Button onClick={handleExportPDF} variant="outline" size="sm"><PdfIcon />{t('exportReportPDF')}</Button>
+             <Button onClick={handleExportExcel} variant="outline" size="sm"><ExcelIcon />{t('exportExcel')}</Button>
+             <Button onClick={handleExportWord} variant="outline" size="sm"><WordIcon />{t('exportWord')}</Button>
           </div>
         </CardHeader>
         <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-2 text-sm">
-            <div><p className="text-gray-500">Employee Name</p><p className="font-semibold">{employeeDetails.employeeName || 'N/A'}</p></div>
-            <div><p className="text-gray-500">Father's Name</p><p className="font-semibold">{employeeDetails.fatherName || 'N/A'}</p></div>
-            <div><p className="text-gray-500">Employee Number</p><p className="font-semibold">{employeeDetails.employeeNo || 'N/A'}</p></div>
-            <div><p className="text-gray-500">CPS / GPF No.</p><p className="font-semibold">{employeeDetails.cpsGpfNo || 'N/A'}</p></div>
-            <div><p className="text-gray-500">PAN Number</p><p className="font-semibold">{employeeDetails.panNumber || 'N/A'}</p></div>
-            <div><p className="text-gray-500">Bank Account No.</p><p className="font-semibold">{employeeDetails.bankAccountNumber || 'N/A'}</p></div>
-            <div><p className="text-gray-500">Date of Birth</p><p className="font-semibold">{employeeDetails.dateOfBirth || 'N/A'}</p></div>
-            <div><p className="text-gray-500">Date of Joining (Service)</p><p className="font-semibold">{employeeDetails.dateOfJoining || 'N/A'}</p></div>
-            <div><p className="text-gray-500">Date of Joining (Office)</p><p className="font-semibold">{employeeDetails.dateOfJoiningInOffice || 'N/A'}</p></div>
-            <div><p className="text-gray-500">Date of Relief (Transfer)</p><p className="font-semibold">{employeeDetails.dateOfRelief || 'N/A'}</p></div>
-            <div><p className="text-gray-500">Post at Joining</p><p className="font-semibold">{employeeDetails.joiningPost || 'N/A'}</p></div>
-            <div><p className="text-gray-500">Date of Retirement</p><p className="font-semibold">{employeeDetails.retirementDate || 'N/A'}</p></div>
-            {employeeDetails.selectionGradeDate && <div><p className="text-gray-500">Selection Grade</p><p className="font-semibold">{employeeDetails.selectionGradeDate}</p></div>}
-            {employeeDetails.specialGradeDate && <div><p className="text-gray-500">Special Grade</p><p className="font-semibold">{employeeDetails.specialGradeDate}</p></div>}
-            {employeeDetails.superGradeDate && <div><p className="text-gray-500">Super Grade</p><p className="font-semibold">{employeeDetails.superGradeDate}</p></div>}
+            <div><p className="text-gray-500">{t('employeeName')}</p><p className="font-semibold">{employeeDetails.employeeName || 'N/A'}</p></div>
+            <div><p className="text-gray-500">{t('fatherName')}</p><p className="font-semibold">{employeeDetails.fatherName || 'N/A'}</p></div>
+            <div><p className="text-gray-500">{t('employeeNo')}</p><p className="font-semibold">{employeeDetails.employeeNo || 'N/A'}</p></div>
+            <div><p className="text-gray-500">{t('cpsGpfNo')}</p><p className="font-semibold">{employeeDetails.cpsGpfNo || 'N/A'}</p></div>
+            <div><p className="text-gray-500">{t('panNumber')}</p><p className="font-semibold">{employeeDetails.panNumber || 'N/A'}</p></div>
+            <div><p className="text-gray-500">{t('bankAccountNumber')}</p><p className="font-semibold">{employeeDetails.bankAccountNumber || 'N/A'}</p></div>
+            <div><p className="text-gray-500">{t('dateOfBirth')}</p><p className="font-semibold">{employeeDetails.dateOfBirth || 'N/A'}</p></div>
+            <div><p className="text-gray-500">{t('dateOfJoiningService')}</p><p className="font-semibold">{employeeDetails.dateOfJoining || 'N/A'}</p></div>
+            <div><p className="text-gray-500">{t('dateOfJoiningOffice')}</p><p className="font-semibold">{employeeDetails.dateOfJoiningInOffice || 'N/A'}</p></div>
+            <div><p className="text-gray-500">{t('dateOfRelief')}</p><p className="font-semibold">{employeeDetails.dateOfRelief || 'N/A'}</p></div>
+            <div><p className="text-gray-500">{t('postAtJoining')}</p><p className="font-semibold">{employeeDetails.joiningPost || 'N/A'}</p></div>
+            <div><p className="text-gray-500">{t('calculatedRetirementDate')}</p><p className="font-semibold">{employeeDetails.retirementDate || 'N/A'}</p></div>
+            {employeeDetails.selectionGradeDate && <div><p className="text-gray-500">{t('selectionGradeDate')}</p><p className="font-semibold">{employeeDetails.selectionGradeDate}</p></div>}
+            {employeeDetails.specialGradeDate && <div><p className="text-gray-500">{t('specialGradeDate')}</p><p className="font-semibold">{employeeDetails.specialGradeDate}</p></div>}
+            {employeeDetails.superGradeDate && <div><p className="text-gray-500">{t('superGradeDate')}</p><p className="font-semibold">{employeeDetails.superGradeDate}</p></div>}
             {employeeDetails.stagnationIncrementDates && employeeDetails.stagnationIncrementDates.length > 0 && 
-              <div className="col-span-full"><p className="text-gray-500">Stagnation Increments</p><p className="font-semibold">{employeeDetails.stagnationIncrementDates.join(', ')}</p></div>
+              <div className="col-span-full"><p className="text-gray-500">{t('stagnationIncrementDate')}</p><p className="font-semibold">{employeeDetails.stagnationIncrementDates.join(', ')}</p></div>
             }
             {employeeDetails.promotions.map((promo, index) => (
                 <React.Fragment key={index}>
                     <div className="col-span-1">
-                        <p className="text-gray-500">Promotion {index + 1} Post</p>
+                        <p className="text-gray-500">{t('promotions')} {index + 1}</p>
                         <p className="font-semibold">{promo.post || 'N/A'}</p>
                     </div>
-                    <div className="md:col-span-2 grid grid-cols-2 gap-x-2">
-                        <div>
-                           <p className="text-gray-500">Promotion {index + 1} Date</p>
+                     <div className="col-span-2">
+                           <p className="text-gray-500">{t('dateOfPromotion')}</p>
                            <p className="font-semibold">{promo.date}</p>
-                        </div>
                     </div>
                 </React.Fragment>
             ))}
@@ -298,81 +440,7 @@ const PayrollResult: React.FC<PayrollResultProps> = ({ result }) => {
         <CareerTimeline result={result} />
       </div>
 
-      {(fixation6thPC || fixation7thPC) && (
-        <Card>
-          <CardHeader><CardTitle>Initial Pay Fixations</CardTitle></CardHeader>
-          <CardContent className="space-y-6">
-            {fixation6thPC && (
-              <div>
-                  <h4 className="font-semibold text-md text-gray-600 mb-3 border-b pb-2">6th Pay Commission Fixation</h4>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                    <div><p className="text-gray-500">Old Basic Pay</p><p className="font-semibold text-lg">{formatCurrency(fixation6thPC.basicPay2005)}</p></div>
-                    <div><p className="text-gray-500">x 1.86 Factor</p><p className="font-semibold text-lg">{formatCurrency(fixation6thPC.multipliedPay)}</p></div>
-                    <div><p className="text-gray-500">Pay in Pay Band</p><p className="font-semibold text-lg">{formatCurrency(fixation6thPC.initialPayInPayBand)}</p></div>
-                    <div><p className="text-gray-500">Revised Basic Pay</p><p className="font-semibold text-lg text-green-600">{formatCurrency(fixation6thPC.initialRevisedBasicPay)}</p><p className="text-xs text-gray-500"> (PIPB + {formatCurrency(fixation6thPC.initialGradePay)} GP)</p></div>
-                  </div>
-              </div>
-            )}
-            {fixation7thPC && (
-              <div>
-                  <h4 className="font-semibold text-md text-gray-600 mb-3 border-b pb-2">7th Pay Commission Fixation</h4>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                    <div><p className="text-gray-500">Old Basic Pay</p><p className="font-semibold text-lg">{formatCurrency(fixation7thPC.oldBasicPay)}</p></div>
-                    <div><p className="text-gray-500">x 2.57 Fitment</p><p className="font-semibold text-lg">{formatCurrency(fixation7thPC.multipliedPay)}</p></div>
-                    <div><p className="text-gray-500">New Pay Level</p><p className="font-semibold text-lg">{fixation7thPC.level}</p></div>
-                    <div><p className="text-gray-500">Revised Basic Pay</p><p className="font-semibold text-lg text-green-600">{formatCurrency(fixation7thPC.initialRevisedPay)}</p></div>
-                  </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
-
-      <div className="space-y-6">
-        {yearlyCalculations.map(yearData => (
-          <Card key={yearData.year}>
-            <CardHeader><CardTitle>Payroll for {yearData.year}</CardTitle></CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm text-left">
-                  <thead className="bg-gray-50 text-xs text-gray-700 uppercase">
-                    <tr>
-                      <th scope="col" className="px-4 py-3">Period</th>
-                      <th scope="col" className="px-4 py-3">Basic Pay</th>
-                      <th scope="col" className="px-4 py-3">DA</th>
-                      <th scope="col" className="px-4 py-3">HRA</th>
-                      <th scope="col" className="px-4 py-3">Gross Pay</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {yearData.periods.map((period, index) => (
-                      <React.Fragment key={index}>
-                      <tr className="border-b hover:bg-gray-50">
-                        <td className="px-4 py-4 font-medium">{period.period}</td>
-                        <td className="px-4 py-4">
-                          {formatCurrency(period.basicPay)}
-                           {period.payInPayBand != null && <p className="text-xs text-gray-500">({formatCurrency(period.payInPayBand)} + {formatCurrency(period.gradePay || 0)} GP)</p>}
-                        </td>
-                        <td className="px-4 py-4">{formatCurrency(period.daAmount)} ({period.daRate}%)</td>
-                        <td className="px-4 py-4">{formatCurrency(period.hra)}</td>
-                        <td className="px-4 py-4 font-bold text-blue-600">{formatCurrency(period.grossPay)}</td>
-                      </tr>
-                      {period.remarks && period.remarks.length > 0 && (
-                        <tr className="bg-blue-50/70 text-blue-800 text-xs">
-                           <td colSpan={5} className="px-4 py-1 italic">
-                               <span className="font-semibold">Note:</span> {period.remarks.join(' ')}
-                           </td>
-                        </tr>
-                      )}
-                      </React.Fragment>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <YearlyPayrollAccordion yearlyCalculations={yearlyCalculations} />
     </div>
   );
 };

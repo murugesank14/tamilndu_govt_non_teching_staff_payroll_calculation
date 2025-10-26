@@ -1,3 +1,4 @@
+
 import { EmployeeInput, PayrollResult, PayrollYear, PayrollPeriod, CityGrade, Promotion } from '../types';
 import { 
     PAY_MATRIX, GRADE_PAY_TO_LEVEL, DA_RATES, HRA_SLABS_7TH_PC, 
@@ -72,7 +73,7 @@ function getHra(basicPay: number, cityGrade: string, date: Date): number {
 
 
 export const calculateFullPayroll = (data: EmployeeInput): PayrollResult => {
-    const { employeeName, fatherName, employeeNo, cpsGpfNo, panNumber, bankAccountNumber, dateOfBirth, retirementAge, dateOfJoining, dateOfJoiningInOffice, dateOfRelief, cityGrade, calculationStartDate, calculationEndDate, promotions, annualIncrementChanges, ...rest } = data;
+    const { employeeName, fatherName, employeeNo, cpsGpfNo, panNumber, bankAccountNumber, dateOfBirth, retirementAge, dateOfJoining, dateOfJoiningInOffice, dateOfRelief, cityGrade, calculationStartDate, calculationEndDate, promotions, annualIncrementChanges, festivalAdvance, carAdvance, twoWheelerAdvance, computerAdvance, otherPayables, breaksInService, incrementEligibilityMonths, ...rest } = data;
     const { selectionGradeDate, specialGradeDate, superGradeDate, joiningPostId, joiningPostCustomName, stagnationIncrementDate, selectionGradeTwoIncrements, specialGradeTwoIncrements } = rest;
     
     const doj = parseDateUTC(dateOfJoining);
@@ -149,7 +150,7 @@ export const calculateFullPayroll = (data: EmployeeInput): PayrollResult => {
             const annualIncrementDate = new Date(Date.UTC(year, incrementMonth, 1));
             
             const cutoffDate = new Date(annualIncrementDate);
-            cutoffDate.setUTCMonth(cutoffDate.getUTCMonth() - 6);
+            cutoffDate.setUTCMonth(cutoffDate.getUTCMonth() - (incrementEligibilityMonths ?? 6));
             if (doj <= cutoffDate && annualIncrementDate > doj) {
                  allEventsPre2016.push({ date: annualIncrementDate, type: 'ANNUAL_INCREMENT' });
             }
@@ -192,12 +193,27 @@ export const calculateFullPayroll = (data: EmployeeInput): PayrollResult => {
             events.push({ date: parseDateUTC(change.effectiveDate)!, type: 'INCREMENT_MONTH_CHANGE', data: { month: change.incrementMonth } });
         }
     });
+    breaksInService?.forEach(b => {
+        if (b.startDate) events.push({ date: parseDateUTC(b.startDate)!, type: 'BREAK_START' });
+        if (b.endDate) {
+            const endDate = parseDateUTC(b.endDate)!;
+            const resumeDate = new Date(endDate.getTime());
+            resumeDate.setUTCDate(resumeDate.getUTCDate() + 1);
+            events.push({ date: resumeDate, type: 'BREAK_END' });
+        }
+    });
 
     const yearlyCalculations: PayrollYear[] = [];
     const startYear = Math.max(2006, doj.getUTCFullYear(), calcStartDate.getUTCFullYear());
     const endYear = Math.min(new Date().getUTCFullYear() + 5, calcEndDate.getUTCFullYear());
 
     let lastStagnationCheckDate = stagnationIncrementDate ? parseDateUTC(stagnationIncrementDate) : null;
+
+    let onBreak = breaksInService?.some(b => {
+        const start = parseDateUTC(b.startDate);
+        const end = parseDateUTC(b.endDate);
+        return start && end && start < calcStartDate && end >= calcStartDate;
+    }) || false;
 
     for (let year = startYear; year <= endYear; year++) {
         const yearData: PayrollYear = { year, periods: [] };
@@ -211,19 +227,20 @@ export const calculateFullPayroll = (data: EmployeeInput): PayrollResult => {
         const annualIncrementDate = new Date(Date.UTC(year, incrementMonth, 1));
         
         const cutoffDate = new Date(annualIncrementDate);
-        cutoffDate.setUTCMonth(cutoffDate.getUTCMonth() - 6);
+        cutoffDate.setUTCMonth(cutoffDate.getUTCMonth() - (incrementEligibilityMonths ?? 6));
         if (doj <= cutoffDate) {
              yearEvents.push({ date: annualIncrementDate, type: 'ANNUAL_INCREMENT' });
         }
 
         // Stagnation Increment Logic
         if (lastStagnationCheckDate && currentLevel >= 24) {
-            const nextStagnationDate = new Date(lastStagnationCheckDate);
-            nextStagnationDate.setUTCFullYear(nextStagnationDate.getUTCFullYear() + 10);
-            if(nextStagnationDate.getUTCFullYear() === year) {
-                yearEvents.push({ date: nextStagnationDate, type: 'STAGNATION_INCREMENT' });
-                stagnationIncrementDates.push(nextStagnationDate.toLocaleDateString('en-GB', { timeZone: 'UTC' }));
-                lastStagnationCheckDate = nextStagnationDate;
+            const nextAnniversary = new Date(lastStagnationCheckDate);
+            nextAnniversary.setUTCFullYear(nextAnniversary.getUTCFullYear() + 10);
+
+            if (nextAnniversary.getUTCFullYear() === year) {
+                yearEvents.push({ date: nextAnniversary, type: 'STAGNATION_INCREMENT' });
+                stagnationIncrementDates.push(nextAnniversary.toLocaleDateString('en-GB', { timeZone: 'UTC' }));
+                lastStagnationCheckDate = nextAnniversary; // Update the date for the next 10-year check
             }
         }
         
@@ -234,21 +251,26 @@ export const calculateFullPayroll = (data: EmployeeInput): PayrollResult => {
             lastDate = doj > calcStartDate ? doj : calcStartDate;
         }
 
-        const processPeriod = (startDate: Date, endDate: Date, remarks: string[]) => {
+        const processPeriod = (startDate: Date, endDate: Date, remarks: string[], isOnBreak: boolean) => {
             if (startDate > endDate || startDate > calcEndDate || endDate < calcStartDate) return;
             const periodStartDate = startDate > calcStartDate ? startDate : calcStartDate;
             const periodEndDate = endDate < calcEndDate ? endDate : calcEndDate;
             if(periodStartDate > periodEndDate) return;
+
+            const startStr = periodStartDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+            const endStr = periodEndDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+            const periodString = `${startStr}, ${year}` + (startStr === endStr ? '' : ` - ${endStr}, ${year}`);
+
+            if (isOnBreak) {
+                yearData.periods.push({ period: periodString, basicPay: 0, daRate: 0, daAmount: 0, hra: 0, grossPay: 0, remarks: ['On Break in Service (LOP / EOL)'] });
+                return;
+            }
 
             const commission = periodStartDate < fixedDate2016 ? 6 : 7;
             const daRate = DA_RATES.filter(r => r.date <= periodStartDate && r.commission === commission).pop()?.rate ?? 0;
             const daAmount = Math.round(currentPay * (daRate / 100));
             const hra = getHra(currentPay, cityGrade, periodStartDate);
             const grossPay = currentPay + daAmount + hra;
-
-            const startStr = periodStartDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
-            const endStr = periodEndDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
-            const periodString = `${startStr}, ${year}` + (startStr === endStr ? '' : ` - ${endStr}, ${year}`);
             
             yearData.periods.push({ period: periodString, basicPay: currentPay, daRate, daAmount, hra, grossPay, remarks, payInPayBand: currentPipb, gradePay: currentGradePay });
         };
@@ -256,7 +278,7 @@ export const calculateFullPayroll = (data: EmployeeInput): PayrollResult => {
         let periodRemarks: string[] = [];
         for (const event of yearEvents) {
             if (event.date > lastDate) {
-                processPeriod(lastDate, new Date(event.date.getTime() - 1), periodRemarks);
+                processPeriod(lastDate, new Date(event.date.getTime() - 1), periodRemarks, onBreak);
                 periodRemarks = [];
             }
             lastDate = event.date;
@@ -275,6 +297,15 @@ export const calculateFullPayroll = (data: EmployeeInput): PayrollResult => {
                 if(event.type === 'INCREMENT_MONTH_CHANGE') {
                     const monthName = event.data.month.charAt(0).toUpperCase() + event.data.month.slice(1);
                     periodRemarks.push(`Annual increment month changed to ${monthName}.`);
+                }
+                
+                if(event.type === 'BREAK_START') {
+                    onBreak = true;
+                    periodRemarks.push('Break in service started.');
+                }
+                if(event.type === 'BREAK_END') {
+                    onBreak = false;
+                    periodRemarks.push('Resumed from break in service.');
                 }
 
                 let steps = 0;
@@ -316,7 +347,7 @@ export const calculateFullPayroll = (data: EmployeeInput): PayrollResult => {
                 }
             }
         }
-        processPeriod(lastDate, new Date(Date.UTC(year, 11, 31)), periodRemarks);
+        processPeriod(lastDate, new Date(Date.UTC(year, 11, 31)), periodRemarks, onBreak);
 
         if(yearData.periods.length > 0) yearlyCalculations.push(yearData);
     }
@@ -345,6 +376,11 @@ export const calculateFullPayroll = (data: EmployeeInput): PayrollResult => {
             specialGradeDate: specialGradeDate ? parseDateUTC(specialGradeDate)!.toLocaleDateString('en-GB', { timeZone: 'UTC' }) : undefined,
             superGradeDate: superGradeDate ? parseDateUTC(superGradeDate)!.toLocaleDateString('en-GB', { timeZone: 'UTC' }) : undefined,
             stagnationIncrementDates: stagnationIncrementDates.length > 0 ? stagnationIncrementDates : undefined,
+            festivalAdvance,
+            carAdvance,
+            twoWheelerAdvance,
+            computerAdvance,
+            otherPayables,
         },
         fixation6thPC,
         fixation7thPC,

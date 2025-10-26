@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { EmployeeInput, CityGrade, Promotion, AnnualIncrementChange } from '../types';
+import { EmployeeInput, CityGrade, Promotion, AnnualIncrementChange, BreakInService } from '../types';
 import { PAY_SCALES_6TH_PC, LEVELS, GRADE_PAY_OPTIONS, POSTS } from '../constants';
 import { Input } from './ui/Input';
 import { Button } from './ui/Button';
 import { Select } from './ui/Select';
 import { Label } from './ui/Label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/Card';
+import { TrashIcon } from './ui/Icons';
+import { useLanguage } from './LanguageProvider';
 
 interface PayrollFormProps {
   onCalculate: (data: EmployeeInput) => void;
   isLoading: boolean;
 }
 
-const initialFormData: Omit<EmployeeInput, 'promotions' | 'annualIncrementChanges'> = {
+const initialFormData: Omit<EmployeeInput, 'promotions' | 'annualIncrementChanges' | 'breaksInService'> = {
     employeeName: '',
     fatherName: '',
     employeeNo: '',
@@ -38,10 +40,18 @@ const initialFormData: Omit<EmployeeInput, 'promotions' | 'annualIncrementChange
     specialGradeTwoIncrements: true,
     superGradeDate: '',
     stagnationIncrementDate: '',
+    
+    incrementEligibilityMonths: 6,
 
     cityGrade: CityGrade.GRADE_III,
     calculationStartDate: '2006-01-01',
     calculationEndDate: new Date().toISOString().split('T')[0],
+    
+    festivalAdvance: undefined,
+    carAdvance: undefined,
+    twoWheelerAdvance: undefined,
+    computerAdvance: undefined,
+    otherPayables: undefined,
 };
 
 const PayrollForm: React.FC<PayrollFormProps> = ({ onCalculate, isLoading }) => {
@@ -50,6 +60,8 @@ const PayrollForm: React.FC<PayrollFormProps> = ({ onCalculate, isLoading }) => 
   const [annualIncrementChanges, setAnnualIncrementChanges] = useState<AnnualIncrementChange[]>([
       { id: Date.now().toString(), effectiveDate: '', incrementMonth: 'jul' }
   ]);
+  const [breaksInService, setBreaksInService] = useState<BreakInService[]>([]);
+  const { t } = useLanguage();
   
   const isCustomPost = formData.joiningPostId === 'custom';
   
@@ -67,7 +79,7 @@ const PayrollForm: React.FC<PayrollFormProps> = ({ onCalculate, isLoading }) => 
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    const isNumberInput = ['basicPay2005', 'joiningPayInPayBand'].includes(name);
+    const isNumberInput = ['basicPay2005', 'joiningPayInPayBand', 'festivalAdvance', 'carAdvance', 'twoWheelerAdvance', 'computerAdvance', 'otherPayables', 'incrementEligibilityMonths'].includes(name);
     
     if (type === 'checkbox') {
         const { checked } = e.target as HTMLInputElement;
@@ -117,6 +129,18 @@ const PayrollForm: React.FC<PayrollFormProps> = ({ onCalculate, isLoading }) => 
         setAnnualIncrementChanges(prev => prev.filter(c => c.id !== id));
     }
   };
+  
+  const addBreakInService = () => {
+    setBreaksInService(prev => [...prev, { id: Date.now().toString(), startDate: '', endDate: '' }]);
+  };
+
+  const removeBreakInService = (id: string) => {
+    setBreaksInService(prev => prev.filter(b => b.id !== id));
+  };
+
+  const handleBreakInServiceChange = (id: string, field: keyof BreakInService, value: string) => {
+    setBreaksInService(prev => prev.map(b => (b.id === id ? { ...b, [field]: value } : b)));
+  };
 
   const getRetirementDate = () => {
     if (!formData.dateOfBirth) return 'N/A';
@@ -135,12 +159,13 @@ const PayrollForm: React.FC<PayrollFormProps> = ({ onCalculate, isLoading }) => 
   const handleReset = () => {
       setFormData(initialFormData);
       setPromotions([]);
+      setBreaksInService([]);
       setAnnualIncrementChanges([{ id: Date.now().toString(), effectiveDate: '', incrementMonth: 'jul' }]);
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onCalculate({ ...formData, promotions, annualIncrementChanges });
+    onCalculate({ ...formData, promotions, annualIncrementChanges, breaksInService });
   };
   
   const joiningDate = formData.dateOfJoining ? new Date(formData.dateOfJoining) : null;
@@ -148,106 +173,102 @@ const PayrollForm: React.FC<PayrollFormProps> = ({ onCalculate, isLoading }) => 
       ? (joiningDate < new Date('2006-01-01') ? 'pre2006' : (joiningDate < new Date('2016-01-01') ? '6thPC' : '7thPC')) 
       : null;
 
-  const joiningPeriodText = {
-    pre2006: 'Pre 2006 (5th Pay Commission)',
-    '6thPC': '2006 - 2015 (6th Pay Commission)',
-    '7thPC': 'Post 2016 (7th Pay Commission)',
-  };
-
   return (
     <form onSubmit={handleSubmit} onReset={handleReset} className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Personal Details</CardTitle>
+          <CardTitle>{t('personalDetails')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="employeeName">Employee Name</Label>
-                <Input type="text" name="employeeName" id="employeeName" value={formData.employeeName} onChange={handleChange} placeholder="Enter full name" required />
+                <Label htmlFor="employeeName">{t('employeeName')}</Label>
+                <Input type="text" name="employeeName" id="employeeName" value={formData.employeeName} onChange={handleChange} placeholder={t('enterFullName')} required />
               </div>
               <div>
-                <Label htmlFor="fatherName">Father's Name</Label>
-                <Input type="text" name="fatherName" id="fatherName" value={formData.fatherName} onChange={handleChange} placeholder="Enter father's name" required />
+                <Label htmlFor="fatherName">{t('fatherName')}</Label>
+                <Input type="text" name="fatherName" id="fatherName" value={formData.fatherName} onChange={handleChange} placeholder={t('enterFatherName')} required />
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="employeeNo">Employee Number</Label>
-                <Input type="text" name="employeeNo" id="employeeNo" value={formData.employeeNo} onChange={handleChange} placeholder="Enter employee number" required />
+                <Label htmlFor="employeeNo">{t('employeeNo')}</Label>
+                <Input type="text" name="employeeNo" id="employeeNo" value={formData.employeeNo} onChange={handleChange} required />
               </div>
               <div>
-                <Label htmlFor="cpsGpfNo">CPS / GPF No.</Label>
-                <Input type="text" name="cpsGpfNo" id="cpsGpfNo" value={formData.cpsGpfNo} onChange={handleChange} placeholder="Enter account number" required />
+                <Label htmlFor="cpsGpfNo">{t('cpsGpfNo')}</Label>
+                <Input type="text" name="cpsGpfNo" id="cpsGpfNo" value={formData.cpsGpfNo} onChange={handleChange} required />
               </div>
             </div>
              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="panNumber">PAN Number</Label>
-                <Input type="text" name="panNumber" id="panNumber" value={formData.panNumber} onChange={handleChange} placeholder="Enter PAN" required />
+                <Label htmlFor="panNumber">{t('panNumber')}</Label>
+                <Input type="text" name="panNumber" id="panNumber" value={formData.panNumber} onChange={handleChange} required />
               </div>
               <div>
-                <Label htmlFor="bankAccountNumber">Bank Account Number</Label>
-                <Input type="text" name="bankAccountNumber" id="bankAccountNumber" value={formData.bankAccountNumber} onChange={handleChange} placeholder="Enter Bank A/C No." required />
+                <Label htmlFor="bankAccountNumber">{t('bankAccountNumber')}</Label>
+                <Input type="text" name="bankAccountNumber" id="bankAccountNumber" value={formData.bankAccountNumber} onChange={handleChange} required />
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="dateOfBirth">Date of Birth</Label>
+                <Label htmlFor="dateOfBirth">{t('dateOfBirth')}</Label>
                 <Input type="date" name="dateOfBirth" id="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} required />
               </div>
               <div>
-                <Label htmlFor="dateOfJoining">Date of Joining (Service)</Label>
+                <Label htmlFor="dateOfJoining">{t('dateOfJoiningService')}</Label>
                 <Input type="date" name="dateOfJoining" id="dateOfJoining" value={formData.dateOfJoining} onChange={handleChange} required />
               </div>
             </div>
             <div>
-                <Label htmlFor="dateOfJoiningInOffice">Date of Joining (This Office)</Label>
+                <Label htmlFor="dateOfJoiningInOffice">{t('dateOfJoiningOffice')}</Label>
                 <Input type="date" name="dateOfJoiningInOffice" id="dateOfJoiningInOffice" value={formData.dateOfJoiningInOffice} onChange={handleChange} required />
             </div>
            <div>
               <div className="flex justify-between items-center mb-2">
-                  <h3 className="text-sm font-medium text-gray-700">Annual Increment Schedule</h3>
-                  <Button type="button" onClick={addIncrementChange} className="text-xs py-1 px-2 rounded-md">+ Add Change</Button>
+                  <h3 className="text-sm font-medium text-gray-700">{t('annualIncrementSchedule')}</h3>
+                  <Button type="button" onClick={addIncrementChange} variant="ghost" size="sm">{t('addChange')}</Button>
               </div>
               <div className="space-y-2">
                   {annualIncrementChanges.map((change, index) => (
-                      <div key={change.id} className="grid grid-cols-12 gap-2 items-center">
-                          <div className="col-span-5">
+                      <div key={change.id} className="flex items-center gap-2">
+                          <div className="flex-1">
                               <Label htmlFor={`inc_date_${change.id}`} className="sr-only">Effective Date</Label>
                               <Input type="date" id={`inc_date_${change.id}`} value={change.effectiveDate} onChange={e => handleIncrementChange(change.id, 'effectiveDate', e.target.value)} disabled={index === 0} required />
                           </div>
-                          <div className="col-span-6">
+                          <div className="flex-1">
                               <Label htmlFor={`inc_month_${change.id}`} className="sr-only">Increment Month</Label>
                               <Select id={`inc_month_${change.id}`} value={change.incrementMonth} onChange={e => handleIncrementChange(change.id, 'incrementMonth', e.target.value as any)}>
                                   <option value="jan">January</option><option value="apr">April</option><option value="jul">July</option><option value="oct">October</option>
                               </Select>
                           </div>
-                          <div className="col-span-1 flex justify-center">{index > 0 && (<button type="button" onClick={() => removeIncrementChange(change.id)} className="text-red-500 hover:text-red-700 font-bold text-lg">&times;</button>)}</div>
+                          <div>{index > 0 && (<Button type="button" onClick={() => removeIncrementChange(change.id)} variant="destructive" size="icon"><TrashIcon /></Button>)}</div>
                       </div>
                   ))}
               </div>
-              <p className="text-xs text-gray-500 mt-1">First entry defaults to joining date. Add changes if the schedule is modified.</p>
+              <p className="text-xs text-gray-500 mt-1">{t('incrementScheduleHelpText')}</p>
           </div>
           <div>
-              <Label>Retirement Age</Label>
+              <Label>{t('retirementAge')}</Label>
               <div className="mt-2 flex items-center space-x-6">
-                  <label className="flex items-center"><input type="radio" name="retirementAge" value="58" checked={formData.retirementAge === '58'} onChange={handleChange as any} className="form-radio" /><span className="ml-2">58 Years</span></label>
-                  <label className="flex items-center"><input type="radio" name="retirementAge" value="60" checked={formData.retirementAge === '60'} onChange={handleChange as any} className="form-radio" /><span className="ml-2">60 Years</span></label>
+                  <label className="flex items-center"><input type="radio" name="retirementAge" value="58" checked={formData.retirementAge === '58'} onChange={handleChange as any} className="form-radio" /><span className="ml-2">{t('retirementAge58')}</span></label>
+                  <label className="flex items-center"><input type="radio" name="retirementAge" value="60" checked={formData.retirementAge === '60'} onChange={handleChange as any} className="form-radio" /><span className="ml-2">{t('retirementAge60')}</span></label>
               </div>
-               <p className="text-xs text-gray-500 mt-2">Calculated Retirement Date: <span className="font-semibold">{getRetirementDate()}</span></p>
+               <p className="text-xs text-gray-500 mt-2">{t('calculatedRetirementDate')}: <span className="font-semibold">{getRetirementDate()}</span></p>
           </div>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>Pay at Time of Joining</CardTitle>
-          {joiningPeriod && <CardDescription>{joiningPeriodText[joiningPeriod]}</CardDescription>}
+          <CardTitle>{t('payAtJoining')}</CardTitle>
+          {joiningPeriod === 'pre2006' && <CardDescription>{t('payAtJoiningDescPre2006')}</CardDescription>}
+          {joiningPeriod === '6thPC' && <CardDescription>{t('payAtJoiningDesc6thPC')}</CardDescription>}
+          {joiningPeriod === '7thPC' && <CardDescription>{t('payAtJoiningDesc7thPC')}</CardDescription>}
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-              <Label htmlFor="joiningPostId">Post at Joining</Label>
+              <Label htmlFor="joiningPostId">{t('postAtJoining')}</Label>
               <Select name="joiningPostId" id="joiningPostId" value={formData.joiningPostId} onChange={handlePostChange}>
                   <option value="custom">-- Other / Manual Entry --</option>
                   {POSTS.map(post => <option key={post.id} value={post.id}>{post.name}</option>)}
@@ -255,158 +276,225 @@ const PayrollForm: React.FC<PayrollFormProps> = ({ onCalculate, isLoading }) => 
           </div>
            {isCustomPost && (
               <div>
-                  <Label htmlFor="joiningPostCustomName">Custom Post Name</Label>
-                  <Input type="text" name="joiningPostCustomName" id="joiningPostCustomName" value={formData.joiningPostCustomName ?? ''} onChange={handleChange} placeholder="e.g., Special Grade Assistant" required />
+                  <Label htmlFor="joiningPostCustomName">{t('customPostName')}</Label>
+                  <Input type="text" name="joiningPostCustomName" id="joiningPostCustomName" value={formData.joiningPostCustomName ?? ''} onChange={handleChange} required />
               </div>
             )}
            {joiningPeriod === 'pre2006' && (
               <>
                   <div>
-                      <Label htmlFor="joiningScaleId">Pay Scale (as of 31-12-2005)</Label>
+                      <Label htmlFor="joiningScaleId">{t('payScaleAsOf2005')}</Label>
                       <Select name="joiningScaleId" id="joiningScaleId" value={formData.joiningScaleId} onChange={handleChange} required disabled={!isCustomPost}>
                         {PAY_SCALES_6TH_PC.map(ps => (<option key={ps.id} value={ps.id}>{ps.scale}</option>))}
                       </Select>
                   </div>
                   <div>
-                      <Label htmlFor="basicPay2005">Basic Pay in the above scale</Label>
-                      <Input type="number" name="basicPay2005" id="basicPay2005" value={formData.basicPay2005 ?? ''} onChange={handleChange} placeholder="e.g., 5500" required />
+                      <Label htmlFor="basicPay2005">{t('basicPayInScale')}</Label>
+                      <Input type="number" name="basicPay2005" id="basicPay2005" value={formData.basicPay2005 ?? ''} onChange={handleChange} required />
                   </div>
               </>
            )}
            {joiningPeriod === '6thPC' && (
               <>
                    <div>
-                      <Label htmlFor="joiningScaleId">Pay Band + Grade Pay</Label>
+                      <Label htmlFor="joiningScaleId">{t('payBandGradePay')}</Label>
                        <Select name="joiningScaleId" id="joiningScaleId" value={formData.joiningScaleId} onChange={handleChange} required disabled={!isCustomPost}>
                         {PAY_SCALES_6TH_PC.map(ps => (<option key={ps.id} value={ps.id}>{`${ps.payBand} + ${ps.gradePay} GP`}</option>))}
                       </Select>
                   </div>
                   <div>
-                      <Label htmlFor="joiningPayInPayBand">Pay in the Pay Band</Label>
-                      <Input type="number" name="joiningPayInPayBand" id="joiningPayInPayBand" value={formData.joiningPayInPayBand ?? ''} onChange={handleChange} placeholder="e.g., 10230" required />
+                      <Label htmlFor="joiningPayInPayBand">{t('payInPayBand')}</Label>
+                      <Input type="number" name="joiningPayInPayBand" id="joiningPayInPayBand" value={formData.joiningPayInPayBand ?? ''} onChange={handleChange} required />
                   </div>
               </>
            )}
            {joiningPeriod === '7thPC' && (
               <div>
-                  <Label htmlFor="joiningLevel">Level of Pay</Label>
+                  <Label htmlFor="joiningLevel">{t('levelOfPay')}</Label>
                   <Select name="joiningLevel" id="joiningLevel" value={formData.joiningLevel} onChange={handleChange} required disabled={!isCustomPost}>
                       {LEVELS.map(level => <option key={level} value={level}>{`Level ${level}`}</option>)}
                   </Select>
-                  <p className="text-xs text-gray-500 mt-1">Pay will be fixed at the minimum of this Level for new entrants.</p>
+                  <p className="text-xs text-gray-500 mt-1">{t('newEntrantHelpText')}</p>
               </div>
            )}
-           {!joiningPeriod && <p className="text-sm text-gray-500 p-4 text-center">Please select a Date of Joining to enter pay details.</p>}
+           {!joiningPeriod && <p className="text-sm text-gray-500 p-4 text-center">{t('selectDatePrompt')}</p>}
         </CardContent>
       </Card>
       
       <Card>
           <CardHeader>
-              <CardTitle>Career Events & HRA</CardTitle>
-              <CardDescription>Enter dates for grade awards, transfers, and HRA classification.</CardDescription>
+              <CardTitle>{t('careerEventsHRA')}</CardTitle>
+              <CardDescription>{t('careerEventsHRADesc')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-4">
                 <div>
-                  <Label htmlFor="selectionGradeDate">Selection Grade Date</Label>
+                  <Label htmlFor="selectionGradeDate">{t('selectionGradeDate')}</Label>
                   <Input type="date" name="selectionGradeDate" id="selectionGradeDate" value={formData.selectionGradeDate} onChange={handleChange} />
                    {formData.selectionGradeDate && <div className="mt-2 text-xs"><label><input type="checkbox" name="selectionGradeTwoIncrements" checked={formData.selectionGradeTwoIncrements} onChange={handleChange} /> Apply 2 Increments</label></div>}
                 </div>
                 <div>
-                  <Label htmlFor="specialGradeDate">Special Grade Date</Label>
+                  <Label htmlFor="specialGradeDate">{t('specialGradeDate')}</Label>
                   <Input type="date" name="specialGradeDate" id="specialGradeDate" value={formData.specialGradeDate} onChange={handleChange} />
                   {formData.specialGradeDate && <div className="mt-2 text-xs"><label><input type="checkbox" name="specialGradeTwoIncrements" checked={formData.specialGradeTwoIncrements} onChange={handleChange} /> Apply 2 Increments</label></div>}
                 </div>
                  <div>
-                  <Label htmlFor="superGradeDate">Super Grade (Bonus) Date</Label>
+                  <Label htmlFor="superGradeDate">{t('superGradeDate')}</Label>
                   <Input type="date" name="superGradeDate" id="superGradeDate" value={formData.superGradeDate} onChange={handleChange} />
                 </div>
                  <div>
-                  <Label htmlFor="stagnationIncrementDate">Stagnation Increment Start Date</Label>
+                  <Label htmlFor="stagnationIncrementDate">{t('stagnationIncrementDate')}</Label>
                   <Input type="date" name="stagnationIncrementDate" id="stagnationIncrementDate" value={formData.stagnationIncrementDate ?? ''} onChange={handleChange} />
-                  <p className="text-xs text-gray-500 mt-1">Date entered post at Level 24+.</p>
+                  <p className="text-xs text-gray-500 mt-1">{t('stagnationHelpText')}</p>
                 </div>
                  <div>
-                  <Label htmlFor="dateOfRelief">Date of Relief (Transfer)</Label>
+                  <Label htmlFor="dateOfRelief">{t('dateOfRelief')}</Label>
                   <Input type="date" name="dateOfRelief" id="dateOfRelief" value={formData.dateOfRelief ?? ''} onChange={handleChange} />
-                  <p className="text-xs text-gray-500 mt-1">Calculation will end on this date.</p>
+                  <p className="text-xs text-gray-500 mt-1">{t('reliefHelpText')}</p>
                 </div>
                  <div>
-                  <Label htmlFor="cityGrade">City/Town Grade for HRA</Label>
+                  <Label htmlFor="cityGrade">{t('cityGradeHRA')}</Label>
                   <Select name="cityGrade" id="cityGrade" value={formData.cityGrade} onChange={handleChange} required>
                     {Object.values(CityGrade).map(grade => (<option key={grade} value={grade}>{grade}</option>))}
                   </Select>
-              </div>
+                 </div>
+                 <div className="sm:col-span-2">
+                    <Label htmlFor="incrementEligibilityMonths">{t('incrementEligibility')}</Label>
+                    <Input type="number" name="incrementEligibilityMonths" id="incrementEligibilityMonths" value={formData.incrementEligibilityMonths} onChange={handleChange} required />
+                    <p className="text-xs text-gray-500 mt-1">{t('incrementEligibilityHelpText')}</p>
+                 </div>
               </div>
           </CardContent>
       </Card>
+      
+      {formData.dateOfRelief && (
+          <Card>
+              <CardHeader>
+                  <CardTitle>{t('advancesLPC')}</CardTitle>
+                  <CardDescription>{t('advancesLPCDesc')}</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <Label htmlFor="festivalAdvance">{t('festivalAdvance')}</Label>
+                            <Input type="number" name="festivalAdvance" id="festivalAdvance" value={formData.festivalAdvance ?? ''} onChange={handleChange} />
+                        </div>
+                        <div>
+                            <Label htmlFor="carAdvance">{t('carAdvance')}</Label>
+                            <Input type="number" name="carAdvance" id="carAdvance" value={formData.carAdvance ?? ''} onChange={handleChange} />
+                        </div>
+                   </div>
+                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <Label htmlFor="twoWheelerAdvance">{t('twoWheelerAdvance')}</Label>
+                            <Input type="number" name="twoWheelerAdvance" id="twoWheelerAdvance" value={formData.twoWheelerAdvance ?? ''} onChange={handleChange} />
+                        </div>
+                        <div>
+                            <Label htmlFor="computerAdvance">{t('computerAdvance')}</Label>
+                            <Input type="number" name="computerAdvance" id="computerAdvance" value={formData.computerAdvance ?? ''} onChange={handleChange} />
+                        </div>
+                   </div>
+                   <div>
+                        <Label htmlFor="otherPayables">{t('otherPayables')}</Label>
+                        <Input type="number" name="otherPayables" id="otherPayables" value={formData.otherPayables ?? ''} onChange={handleChange} />
+                   </div>
+              </CardContent>
+          </Card>
+      )}
 
       <Card>
           <CardHeader className="flex justify-between items-center">
-             <CardTitle>Promotions</CardTitle>
-             <Button type="button" onClick={addPromotion} className="text-xs py-1 px-3 rounded-md -my-2">+ Add</Button>
+             <CardTitle>{t('promotions')}</CardTitle>
+             <Button type="button" onClick={addPromotion} variant="ghost" size="sm">{t('add')}</Button>
           </CardHeader>
           <CardContent className="space-y-3">
               {promotions.length === 0 && <p className="text-sm text-gray-500 text-center py-4">No promotions added.</p>}
               {promotions.map((promo) => (
-                  <div key={promo.id} className="p-3 border rounded-md relative bg-gray-50/80">
-                      <button type="button" onClick={() => removePromotion(promo.id)} className="absolute top-1 right-2 text-red-500 hover:text-red-700 font-bold text-lg">&times;</button>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                         <div>
-                              <Label htmlFor={`promo_date_${promo.id}`}>Date of Promotion</Label>
-                              <Input type="date" id={`promo_date_${promo.id}`} value={promo.date} onChange={e => handlePromotionChange(promo.id, 'date', e.target.value)} />
-                          </div>
-                           <div>
-                              <Label htmlFor={`promo_post_${promo.id}`}>Post of Promotion</Label>
-                              <Input type="text" id={`promo_post_${promo.id}`} value={promo.post} onChange={e => handlePromotionChange(promo.id, 'post', e.target.value)} placeholder="e.g., Superintendent"/>
-                          </div>
-                          {promo.date && new Date(promo.date) < new Date('2016-01-01') ? (
-                              <div className="md:col-span-2">
-                                  <Label htmlFor={`promo_gp_${promo.id}`}>New Grade Pay</Label>
-                                   <Select id={`promo_gp_${promo.id}`} value={promo.gradePay ?? ''} onChange={e => handlePromotionChange(promo.id, 'gradePay', Number(e.target.value))}>
-                                      <option value="">Select Grade Pay</option>
-                                      {GRADE_PAY_OPTIONS.map(gp => <option key={gp} value={gp}>{gp}</option>)}
-                                  </Select>
-                              </div>
-                          ) : (
-                              <div className="md:col-span-2">
-                                  <Label htmlFor={`promo_level_${promo.id}`}>New Level of Pay</Label>
-                                   <Select id={`promo_level_${promo.id}`} value={promo.level ?? ''} onChange={e => handlePromotionChange(promo.id, 'level', e.target.value)}>
-                                      <option value="">Select Level</option>
-                                      {LEVELS.map(level => <option key={level} value={level}>{level}</option>)}
-                                  </Select>
-                              </div>
-                          )}
+                  <div key={promo.id} className="p-3 border rounded-md bg-gray-50/80 space-y-3">
+                      <div className="flex justify-between items-start">
+                         <div className="flex-1 space-y-1">
+                           <Label htmlFor={`promo_post_${promo.id}`}>{t('postOfPromotion')}</Label>
+                           <Input type="text" id={`promo_post_${promo.id}`} value={promo.post} onChange={e => handlePromotionChange(promo.id, 'post', e.target.value)} />
+                         </div>
+                         <Button type="button" onClick={() => removePromotion(promo.id)} variant="destructive" size="icon" className="ml-2 mt-5"><TrashIcon /></Button>
                       </div>
+
+                      <div>
+                          <Label htmlFor={`promo_date_${promo.id}`}>{t('dateOfPromotion')}</Label>
+                          <Input type="date" id={`promo_date_${promo.id}`} value={promo.date} onChange={e => handlePromotionChange(promo.id, 'date', e.target.value)} />
+                      </div>
+                      
+                      {promo.date && new Date(promo.date) < new Date('2016-01-01') ? (
+                          <div>
+                              <Label htmlFor={`promo_gp_${promo.id}`}>{t('newGradePay')}</Label>
+                               <Select id={`promo_gp_${promo.id}`} value={promo.gradePay ?? ''} onChange={e => handlePromotionChange(promo.id, 'gradePay', Number(e.target.value))}>
+                                  <option value="">Select Grade Pay</option>
+                                  {GRADE_PAY_OPTIONS.map(gp => <option key={gp} value={gp}>{gp}</option>)}
+                              </Select>
+                          </div>
+                      ) : (
+                          <div>
+                              <Label htmlFor={`promo_level_${promo.id}`}>{t('newLevelOfPay')}</Label>
+                               <Select id={`promo_level_${promo.id}`} value={promo.level ?? ''} onChange={e => handlePromotionChange(promo.id, 'level', e.target.value)}>
+                                  <option value="">Select Level</option>
+                                  {LEVELS.map(level => <option key={level} value={level}>{level}</option>)}
+                              </Select>
+                          </div>
+                      )}
                   </div>
               ))}
           </CardContent>
       </Card>
       
       <Card>
+        <CardHeader className="flex justify-between items-center">
+            <CardTitle>{t('breaksInService')}</CardTitle>
+            <Button type="button" onClick={addBreakInService} variant="ghost" size="sm">{t('addBreak')}</Button>
+        </CardHeader>
+        <CardContent className="space-y-3">
+            {breaksInService.length === 0 && <p className="text-sm text-gray-500 text-center py-4">No breaks in service added.</p>}
+            {breaksInService.map((breakItem) => (
+                <div key={breakItem.id} className="p-3 border rounded-md bg-gray-50/80">
+                    <div className="flex items-end gap-4">
+                        <div className="flex-1">
+                            <Label htmlFor={`break_start_${breakItem.id}`}>{t('startDate')}</Label>
+                            <Input type="date" id={`break_start_${breakItem.id}`} value={breakItem.startDate} onChange={e => handleBreakInServiceChange(breakItem.id, 'startDate', e.target.value)} required />
+                        </div>
+                        <div className="flex-1">
+                            <Label htmlFor={`break_end_${breakItem.id}`}>{t('endDate')}</Label>
+                            <Input type="date" id={`break_end_${breakItem.id}`} value={breakItem.endDate} onChange={e => handleBreakInServiceChange(breakItem.id, 'endDate', e.target.value)} required />
+                        </div>
+                        <Button type="button" onClick={() => removeBreakInService(breakItem.id)} variant="destructive" size="icon"><TrashIcon /></Button>
+                    </div>
+                </div>
+            ))}
+        </CardContent>
+      </Card>
+
+      <Card>
           <CardHeader>
-              <CardTitle>Calculation Period</CardTitle>
+              <CardTitle>{t('calculationPeriod')}</CardTitle>
           </CardHeader>
           <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                    <div>
-                      <Label htmlFor="calculationStartDate">Calculate From</Label>
+                      <Label htmlFor="calculationStartDate">{t('calculateFrom')}</Label>
                       <Input type="date" name="calculationStartDate" id="calculationStartDate" value={formData.calculationStartDate} onChange={handleChange} required />
                   </div>
                    <div>
-                      <Label htmlFor="calculationEndDate">Calculate To</Label>
+                      <Label htmlFor="calculationEndDate">{t('calculateTo')}</Label>
                       <Input type="date" name="calculationEndDate" id="calculationEndDate" value={formData.calculationEndDate} onChange={handleChange} required />
                   </div>
               </div>
           </CardContent>
       </Card>
 
-      <div className="pt-2 grid grid-cols-2 gap-4">
-        <Button type="reset" className="w-full bg-gray-600 hover:bg-gray-700">
-          Reset Form
+      <div className="pt-4 grid grid-cols-2 gap-4">
+        <Button type="reset" variant="outline">
+          {t('resetForm')}
         </Button>
-        <Button type="submit" disabled={isLoading} className="w-full">
-          {isLoading ? 'Calculating...' : 'Calculate Full Payroll'}
+        <Button type="submit" disabled={isLoading}>
+          {isLoading ? t('calculating') : t('calculatePayroll')}
         </Button>
       </div>
     </form>

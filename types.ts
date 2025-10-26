@@ -12,6 +12,12 @@ export interface AnnualIncrementChange {
   incrementMonth: 'jan' | 'apr' | 'jul' | 'oct';
 }
 
+export interface BreakInService {
+  id: string;
+  startDate: string;
+  endDate: string;
+}
+
 export interface EmployeeInput {
   employeeName: string;
   fatherName: string;
@@ -42,11 +48,21 @@ export interface EmployeeInput {
   stagnationIncrementDate?: string;
 
   promotions: Promotion[];
+  breaksInService: BreakInService[];
+  incrementEligibilityMonths: number;
 
   cityGrade: CityGrade;
   
   calculationStartDate: string;
   calculationEndDate: string;
+
+  // For Last Pay Certificate (LPC)
+  festivalAdvance?: number;
+  carAdvance?: number;
+
+  twoWheelerAdvance?: number;
+  computerAdvance?: number;
+  otherPayables?: number;
 }
 
 export interface PayScale {
@@ -68,6 +84,7 @@ export interface PayrollPeriod {
   period: string;
   basicPay: number;
   daRate: number;
+
   daAmount: number;
   hra: number;
   grossPay: number;
@@ -100,6 +117,12 @@ export interface EmployeeDetails {
     specialGradeDate?: string;
     superGradeDate?: string;
     stagnationIncrementDates?: string[];
+    // For Last Pay Certificate (LPC)
+    festivalAdvance?: number;
+    carAdvance?: number;
+    twoWheelerAdvance?: number;
+    computerAdvance?: number;
+    otherPayables?: number;
 }
 
 

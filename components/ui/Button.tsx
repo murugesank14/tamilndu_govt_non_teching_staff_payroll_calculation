@@ -1,12 +1,34 @@
-
 import React from 'react';
 
-type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement>;
+const variants = {
+  default: "bg-blue-600 text-white hover:bg-blue-700",
+  destructive: "bg-red-500 text-white hover:bg-red-600",
+  outline: "border border-gray-300 bg-transparent text-gray-700 hover:bg-gray-100",
+  ghost: "bg-transparent text-blue-600 hover:bg-blue-50",
+  icon: "bg-transparent text-gray-500 hover:bg-gray-100",
+};
 
-export const Button: React.FC<ButtonProps> = ({ children, className, ...props }) => {
+const sizes = {
+  default: "h-12 px-6 py-3 text-base",
+  sm: "h-9 rounded-md px-3",
+  icon: "h-9 w-9",
+};
+
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: keyof typeof variants;
+  size?: keyof typeof sizes;
+}
+
+export const Button: React.FC<ButtonProps> = ({ 
+  children, 
+  className,
+  variant = 'default',
+  size = 'default', 
+  ...props 
+}) => {
   return (
     <button
-      className={`bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed ${className}`}
+      className={`inline-flex items-center justify-center rounded-lg text-sm font-semibold ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${variants[variant]} ${sizes[size]} ${className}`}
       {...props}
     >
       {children}

@@ -2,6 +2,7 @@ import React from 'react';
 import { PayrollResult as PayrollResultType } from '../types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/Card';
 import { TimelineIcon } from './ui/TimelineIcon';
+import { useLanguage } from './LanguageProvider';
 
 interface CareerTimelineProps {
   result: PayrollResultType;
@@ -10,6 +11,7 @@ interface CareerTimelineProps {
 export const CareerTimeline: React.FC<CareerTimelineProps> = ({ result }) => {
     const { employeeDetails } = result;
     const { dateOfJoining, promotions, retirementDate, selectionGradeDate, specialGradeDate, superGradeDate, retirementAge, stagnationIncrementDates, dateOfRelief } = employeeDetails;
+    const { t } = useLanguage();
 
     const events: { dateStr: string; date: Date; title: string; description: string; type: 'joining' | 'promotion' | 'grade' | 'retirement' | 'stagnation' | 'transfer' }[] = [];
 
@@ -102,8 +104,8 @@ export const CareerTimeline: React.FC<CareerTimelineProps> = ({ result }) => {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Career Timeline</CardTitle>
-                <CardDescription>A summary of key career milestones.</CardDescription>
+                <CardTitle>{t('careerTimeline')}</CardTitle>
+                <CardDescription>{t('careerTimelineDesc')}</CardDescription>
             </CardHeader>
             <CardContent>
                 <ol className="relative border-l border-gray-200 ml-4">

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { PayrollYear } from '../types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/Card';
+import { useLanguage } from './LanguageProvider';
 
 // Tell typescript about Chart.js from CDN
 declare const Chart: any;
@@ -12,6 +13,7 @@ interface PayProgressionChartProps {
 export const PayProgressionChart: React.FC<PayProgressionChartProps> = ({ yearlyCalculations }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const chartRef = useRef<any>(null);
+    const { t } = useLanguage();
 
     useEffect(() => {
         if (!canvasRef.current || !yearlyCalculations || yearlyCalculations.length === 0) return;
@@ -90,8 +92,8 @@ export const PayProgressionChart: React.FC<PayProgressionChartProps> = ({ yearly
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Pay Progression</CardTitle>
-                <CardDescription>Annual Gross Pay over time.</CardDescription>
+                <CardTitle>{t('payProgression')}</CardTitle>
+                <CardDescription>{t('payProgressionDesc')}</CardDescription>
             </CardHeader>
             <CardContent>
                 <div className="h-80 relative">
