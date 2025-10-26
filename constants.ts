@@ -7,15 +7,27 @@ export interface Post {
   level: number; // Corresponds to 7th PC Level
 }
 
+// Sorted by Level for easier dropdown navigation
 export const POSTS: Post[] = [
     { id: 'office-assistant', name: 'Office Assistant', scaleId: '2550-55-2660-60-3200', level: 1 },
     { id: 'record-clerk', name: 'Record Clerk', scaleId: '2610-60-3150-65-3540', level: 2 },
+    { id: 'record-assistant', name: 'Record Assistant', scaleId: '2610-60-3150-65-3540', level: 2 },
+    { id: 'jeep-driver', name: 'Jeep Driver', scaleId: '4000-100-6000', level: 8 },
     { id: 'junior-assistant', name: 'Junior Assistant', scaleId: '4000-100-6000', level: 8 },
+    { id: 'panchayat-clerk', name: 'Panchayat Clerk', scaleId: '4000-100-6000', level: 8 },
     { id: 'typist', name: 'Typist', scaleId: '4000-100-6000', level: 8 },
     { id: 'steno-typist-g3', name: 'Steno-Typist Grade-III', scaleId: '4000-100-6000', level: 8 },
     { id: 'assistant', name: 'Assistant', scaleId: '5000-150-8000', level: 11 },
+    { id: 'accountant', name: 'Accountant', scaleId: '5000-150-8000', level: 11 },
     { id: 'superintendent', name: 'Superintendent', scaleId: '5500-175-9000', level: 13 },
+    { id: 'manager', name: 'Manager', scaleId: '5500-175-9000', level: 13 },
+    { id: 'assistant-inspector', name: 'Assistant Inspector', scaleId: '6500-200-10500', level: 16 },
+    { id: 'deputy-inspector', name: 'Deputy Inspector', scaleId: '7000-225-11500', level: 18 },
+    { id: 'inspector', name: 'Inspector', scaleId: '8000-275-13500', level: 22 },
+    { id: 'assistant-director', name: 'Assistant Director', scaleId: '10000-325-15200', level: 25 },
+    { id: 'deputy-director', name: 'Deputy Director', scaleId: '12000-375-16500', level: 26 },
 ];
+
 
 export const GRADE_PAY_OPTIONS: number[] = [
     1300, 1400, 1650, 1800, 1900, 2000, 2200, 2400, 2600, 2800, 4200, 4300, 

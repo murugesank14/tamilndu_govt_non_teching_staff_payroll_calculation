@@ -9,9 +9,9 @@ interface CareerTimelineProps {
 
 export const CareerTimeline: React.FC<CareerTimelineProps> = ({ result }) => {
     const { employeeDetails } = result;
-    const { dateOfJoining, promotions, retirementDate, selectionGradeDate, specialGradeDate, superGradeDate, retirementAge } = employeeDetails;
+    const { dateOfJoining, promotions, retirementDate, selectionGradeDate, specialGradeDate, superGradeDate, retirementAge, stagnationIncrementDates, dateOfRelief } = employeeDetails;
 
-    const events: { dateStr: string; date: Date; title: string; description: string; type: 'joining' | 'promotion' | 'grade' | 'retirement' }[] = [];
+    const events: { dateStr: string; date: Date; title: string; description: string; type: 'joining' | 'promotion' | 'grade' | 'retirement' | 'stagnation' | 'transfer' }[] = [];
 
     if (dateOfJoining && dateOfJoining !== 'N/A') {
         events.push({
@@ -20,6 +20,16 @@ export const CareerTimeline: React.FC<CareerTimelineProps> = ({ result }) => {
             title: 'Joined Service',
             description: `Started as ${employeeDetails.joiningPost || 'initial post'}.`,
             type: 'joining',
+        });
+    }
+    
+    if (dateOfRelief && dateOfRelief !== 'N/A') {
+        events.push({
+            dateStr: dateOfRelief,
+            date: new Date(dateOfRelief.split('/').reverse().join('-')),
+            title: 'Relieved from Office',
+            description: `Transferred from the current office.`,
+            type: 'transfer',
         });
     }
 
@@ -37,8 +47,8 @@ export const CareerTimeline: React.FC<CareerTimelineProps> = ({ result }) => {
 
     if (selectionGradeDate) {
          events.push({
-            dateStr: new Date(selectionGradeDate).toLocaleDateString('en-GB'),
-            date: new Date(selectionGradeDate),
+            dateStr: selectionGradeDate,
+            date: new Date(selectionGradeDate.split('/').reverse().join('-')),
             title: 'Selection Grade Awarded',
             description: 'Completed 10 years of service.',
             type: 'grade',
@@ -47,8 +57,8 @@ export const CareerTimeline: React.FC<CareerTimelineProps> = ({ result }) => {
 
      if (specialGradeDate) {
          events.push({
-            dateStr: new Date(specialGradeDate).toLocaleDateString('en-GB'),
-            date: new Date(specialGradeDate),
+            dateStr: specialGradeDate,
+            date: new Date(specialGradeDate.split('/').reverse().join('-')),
             title: 'Special Grade Awarded',
             description: 'Completed 20 years of service.',
             type: 'grade',
@@ -57,11 +67,23 @@ export const CareerTimeline: React.FC<CareerTimelineProps> = ({ result }) => {
 
      if (superGradeDate) {
          events.push({
-            dateStr: new Date(superGradeDate).toLocaleDateString('en-GB'),
-            date: new Date(superGradeDate),
+            dateStr: superGradeDate,
+            date: new Date(superGradeDate.split('/').reverse().join('-')),
             title: 'Super Grade (Bonus) Awarded',
             description: 'Completed 30 years of service.',
             type: 'grade',
+        });
+    }
+
+    if (stagnationIncrementDates) {
+        stagnationIncrementDates.forEach(d => {
+            events.push({
+                dateStr: d,
+                date: new Date(d.split('/').reverse().join('-')),
+                title: 'Stagnation Increment',
+                description: 'Awarded after 10 years in the same post.',
+                type: 'stagnation',
+            });
         });
     }
 

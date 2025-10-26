@@ -17,22 +17,29 @@ export interface EmployeeInput {
   fatherName: string;
   employeeNo: string;
   cpsGpfNo: string;
+  panNumber: string;
+  bankAccountNumber: string;
   dateOfBirth: string;
   retirementAge: '58' | '60';
   dateOfJoining: string;
   dateOfJoiningInOffice: string;
+  dateOfRelief?: string;
   annualIncrementChanges: AnnualIncrementChange[];
 
   // Pay at time of joining
   joiningPostId?: string;
+  joiningPostCustomName?: string;
   basicPay2005?: number; // For pre-2006 joiners
   joiningPayInPayBand?: number; // For 6th PC joiners
   joiningScaleId?: string; // For pre-2006 OR 6th PC joiners
   joiningLevel?: string; // For 7th PC joiners
 
   selectionGradeDate: string;
+  selectionGradeTwoIncrements: boolean;
   specialGradeDate: string;
+  specialGradeTwoIncrements: boolean;
   superGradeDate: string;
+  stagnationIncrementDate?: string;
 
   promotions: Promotion[];
 
@@ -79,9 +86,12 @@ export interface EmployeeDetails {
     fatherName: string;
     employeeNo: string;
     cpsGpfNo: string;
+    panNumber: string;
+    bankAccountNumber: string;
     dateOfBirth: string;
     dateOfJoining: string;
     dateOfJoiningInOffice: string;
+    dateOfRelief?: string;
     joiningPost?: string;
     retirementDate: string;
     retirementAge: '58' | '60';
@@ -89,6 +99,7 @@ export interface EmployeeDetails {
     selectionGradeDate?: string;
     specialGradeDate?: string;
     superGradeDate?: string;
+    stagnationIncrementDates?: string[];
 }
 
 

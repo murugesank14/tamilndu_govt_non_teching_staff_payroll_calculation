@@ -44,9 +44,12 @@ const PayrollResult: React.FC<PayrollResultProps> = ({ result }) => {
             ["Father's Name", employeeDetails.fatherName],
             ['Employee Number', employeeDetails.employeeNo],
             ['CPS / GPF No.', employeeDetails.cpsGpfNo],
+            ['PAN Number', employeeDetails.panNumber],
+            ['Bank Account No.', employeeDetails.bankAccountNumber],
             ['Date of Birth', employeeDetails.dateOfBirth],
             ['Date of Joining (Service)', employeeDetails.dateOfJoining],
             ['Date of Joining (Office)', employeeDetails.dateOfJoiningInOffice],
+            ['Date of Relief (Transfer)', employeeDetails.dateOfRelief || 'N/A'],
             ['Post at Joining', employeeDetails.joiningPost || 'N/A'],
             ['Date of Retirement', employeeDetails.retirementDate],
         ];
@@ -114,9 +117,12 @@ const PayrollResult: React.FC<PayrollResultProps> = ({ result }) => {
         ["Father's Name", employeeDetails.fatherName],
         ['Employee Number', employeeDetails.employeeNo],
         ['CPS / GPF No.', employeeDetails.cpsGpfNo],
+        ['PAN Number', employeeDetails.panNumber],
+        ['Bank Account No.', employeeDetails.bankAccountNumber],
         ['Date of Birth', employeeDetails.dateOfBirth],
         ['Date of Joining (Service)', employeeDetails.dateOfJoining],
         ['Date of Joining (Office)', employeeDetails.dateOfJoiningInOffice],
+        ['Date of Relief (Transfer)', employeeDetails.dateOfRelief || 'N/A'],
         ['Post at Joining', employeeDetails.joiningPost || 'N/A'],
         ['Date of Retirement', employeeDetails.retirementDate],
       ];
@@ -201,9 +207,12 @@ const PayrollResult: React.FC<PayrollResultProps> = ({ result }) => {
             <tr><td>Father's Name</td><td>${employeeDetails.fatherName}</td></tr>
             <tr><td>Employee Number</td><td>${employeeDetails.employeeNo}</td></tr>
             <tr><td>CPS / GPF No.</td><td>${employeeDetails.cpsGpfNo}</td></tr>
+            <tr><td>PAN Number</td><td>${employeeDetails.panNumber}</td></tr>
+            <tr><td>Bank Account No.</td><td>${employeeDetails.bankAccountNumber}</td></tr>
             <tr><td>Date of Birth</td><td>${employeeDetails.dateOfBirth}</td></tr>
             <tr><td>Date of Joining (Service)</td><td>${employeeDetails.dateOfJoining}</td></tr>
             <tr><td>Date of Joining (Office)</td><td>${employeeDetails.dateOfJoiningInOffice}</td></tr>
+            <tr><td>Date of Relief (Transfer)</td><td>${employeeDetails.dateOfRelief || 'N/A'}</td></tr>
             <tr><td>Post at Joining</td><td>${employeeDetails.joiningPost || 'N/A'}</td></tr>
             <tr><td>Date of Retirement</td><td>${employeeDetails.retirementDate}</td></tr>
             ${promotionHtml}
@@ -218,7 +227,7 @@ const PayrollResult: React.FC<PayrollResultProps> = ({ result }) => {
             yearData.periods.forEach(p => {
                 htmlString += `<tr>
                     <td>${p.period}</td>
-                    <td>${formatCurrencyForExport(p.basic_pay)}</td>
+                    <td>${formatCurrencyForExport(p.basicPay)}</td>
                     <td>${formatCurrencyForExport(p.daAmount)} (${p.daRate}%)</td>
                     <td>${formatCurrencyForExport(p.hra)}</td>
                     <td>${formatCurrencyForExport(p.grossPay)}</td>
@@ -253,20 +262,31 @@ const PayrollResult: React.FC<PayrollResultProps> = ({ result }) => {
             <div><p className="text-gray-500">Father's Name</p><p className="font-semibold">{employeeDetails.fatherName || 'N/A'}</p></div>
             <div><p className="text-gray-500">Employee Number</p><p className="font-semibold">{employeeDetails.employeeNo || 'N/A'}</p></div>
             <div><p className="text-gray-500">CPS / GPF No.</p><p className="font-semibold">{employeeDetails.cpsGpfNo || 'N/A'}</p></div>
+            <div><p className="text-gray-500">PAN Number</p><p className="font-semibold">{employeeDetails.panNumber || 'N/A'}</p></div>
+            <div><p className="text-gray-500">Bank Account No.</p><p className="font-semibold">{employeeDetails.bankAccountNumber || 'N/A'}</p></div>
             <div><p className="text-gray-500">Date of Birth</p><p className="font-semibold">{employeeDetails.dateOfBirth || 'N/A'}</p></div>
             <div><p className="text-gray-500">Date of Joining (Service)</p><p className="font-semibold">{employeeDetails.dateOfJoining || 'N/A'}</p></div>
             <div><p className="text-gray-500">Date of Joining (Office)</p><p className="font-semibold">{employeeDetails.dateOfJoiningInOffice || 'N/A'}</p></div>
+            <div><p className="text-gray-500">Date of Relief (Transfer)</p><p className="font-semibold">{employeeDetails.dateOfRelief || 'N/A'}</p></div>
             <div><p className="text-gray-500">Post at Joining</p><p className="font-semibold">{employeeDetails.joiningPost || 'N/A'}</p></div>
             <div><p className="text-gray-500">Date of Retirement</p><p className="font-semibold">{employeeDetails.retirementDate || 'N/A'}</p></div>
+            {employeeDetails.selectionGradeDate && <div><p className="text-gray-500">Selection Grade</p><p className="font-semibold">{employeeDetails.selectionGradeDate}</p></div>}
+            {employeeDetails.specialGradeDate && <div><p className="text-gray-500">Special Grade</p><p className="font-semibold">{employeeDetails.specialGradeDate}</p></div>}
+            {employeeDetails.superGradeDate && <div><p className="text-gray-500">Super Grade</p><p className="font-semibold">{employeeDetails.superGradeDate}</p></div>}
+            {employeeDetails.stagnationIncrementDates && employeeDetails.stagnationIncrementDates.length > 0 && 
+              <div className="col-span-full"><p className="text-gray-500">Stagnation Increments</p><p className="font-semibold">{employeeDetails.stagnationIncrementDates.join(', ')}</p></div>
+            }
             {employeeDetails.promotions.map((promo, index) => (
                 <React.Fragment key={index}>
                     <div className="col-span-1">
                         <p className="text-gray-500">Promotion {index + 1} Post</p>
                         <p className="font-semibold">{promo.post || 'N/A'}</p>
                     </div>
-                    <div className="md:col-span-2">
-                        <p className="text-gray-500">Promotion {index + 1} Date</p>
-                        <p className="font-semibold">{promo.date}</p>
+                    <div className="md:col-span-2 grid grid-cols-2 gap-x-2">
+                        <div>
+                           <p className="text-gray-500">Promotion {index + 1} Date</p>
+                           <p className="font-semibold">{promo.date}</p>
+                        </div>
                     </div>
                 </React.Fragment>
             ))}

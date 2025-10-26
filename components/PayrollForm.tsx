@@ -12,37 +12,46 @@ interface PayrollFormProps {
   isLoading: boolean;
 }
 
-const PayrollForm: React.FC<PayrollFormProps> = ({ onCalculate, isLoading }) => {
-  const [formData, setFormData] = useState<Omit<EmployeeInput, 'promotions' | 'annualIncrementChanges'>>({
+const initialFormData: Omit<EmployeeInput, 'promotions' | 'annualIncrementChanges'> = {
     employeeName: '',
     fatherName: '',
     employeeNo: '',
     cpsGpfNo: '',
+    panNumber: '',
+    bankAccountNumber: '',
     dateOfBirth: '',
     retirementAge: '60',
     dateOfJoining: '',
     dateOfJoiningInOffice: '',
+    dateOfRelief: '',
     
     joiningPostId: 'custom',
+    joiningPostCustomName: '',
     basicPay2005: undefined,
     joiningScaleId: PAY_SCALES_6TH_PC[12].id,
     joiningPayInPayBand: undefined,
     joiningLevel: '11',
 
     selectionGradeDate: '',
+    selectionGradeTwoIncrements: true,
     specialGradeDate: '',
+    specialGradeTwoIncrements: true,
     superGradeDate: '',
+    stagnationIncrementDate: '',
 
     cityGrade: CityGrade.GRADE_III,
     calculationStartDate: '2006-01-01',
     calculationEndDate: new Date().toISOString().split('T')[0],
-  });
+};
 
-  const [isCustomPayScale, setIsCustomPayScale] = useState(true);
+const PayrollForm: React.FC<PayrollFormProps> = ({ onCalculate, isLoading }) => {
+  const [formData, setFormData] = useState(initialFormData);
   const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [annualIncrementChanges, setAnnualIncrementChanges] = useState<AnnualIncrementChange[]>([
       { id: Date.now().toString(), effectiveDate: '', incrementMonth: 'jul' }
   ]);
+  
+  const isCustomPost = formData.joiningPostId === 'custom';
   
   useEffect(() => {
     setAnnualIncrementChanges(prev => {
@@ -57,27 +66,29 @@ const PayrollForm: React.FC<PayrollFormProps> = ({ onCalculate, isLoading }) => 
 }, [formData.dateOfJoining]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
+    const { name, value, type } = e.target;
     const isNumberInput = ['basicPay2005', 'joiningPayInPayBand'].includes(name);
-    setFormData(prev => ({ ...prev, [name]: isNumberInput && value ? Number(value) : value }));
+    
+    if (type === 'checkbox') {
+        const { checked } = e.target as HTMLInputElement;
+        setFormData(prev => ({ ...prev, [name]: checked }));
+    } else {
+        setFormData(prev => ({ ...prev, [name]: isNumberInput && value ? Number(value) : value }));
+    }
   };
   
   const handlePostChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const postId = e.target.value;
-    if (postId === 'custom') {
-        setIsCustomPayScale(true);
-        setFormData(prev => ({ ...prev, joiningPostId: postId }));
+    const selectedPost = POSTS.find(p => p.id === postId);
+    if (selectedPost) {
+        setFormData(prev => ({
+            ...prev,
+            joiningPostId: postId,
+            joiningScaleId: selectedPost.scaleId,
+            joiningLevel: selectedPost.level.toString(),
+        }));
     } else {
-        const selectedPost = POSTS.find(p => p.id === postId);
-        if (selectedPost) {
-            setIsCustomPayScale(false);
-            setFormData(prev => ({
-                ...prev,
-                joiningPostId: postId,
-                joiningScaleId: selectedPost.scaleId,
-                joiningLevel: selectedPost.level.toString(),
-            }));
-        }
+        setFormData(prev => ({ ...prev, joiningPostId: 'custom' }));
     }
   };
 
@@ -120,6 +131,12 @@ const PayrollForm: React.FC<PayrollFormProps> = ({ onCalculate, isLoading }) => 
         return 'Invalid Date';
     }
   }
+  
+  const handleReset = () => {
+      setFormData(initialFormData);
+      setPromotions([]);
+      setAnnualIncrementChanges([{ id: Date.now().toString(), effectiveDate: '', incrementMonth: 'jul' }]);
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -138,44 +155,56 @@ const PayrollForm: React.FC<PayrollFormProps> = ({ onCalculate, isLoading }) => 
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} onReset={handleReset} className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle>Personal Details</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="employeeName">Employee Name</Label>
-            <Input type="text" name="employeeName" id="employeeName" value={formData.employeeName} onChange={handleChange} placeholder="Enter full name" required />
-          </div>
-          <div>
-            <Label htmlFor="fatherName">Father's Name</Label>
-            <Input type="text" name="fatherName" id="fatherName" value={formData.fatherName} onChange={handleChange} placeholder="Enter father's name" required />
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="employeeNo">Employee Number</Label>
-              <Input type="text" name="employeeNo" id="employeeNo" value={formData.employeeNo} onChange={handleChange} placeholder="Enter employee number" required />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="employeeName">Employee Name</Label>
+                <Input type="text" name="employeeName" id="employeeName" value={formData.employeeName} onChange={handleChange} placeholder="Enter full name" required />
+              </div>
+              <div>
+                <Label htmlFor="fatherName">Father's Name</Label>
+                <Input type="text" name="fatherName" id="fatherName" value={formData.fatherName} onChange={handleChange} placeholder="Enter father's name" required />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="employeeNo">Employee Number</Label>
+                <Input type="text" name="employeeNo" id="employeeNo" value={formData.employeeNo} onChange={handleChange} placeholder="Enter employee number" required />
+              </div>
+              <div>
+                <Label htmlFor="cpsGpfNo">CPS / GPF No.</Label>
+                <Input type="text" name="cpsGpfNo" id="cpsGpfNo" value={formData.cpsGpfNo} onChange={handleChange} placeholder="Enter account number" required />
+              </div>
+            </div>
+             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="panNumber">PAN Number</Label>
+                <Input type="text" name="panNumber" id="panNumber" value={formData.panNumber} onChange={handleChange} placeholder="Enter PAN" required />
+              </div>
+              <div>
+                <Label htmlFor="bankAccountNumber">Bank Account Number</Label>
+                <Input type="text" name="bankAccountNumber" id="bankAccountNumber" value={formData.bankAccountNumber} onChange={handleChange} placeholder="Enter Bank A/C No." required />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="dateOfBirth">Date of Birth</Label>
+                <Input type="date" name="dateOfBirth" id="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} required />
+              </div>
+              <div>
+                <Label htmlFor="dateOfJoining">Date of Joining (Service)</Label>
+                <Input type="date" name="dateOfJoining" id="dateOfJoining" value={formData.dateOfJoining} onChange={handleChange} required />
+              </div>
             </div>
             <div>
-              <Label htmlFor="cpsGpfNo">CPS / GPF No.</Label>
-              <Input type="text" name="cpsGpfNo" id="cpsGpfNo" value={formData.cpsGpfNo} onChange={handleChange} placeholder="Enter account number" required />
+                <Label htmlFor="dateOfJoiningInOffice">Date of Joining (This Office)</Label>
+                <Input type="date" name="dateOfJoiningInOffice" id="dateOfJoiningInOffice" value={formData.dateOfJoiningInOffice} onChange={handleChange} required />
             </div>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="dateOfBirth">Date of Birth</Label>
-              <Input type="date" name="dateOfBirth" id="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} required />
-            </div>
-            <div>
-              <Label htmlFor="dateOfJoining">Date of Joining (Service)</Label>
-              <Input type="date" name="dateOfJoining" id="dateOfJoining" value={formData.dateOfJoining} onChange={handleChange} required />
-            </div>
-          </div>
-           <div>
-              <Label htmlFor="dateOfJoiningInOffice">Date of Joining (This Office)</Label>
-              <Input type="date" name="dateOfJoiningInOffice" id="dateOfJoiningInOffice" value={formData.dateOfJoiningInOffice} onChange={handleChange} required />
-           </div>
            <div>
               <div className="flex justify-between items-center mb-2">
                   <h3 className="text-sm font-medium text-gray-700">Annual Increment Schedule</h3>
@@ -224,11 +253,17 @@ const PayrollForm: React.FC<PayrollFormProps> = ({ onCalculate, isLoading }) => 
                   {POSTS.map(post => <option key={post.id} value={post.id}>{post.name}</option>)}
               </Select>
           </div>
+           {isCustomPost && (
+              <div>
+                  <Label htmlFor="joiningPostCustomName">Custom Post Name</Label>
+                  <Input type="text" name="joiningPostCustomName" id="joiningPostCustomName" value={formData.joiningPostCustomName ?? ''} onChange={handleChange} placeholder="e.g., Special Grade Assistant" required />
+              </div>
+            )}
            {joiningPeriod === 'pre2006' && (
               <>
                   <div>
                       <Label htmlFor="joiningScaleId">Pay Scale (as of 31-12-2005)</Label>
-                      <Select name="joiningScaleId" id="joiningScaleId" value={formData.joiningScaleId} onChange={handleChange} required disabled={!isCustomPayScale}>
+                      <Select name="joiningScaleId" id="joiningScaleId" value={formData.joiningScaleId} onChange={handleChange} required disabled={!isCustomPost}>
                         {PAY_SCALES_6TH_PC.map(ps => (<option key={ps.id} value={ps.id}>{ps.scale}</option>))}
                       </Select>
                   </div>
@@ -242,7 +277,7 @@ const PayrollForm: React.FC<PayrollFormProps> = ({ onCalculate, isLoading }) => 
               <>
                    <div>
                       <Label htmlFor="joiningScaleId">Pay Band + Grade Pay</Label>
-                       <Select name="joiningScaleId" id="joiningScaleId" value={formData.joiningScaleId} onChange={handleChange} required disabled={!isCustomPayScale}>
+                       <Select name="joiningScaleId" id="joiningScaleId" value={formData.joiningScaleId} onChange={handleChange} required disabled={!isCustomPost}>
                         {PAY_SCALES_6TH_PC.map(ps => (<option key={ps.id} value={ps.id}>{`${ps.payBand} + ${ps.gradePay} GP`}</option>))}
                       </Select>
                   </div>
@@ -255,7 +290,7 @@ const PayrollForm: React.FC<PayrollFormProps> = ({ onCalculate, isLoading }) => 
            {joiningPeriod === '7thPC' && (
               <div>
                   <Label htmlFor="joiningLevel">Level of Pay</Label>
-                  <Select name="joiningLevel" id="joiningLevel" value={formData.joiningLevel} onChange={handleChange} required disabled={!isCustomPayScale}>
+                  <Select name="joiningLevel" id="joiningLevel" value={formData.joiningLevel} onChange={handleChange} required disabled={!isCustomPost}>
                       {LEVELS.map(level => <option key={level} value={level}>{`Level ${level}`}</option>)}
                   </Select>
                   <p className="text-xs text-gray-500 mt-1">Pay will be fixed at the minimum of this Level for new entrants.</p>
@@ -268,31 +303,40 @@ const PayrollForm: React.FC<PayrollFormProps> = ({ onCalculate, isLoading }) => 
       <Card>
           <CardHeader>
               <CardTitle>Career Events & HRA</CardTitle>
-              <CardDescription>Enter dates for grade awards and specify HRA classification.</CardDescription>
+              <CardDescription>Enter dates for grade awards, transfers, and HRA classification.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-4">
                 <div>
                   <Label htmlFor="selectionGradeDate">Selection Grade Date</Label>
                   <Input type="date" name="selectionGradeDate" id="selectionGradeDate" value={formData.selectionGradeDate} onChange={handleChange} />
-                  <p className="text-xs text-gray-500 mt-1">Typically after 10 years.</p>
+                   {formData.selectionGradeDate && <div className="mt-2 text-xs"><label><input type="checkbox" name="selectionGradeTwoIncrements" checked={formData.selectionGradeTwoIncrements} onChange={handleChange} /> Apply 2 Increments</label></div>}
                 </div>
                 <div>
                   <Label htmlFor="specialGradeDate">Special Grade Date</Label>
                   <Input type="date" name="specialGradeDate" id="specialGradeDate" value={formData.specialGradeDate} onChange={handleChange} />
-                   <p className="text-xs text-gray-500 mt-1">Typically after 20 years.</p>
+                  {formData.specialGradeDate && <div className="mt-2 text-xs"><label><input type="checkbox" name="specialGradeTwoIncrements" checked={formData.specialGradeTwoIncrements} onChange={handleChange} /> Apply 2 Increments</label></div>}
                 </div>
-              </div>
-              <div>
+                 <div>
                   <Label htmlFor="superGradeDate">Super Grade (Bonus) Date</Label>
                   <Input type="date" name="superGradeDate" id="superGradeDate" value={formData.superGradeDate} onChange={handleChange} />
-                  <p className="text-xs text-gray-500 mt-1">Typically after 30 years.</p>
-              </div>
-              <div>
+                </div>
+                 <div>
+                  <Label htmlFor="stagnationIncrementDate">Stagnation Increment Start Date</Label>
+                  <Input type="date" name="stagnationIncrementDate" id="stagnationIncrementDate" value={formData.stagnationIncrementDate ?? ''} onChange={handleChange} />
+                  <p className="text-xs text-gray-500 mt-1">Date entered post at Level 24+.</p>
+                </div>
+                 <div>
+                  <Label htmlFor="dateOfRelief">Date of Relief (Transfer)</Label>
+                  <Input type="date" name="dateOfRelief" id="dateOfRelief" value={formData.dateOfRelief ?? ''} onChange={handleChange} />
+                  <p className="text-xs text-gray-500 mt-1">Calculation will end on this date.</p>
+                </div>
+                 <div>
                   <Label htmlFor="cityGrade">City/Town Grade for HRA</Label>
                   <Select name="cityGrade" id="cityGrade" value={formData.cityGrade} onChange={handleChange} required>
                     {Object.values(CityGrade).map(grade => (<option key={grade} value={grade}>{grade}</option>))}
                   </Select>
+              </div>
               </div>
           </CardContent>
       </Card>
@@ -357,7 +401,10 @@ const PayrollForm: React.FC<PayrollFormProps> = ({ onCalculate, isLoading }) => 
           </CardContent>
       </Card>
 
-      <div className="pt-2">
+      <div className="pt-2 grid grid-cols-2 gap-4">
+        <Button type="reset" className="w-full bg-gray-600 hover:bg-gray-700">
+          Reset Form
+        </Button>
         <Button type="submit" disabled={isLoading} className="w-full">
           {isLoading ? 'Calculating...' : 'Calculate Full Payroll'}
         </Button>
