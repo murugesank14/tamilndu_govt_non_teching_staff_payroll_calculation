@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, ReactNode } from 'react';
+import React, { createContext, useState, useContext } from 'react';
 import { translations, TranslationKey } from '../translations';
 
 type Language = 'en' | 'ta';
@@ -11,7 +11,12 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-export const LanguageProvider = ({ children }: { children: React.ReactNode }) => {
+// Fix: Refactored to use a standard props interface with React.FC for better type clarity.
+interface LanguageProviderProps {
+  children: React.ReactNode;
+}
+
+export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
   const [language, setLanguage] = useState<Language>('en');
 
   const t = (key: TranslationKey, vars?: { [key: string]: string | number }): string => {

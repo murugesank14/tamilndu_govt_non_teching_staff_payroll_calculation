@@ -41,8 +41,8 @@ export const PayProgressionChart: React.FC<PayProgressionChartProps> = ({ yearly
                     label: 'Gross Pay (INR)',
                     data: data,
                     fill: true,
-                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                    borderColor: 'rgba(59, 130, 246, 0.8)',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    borderColor: 'rgba(16, 185, 129, 0.8)',
                     tension: 0.2
                 }]
             },

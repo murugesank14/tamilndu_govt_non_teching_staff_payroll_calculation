@@ -8,7 +8,7 @@ import { useLanguage } from './components/LanguageProvider';
 
 const LanguageSwitcher: React.FC = () => {
     const { language, setLanguage } = useLanguage();
-    const activeClasses = "bg-blue-600 text-white";
+    const activeClasses = "bg-emerald-600 text-white";
     const inactiveClasses = "bg-white text-gray-600 hover:bg-gray-100";
     
     return (
@@ -67,7 +67,7 @@ const App: React.FC = () => {
                  <h1 className="text-base md:text-xl font-bold text-gray-800">
                   {t('appTitle')}
                 </h1>
-                <h2 className="text-sm md:text-base font-medium text-blue-700">{t('appTitleTa')}</h2>
+                <h2 className="text-sm md:text-base font-medium text-emerald-700">{t('appTitleTa')}</h2>
             </div>
           </div>
           <LanguageSwitcher />
@@ -82,7 +82,7 @@ const App: React.FC = () => {
           <div className="lg:col-span-3">
             {isLoading && (
               <div className="flex justify-center items-center h-full bg-white rounded-xl shadow-md p-8">
-                <div className="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12 mb-4 animate-spin border-t-blue-500"></div>
+                <div className="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12 mb-4 animate-spin border-t-emerald-500"></div>
               </div>
             )}
             {error && (
