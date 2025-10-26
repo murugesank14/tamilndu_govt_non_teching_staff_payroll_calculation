@@ -1,5 +1,22 @@
 import { CityGrade, PayScale } from './types';
 
+export interface Post {
+  id: string;
+  name: string;
+  scaleId: string; // Corresponds to PAY_SCALES_6TH_PC id
+  level: number; // Corresponds to 7th PC Level
+}
+
+export const POSTS: Post[] = [
+    { id: 'office-assistant', name: 'Office Assistant', scaleId: '2550-55-2660-60-3200', level: 1 },
+    { id: 'record-clerk', name: 'Record Clerk', scaleId: '2610-60-3150-65-3540', level: 2 },
+    { id: 'junior-assistant', name: 'Junior Assistant', scaleId: '4000-100-6000', level: 8 },
+    { id: 'typist', name: 'Typist', scaleId: '4000-100-6000', level: 8 },
+    { id: 'steno-typist-g3', name: 'Steno-Typist Grade-III', scaleId: '4000-100-6000', level: 8 },
+    { id: 'assistant', name: 'Assistant', scaleId: '5000-150-8000', level: 11 },
+    { id: 'superintendent', name: 'Superintendent', scaleId: '5500-175-9000', level: 13 },
+];
+
 export const GRADE_PAY_OPTIONS: number[] = [
     1300, 1400, 1650, 1800, 1900, 2000, 2200, 2400, 2600, 2800, 4200, 4300, 
     4400, 4450, 4500, 4600, 4700, 4800, 4900, 5100, 5200, 5400, 5700, 6000, 

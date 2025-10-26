@@ -6,14 +6,25 @@ export interface Promotion {
   level?: string; // for post-2016
 }
 
+export interface AnnualIncrementChange {
+  id: string;
+  effectiveDate: string;
+  incrementMonth: 'jan' | 'apr' | 'jul' | 'oct';
+}
+
 export interface EmployeeInput {
   employeeName: string;
+  fatherName: string;
+  employeeNo: string;
   cpsGpfNo: string;
   dateOfBirth: string;
   retirementAge: '58' | '60';
   dateOfJoining: string;
+  dateOfJoiningInOffice: string;
+  annualIncrementChanges: AnnualIncrementChange[];
 
   // Pay at time of joining
+  joiningPostId?: string;
   basicPay2005?: number; // For pre-2006 joiners
   joiningPayInPayBand?: number; // For 6th PC joiners
   joiningScaleId?: string; // For pre-2006 OR 6th PC joiners
@@ -65,11 +76,19 @@ export interface PayrollYear {
 
 export interface EmployeeDetails {
     employeeName: string;
+    fatherName: string;
+    employeeNo: string;
     cpsGpfNo: string;
     dateOfBirth: string;
     dateOfJoining: string;
+    dateOfJoiningInOffice: string;
+    joiningPost?: string;
     retirementDate: string;
+    retirementAge: '58' | '60';
     promotions: { post: string; date: string }[];
+    selectionGradeDate?: string;
+    specialGradeDate?: string;
+    superGradeDate?: string;
 }
 
 

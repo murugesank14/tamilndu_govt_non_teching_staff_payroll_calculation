@@ -1,7 +1,7 @@
 import { EmployeeInput, PayrollResult, PayrollYear, PayrollPeriod, CityGrade, Promotion } from '../types';
 import { 
     PAY_MATRIX, GRADE_PAY_TO_LEVEL, DA_RATES, HRA_SLABS_7TH_PC, 
-    PAY_SCALES_6TH_PC, HRA_SLABS_6TH_PC, HRA_SLABS_6TH_PC_PRE_2009 
+    PAY_SCALES_6TH_PC, HRA_SLABS_6TH_PC, HRA_SLABS_6TH_PC_PRE_2009, POSTS 
 } from '../constants';
 
 const FITMENT_FACTOR_7TH_PC = 2.57;
@@ -34,7 +34,6 @@ function getIncrement(currentPay: number, level: number, steps: number, commissi
     } else { // 6th PC
         if (gradePay === undefined) throw new Error("Grade Pay is required for 6th PC increment");
         const payInPayBand = currentPay - gradePay;
-        const basicPay = currentPay;
         let newPipb = payInPayBand;
         for (let i = 0; i < steps; i++) {
              const increment = Math.ceil(((newPipb + gradePay) * 0.03) / 10) * 10;
@@ -66,8 +65,8 @@ function getHra(basicPay: number, cityGrade: string, date: Date): number {
 
 
 export const calculateFullPayroll = (data: EmployeeInput): PayrollResult => {
-    const { employeeName, cpsGpfNo, dateOfBirth, retirementAge, dateOfJoining, cityGrade, calculationStartDate, calculationEndDate, promotions, ...rest } = data;
-    const { selectionGradeDate, specialGradeDate, superGradeDate } = rest;
+    const { employeeName, fatherName, employeeNo, cpsGpfNo, dateOfBirth, retirementAge, dateOfJoining, dateOfJoiningInOffice, cityGrade, calculationStartDate, calculationEndDate, promotions, annualIncrementChanges, ...rest } = data;
+    const { selectionGradeDate, specialGradeDate, superGradeDate, joiningPostId } = rest;
 
     if (!dateOfJoining || !calculationStartDate || !calculationEndDate) {
       throw new Error('Please fill all required fields, including Date of Joining and Calculation Period.');
@@ -80,6 +79,10 @@ export const calculateFullPayroll = (data: EmployeeInput): PayrollResult => {
     let currentPay: number, currentLevel: number, currentPipb: number | undefined, currentGradePay: number | undefined;
     let fixation6thPC: PayrollResult['fixation6thPC'] | undefined = undefined;
     let fixation7thPC: PayrollResult['fixation7thPC'] | undefined = undefined;
+    
+    const sortedIncrementChanges = [...annualIncrementChanges]
+        .filter(c => c.effectiveDate)
+        .sort((a, b) => new Date(a.effectiveDate).getTime() - new Date(b.effectiveDate).getTime());
 
     // 1. Determine Initial Pay based on Date of Joining
     if (doj < new Date('2006-01-01')) {
@@ -113,32 +116,50 @@ export const calculateFullPayroll = (data: EmployeeInput): PayrollResult => {
     
     // --- Setup for 7th PC Fixation (if applicable) ---
     if (doj < new Date('2016-01-01')) {
-        const events6thPC = [];
-        if (selectionGradeDate) events6thPC.push({ date: new Date(selectionGradeDate), type: 'SELECTION_GRADE'});
-        if (specialGradeDate) events6thPC.push({ date: new Date(specialGradeDate), type: 'SPECIAL_GRADE'});
-        if (superGradeDate) events6thPC.push({ date: new Date(superGradeDate), type: 'SUPER_GRADE'});
-        promotions.forEach(p => p.date && new Date(p.date) < new Date('2016-01-01') && events6thPC.push({ date: new Date(p.date), type: 'PROMOTION', data: p}));
-        
-        // Calculate pay progression up to 31-12-2015 to find the base for 7th PC fixation
         let payAt2015 = currentPay;
         let gradePayAt2015 = currentGradePay!;
         
+        // --- Refactored Pre-2016 chronological event processing ---
+        const allEventsPre2016: { date: Date, type: string, data?: any }[] = [];
+        // Gather grade and promotion events
+        if (selectionGradeDate && new Date(selectionGradeDate) < new Date('2016-01-01')) allEventsPre2016.push({ date: new Date(selectionGradeDate), type: 'SELECTION_GRADE'});
+        if (specialGradeDate && new Date(specialGradeDate) < new Date('2016-01-01')) allEventsPre2016.push({ date: new Date(specialGradeDate), type: 'SPECIAL_GRADE'});
+        if (superGradeDate && new Date(superGradeDate) < new Date('2016-01-01')) allEventsPre2016.push({ date: new Date(superGradeDate), type: 'SUPER_GRADE'});
+        promotions.forEach(p => p.date && new Date(p.date) < new Date('2016-01-01') && allEventsPre2016.push({ date: new Date(p.date), type: 'PROMOTION', data: p}));
+
+        // Gather annual increments
         for (let year = doj.getFullYear(); year <= 2015; year++) {
-            if (year < 2006) continue;
-            const annualIncrementDate = new Date(year, 6, 1);
-             if (doj <= annualIncrementDate) {
-                 payAt2015 = getIncrement(payAt2015, 0, 1, 6, gradePayAt2015).newPay;
+            const applicableChange = sortedIncrementChanges
+                .filter(c => new Date(c.effectiveDate) <= new Date(year, 11, 31))
+                .pop();
+            const effectiveIncrementMonth = applicableChange ? applicableChange.incrementMonth : 'jul';
+            const incrementMonthMap = { 'jan': 0, 'apr': 3, 'jul': 6, 'oct': 9 };
+            const incrementMonth = incrementMonthMap[effectiveIncrementMonth as 'jan' | 'apr' | 'jul' | 'oct'];
+            const annualIncrementDate = new Date(year, incrementMonth, 1);
+            
+            const cutoffDate = new Date(annualIncrementDate);
+            cutoffDate.setMonth(cutoffDate.getMonth() - 6);
+            if (doj <= cutoffDate && annualIncrementDate > doj) {
+                 allEventsPre2016.push({ date: annualIncrementDate, type: 'ANNUAL_INCREMENT' });
             }
-             events6thPC.filter(e => e.date.getFullYear() === year).sort((a,b) => a.date.getTime() - b.date.getTime()).forEach(event => {
-                if (event.type.endsWith('_GRADE')) {
-                    payAt2015 = getIncrement(payAt2015, 0, event.type === 'SUPER_GRADE' ? 2 : 1, 6, gradePayAt2015).newPay;
+        }
+
+        // Sort and process all events chronologically
+        allEventsPre2016
+            .filter(e => e.date >= doj)
+            .sort((a, b) => a.date.getTime() - b.date.getTime())
+            .forEach(event => {
+                if (event.type === 'ANNUAL_INCREMENT' || event.type === 'SUPER_GRADE') {
+                    payAt2015 = getIncrement(payAt2015, 0, 1, 6, gradePayAt2015).newPay;
+                } else if (event.type === 'SELECTION_GRADE' || event.type === 'SPECIAL_GRADE') {
+                    // Apply two 3% increments as requested for pre-2016 awards
+                    payAt2015 = getIncrement(payAt2015, 0, 2, 6, gradePayAt2015).newPay;
                 } else if (event.type === 'PROMOTION') {
-                    const {newPay} = getIncrement(payAt2015, 0, 1, 6, gradePayAt2015);
+                    const { newPipb } = getIncrement(payAt2015, 0, 1, 6, gradePayAt2015);
                     gradePayAt2015 = event.data.gradePay!;
-                    payAt2015 = newPay - gradePayAt2015 + event.data.gradePay;
+                    payAt2015 = newPipb! + gradePayAt2015;
                 }
             });
-        }
 
         const multipliedPay = Math.round(payAt2015 * FITMENT_FACTOR_7TH_PC);
         const levelFor7PC = GRADE_PAY_TO_LEVEL[gradePayAt2015];
@@ -156,6 +177,16 @@ export const calculateFullPayroll = (data: EmployeeInput): PayrollResult => {
     if (specialGradeDate) events.push({ date: new Date(specialGradeDate), type: 'SPECIAL_GRADE' });
     if (superGradeDate) events.push({ date: new Date(superGradeDate), type: 'SUPER_GRADE'});
     promotions.forEach(p => p.date && events.push({ date: new Date(p.date), type: 'PROMOTION', data: p }));
+    annualIncrementChanges.forEach((change, index) => {
+        // Only add remarks for changes after the initial setting
+        if (index > 0 && change.effectiveDate) {
+            events.push({
+                date: new Date(change.effectiveDate),
+                type: 'INCREMENT_MONTH_CHANGE',
+                data: { month: change.incrementMonth }
+            });
+        }
+    });
 
     const yearlyCalculations: PayrollYear[] = [];
     const startYear = Math.max(2006, doj.getFullYear(), calcStartDate.getFullYear());
@@ -165,9 +196,22 @@ export const calculateFullPayroll = (data: EmployeeInput): PayrollResult => {
         const yearData: PayrollYear = { year, periods: [] };
         
         const yearEvents = [...events.filter(e => e.date.getFullYear() === year)];
-        if (doj.getFullYear() < year || (doj.getFullYear() === year && doj.getMonth() < 6)) {
-             yearEvents.push({ date: new Date(year, 6, 1), type: 'ANNUAL_INCREMENT' });
+        
+        const applicableChange = sortedIncrementChanges
+                .filter(c => new Date(c.effectiveDate) <= new Date(year, 11, 31))
+                .pop();
+        const effectiveIncrementMonth = applicableChange ? applicableChange.incrementMonth : 'jul';
+
+        const incrementMonthMap = { 'jan': 0, 'apr': 3, 'jul': 6, 'oct': 9 };
+        const incrementMonth = incrementMonthMap[effectiveIncrementMonth as 'jan' | 'apr' | 'jul' | 'oct'];
+        const annualIncrementDate = new Date(year, incrementMonth, 1);
+        
+        const cutoffDate = new Date(annualIncrementDate);
+        cutoffDate.setMonth(cutoffDate.getMonth() - 6);
+        if (doj <= cutoffDate) {
+             yearEvents.push({ date: annualIncrementDate, type: 'ANNUAL_INCREMENT' });
         }
+        
         yearEvents.sort((a, b) => a.date.getTime() - b.date.getTime());
 
         let lastDate = new Date(year, 0, 1);
@@ -202,7 +246,6 @@ export const calculateFullPayroll = (data: EmployeeInput): PayrollResult => {
             }
             lastDate = event.date;
             
-            // Apply event changes if within date range
             if (event.date >= doj && event.date <= calcEndDate) {
                 const commission = event.date < new Date('2016-01-01') ? 6 : 7;
                 
@@ -214,12 +257,35 @@ export const calculateFullPayroll = (data: EmployeeInput): PayrollResult => {
                     periodRemarks.push(`7th Pay Commission fixation applied.`);
                 }
                 
-                const steps = (event.type === 'SELECTION_GRADE' || event.type === 'SPECIAL_GRADE') ? 1 : (event.type === 'SUPER_GRADE') ? 2 : (event.type === 'ANNUAL_INCREMENT') ? 1 : 0;
+                if(event.type === 'INCREMENT_MONTH_CHANGE') {
+                    const monthName = event.data.month.charAt(0).toUpperCase() + event.data.month.slice(1);
+                    periodRemarks.push(`Annual increment month changed to ${monthName}.`);
+                }
+
+                let steps = 0;
+                let eventName = event.type.replace('_', ' ');
+                if (event.type === 'ANNUAL_INCREMENT') {
+                    steps = 1;
+                } else if (event.type === 'SELECTION_GRADE' || event.type === 'SPECIAL_GRADE') {
+                    if (commission === 7 && currentLevel >= 1 && currentLevel <= 23) {
+                        steps = 2; // G.O. rule for 7th PC
+                    } else if (commission === 6) {
+                        steps = 2; // User requested 3%+3% for 6th PC
+                    } else {
+                        // For 7th PC levels > 23, it is one increment.
+                        steps = 1;
+                    }
+                } else if (event.type === 'SUPER_GRADE') {
+                    // This corresponds to the 30-year Bonus Increment, which is one increment.
+                    steps = 1;
+                    eventName = 'Bonus Increment (Super Grade)';
+                }
+
                 if (steps > 0) {
                     const { newPay, newPipb } = getIncrement(currentPay, currentLevel, steps, commission, currentGradePay);
                     currentPay = newPay;
                     if(newPipb !== undefined) currentPipb = newPipb;
-                    periodRemarks.push(event.type.replace('_', ' ') + ' applied.');
+                    periodRemarks.push(`${eventName} applied` + (steps > 1 ? ` (${steps} increments).` : '.'));
                 }
 
                 if (event.type === 'PROMOTION') {
@@ -243,13 +309,25 @@ export const calculateFullPayroll = (data: EmployeeInput): PayrollResult => {
     }
     
     const retirementDateStr = dateOfBirth ? new Date(new Date(dateOfBirth).getFullYear() + parseInt(retirementAge, 10), new Date(dateOfBirth).getMonth() + 1, 0).toLocaleDateString('en-GB') : 'N/A';
+    const joiningPostName = POSTS.find(p => p.id === joiningPostId)?.name || 'N/A (Custom)';
+
 
     return {
         employeeDetails: {
-            employeeName, cpsGpfNo, retirementDate: retirementDateStr,
+            employeeName,
+            fatherName,
+            employeeNo,
+            cpsGpfNo,
+            retirementDate: retirementDateStr,
             dateOfBirth: dateOfBirth ? new Date(dateOfBirth).toLocaleDateString('en-GB') : 'N/A',
             dateOfJoining: doj.toLocaleDateString('en-GB'),
-            promotions: promotions.map(p => ({post: p.post, date: new Date(p.date).toLocaleDateString('en-GB')}))
+            dateOfJoiningInOffice: dateOfJoiningInOffice ? new Date(dateOfJoiningInOffice).toLocaleDateString('en-GB') : 'N/A',
+            joiningPost: joiningPostName,
+            promotions: promotions.map(p => ({post: p.post, date: new Date(p.date).toLocaleDateString('en-GB')})),
+            retirementAge,
+            selectionGradeDate: selectionGradeDate || undefined,
+            specialGradeDate: specialGradeDate || undefined,
+            superGradeDate: superGradeDate || undefined,
         },
         fixation6thPC,
         fixation7thPC,

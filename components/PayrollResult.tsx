@@ -1,13 +1,15 @@
 import React from 'react';
-import { PayrollResult as PayrollResultType, Promotion } from '../types';
+import { PayrollResult as PayrollResultType } from '../types';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/Card';
 import { Button } from './ui/Button';
+import { PayProgressionChart } from './PayProgressionChart';
+import { CareerTimeline } from './CareerTimeline';
 
 // Declare global variables from CDN scripts to satisfy TypeScript
 declare global {
     interface Window {
         jspdf: any;
-        htmlToDocx: any;
+        htmlDocx: any;
     }
 }
 declare const XLSX: any;
@@ -39,9 +41,13 @@ const PayrollResult: React.FC<PayrollResultProps> = ({ result }) => {
         // Employee Summary
         let summaryBody = [
             ['Employee Name', employeeDetails.employeeName],
+            ["Father's Name", employeeDetails.fatherName],
+            ['Employee Number', employeeDetails.employeeNo],
             ['CPS / GPF No.', employeeDetails.cpsGpfNo],
             ['Date of Birth', employeeDetails.dateOfBirth],
-            ['Date of Joining', employeeDetails.dateOfJoining],
+            ['Date of Joining (Service)', employeeDetails.dateOfJoining],
+            ['Date of Joining (Office)', employeeDetails.dateOfJoiningInOffice],
+            ['Post at Joining', employeeDetails.joiningPost || 'N/A'],
             ['Date of Retirement', employeeDetails.retirementDate],
         ];
 
@@ -105,9 +111,13 @@ const PayrollResult: React.FC<PayrollResultProps> = ({ result }) => {
       // Summary Sheet
       let summaryData = [
         ['Employee Name', employeeDetails.employeeName],
+        ["Father's Name", employeeDetails.fatherName],
+        ['Employee Number', employeeDetails.employeeNo],
         ['CPS / GPF No.', employeeDetails.cpsGpfNo],
         ['Date of Birth', employeeDetails.dateOfBirth],
-        ['Date of Joining', employeeDetails.dateOfJoining],
+        ['Date of Joining (Service)', employeeDetails.dateOfJoining],
+        ['Date of Joining (Office)', employeeDetails.dateOfJoiningInOffice],
+        ['Post at Joining', employeeDetails.joiningPost || 'N/A'],
         ['Date of Retirement', employeeDetails.retirementDate],
       ];
       employeeDetails.promotions.forEach((promo, i) => {
@@ -148,6 +158,12 @@ const PayrollResult: React.FC<PayrollResultProps> = ({ result }) => {
     };
 
     const handleExportWord = async () => {
+        if (!window.htmlDocx) {
+            alert("The Word export library failed to load. Please check your internet connection and try again.");
+            console.error("`window.htmlDocx` is not available. The html-to-docx script might have failed to load.");
+            return;
+        }
+
         let promotionHtml = employeeDetails.promotions.map((p,i) => `
             <tr><td>Promotion ${i+1} Post</td><td>${p.post || 'N/A'}</td></tr>
             <tr><td>Promotion ${i+1} Date</td><td>${p.date || 'N/A'}</td></tr>
@@ -182,9 +198,13 @@ const PayrollResult: React.FC<PayrollResultProps> = ({ result }) => {
           <h2>Employee Summary</h2>
           <table class="summary-table">
             <tr><td>Employee Name</td><td>${employeeDetails.employeeName}</td></tr>
+            <tr><td>Father's Name</td><td>${employeeDetails.fatherName}</td></tr>
+            <tr><td>Employee Number</td><td>${employeeDetails.employeeNo}</td></tr>
             <tr><td>CPS / GPF No.</td><td>${employeeDetails.cpsGpfNo}</td></tr>
             <tr><td>Date of Birth</td><td>${employeeDetails.dateOfBirth}</td></tr>
-            <tr><td>Date of Joining</td><td>${employeeDetails.dateOfJoining}</td></tr>
+            <tr><td>Date of Joining (Service)</td><td>${employeeDetails.dateOfJoining}</td></tr>
+            <tr><td>Date of Joining (Office)</td><td>${employeeDetails.dateOfJoiningInOffice}</td></tr>
+            <tr><td>Post at Joining</td><td>${employeeDetails.joiningPost || 'N/A'}</td></tr>
             <tr><td>Date of Retirement</td><td>${employeeDetails.retirementDate}</td></tr>
             ${promotionHtml}
           </table>
@@ -198,7 +218,7 @@ const PayrollResult: React.FC<PayrollResultProps> = ({ result }) => {
             yearData.periods.forEach(p => {
                 htmlString += `<tr>
                     <td>${p.period}</td>
-                    <td>${formatCurrencyForExport(p.basicPay)}</td>
+                    <td>${formatCurrencyForExport(p.basic_pay)}</td>
                     <td>${formatCurrencyForExport(p.daAmount)} (${p.daRate}%)</td>
                     <td>${formatCurrencyForExport(p.hra)}</td>
                     <td>${formatCurrencyForExport(p.grossPay)}</td>
@@ -208,7 +228,7 @@ const PayrollResult: React.FC<PayrollResultProps> = ({ result }) => {
             htmlString += `</tbody></table>`;
         });
         
-        const blob = await window.htmlToDocx.asBlob(htmlString);
+        const blob = await window.htmlDocx.asBlob(htmlString);
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -230,17 +250,21 @@ const PayrollResult: React.FC<PayrollResultProps> = ({ result }) => {
         </CardHeader>
         <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-2 text-sm">
             <div><p className="text-gray-500">Employee Name</p><p className="font-semibold">{employeeDetails.employeeName || 'N/A'}</p></div>
+            <div><p className="text-gray-500">Father's Name</p><p className="font-semibold">{employeeDetails.fatherName || 'N/A'}</p></div>
+            <div><p className="text-gray-500">Employee Number</p><p className="font-semibold">{employeeDetails.employeeNo || 'N/A'}</p></div>
             <div><p className="text-gray-500">CPS / GPF No.</p><p className="font-semibold">{employeeDetails.cpsGpfNo || 'N/A'}</p></div>
             <div><p className="text-gray-500">Date of Birth</p><p className="font-semibold">{employeeDetails.dateOfBirth || 'N/A'}</p></div>
-            <div><p className="text-gray-500">Date of Joining</p><p className="font-semibold">{employeeDetails.dateOfJoining || 'N/A'}</p></div>
+            <div><p className="text-gray-500">Date of Joining (Service)</p><p className="font-semibold">{employeeDetails.dateOfJoining || 'N/A'}</p></div>
+            <div><p className="text-gray-500">Date of Joining (Office)</p><p className="font-semibold">{employeeDetails.dateOfJoiningInOffice || 'N/A'}</p></div>
+            <div><p className="text-gray-500">Post at Joining</p><p className="font-semibold">{employeeDetails.joiningPost || 'N/A'}</p></div>
             <div><p className="text-gray-500">Date of Retirement</p><p className="font-semibold">{employeeDetails.retirementDate || 'N/A'}</p></div>
             {employeeDetails.promotions.map((promo, index) => (
                 <React.Fragment key={index}>
-                    <div>
+                    <div className="col-span-1">
                         <p className="text-gray-500">Promotion {index + 1} Post</p>
                         <p className="font-semibold">{promo.post || 'N/A'}</p>
                     </div>
-                    <div>
+                    <div className="md:col-span-2">
                         <p className="text-gray-500">Promotion {index + 1} Date</p>
                         <p className="font-semibold">{promo.date}</p>
                     </div>
@@ -249,6 +273,11 @@ const PayrollResult: React.FC<PayrollResultProps> = ({ result }) => {
         </CardContent>
       </Card>
       
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <PayProgressionChart yearlyCalculations={yearlyCalculations} />
+        <CareerTimeline result={result} />
+      </div>
+
       {(fixation6thPC || fixation7thPC) && (
         <Card>
           <CardHeader><CardTitle>Initial Pay Fixations</CardTitle></CardHeader>

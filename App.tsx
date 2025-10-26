@@ -47,11 +47,11 @@ const App: React.FC = () => {
       </header>
 
       <main className="container mx-auto p-4 md:p-6 lg:p-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-1">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+          <div className="lg:col-span-2">
             <PayrollForm onCalculate={handleCalculate} isLoading={isLoading} />
           </div>
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-3">
             {isLoading && (
               <div className="flex justify-center items-center h-full bg-white rounded-lg shadow p-8">
                 <div className="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12 mb-4 animate-spin border-t-blue-500"></div>
