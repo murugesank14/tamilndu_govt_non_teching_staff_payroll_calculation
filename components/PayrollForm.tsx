@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { EmployeeInput, CityGrade, Promotion, AnnualIncrementChange, BreakInService } from '../types';
-import { PAY_SCALES_6TH_PC, LEVELS, GRADE_PAY_OPTIONS, POSTS } from '../constants';
+import { PAY_SCALES_6TH_PC, LEVELS, GRADE_PAY_OPTIONS, POSTS, PAY_SCALES_5TH_PC } from '../constants';
 import { Input } from './ui/Input';
 import { Button } from './ui/Button';
 import { Select } from './ui/Select';
@@ -30,9 +30,10 @@ const initialFormData: Omit<EmployeeInput, 'promotions' | 'annualIncrementChange
     
     joiningPostId: 'custom',
     joiningPostCustomName: '',
-    basicPay2005: undefined,
-    joiningScaleId: PAY_SCALES_6TH_PC[12].id,
+    joiningBasicPay5thPC: undefined,
+    joiningScaleId5thPC: PAY_SCALES_5TH_PC[10].id,
     joiningPayInPayBand: undefined,
+    joiningScaleId6thPC: PAY_SCALES_6TH_PC[12].id,
     joiningLevel: '11',
 
     selectionGradeDate: '',
@@ -45,7 +46,7 @@ const initialFormData: Omit<EmployeeInput, 'promotions' | 'annualIncrementChange
     incrementEligibilityMonths: 6,
 
     cityGrade: CityGrade.GRADE_III,
-    calculationStartDate: '2006-01-01',
+    calculationStartDate: '1998-01-01',
     calculationEndDate: new Date().toISOString().split('T')[0],
     
     festivalAdvance: undefined,
@@ -88,7 +89,7 @@ const PayrollForm: React.FC<PayrollFormProps> = ({ onCalculate, isLoading }) => 
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    const isNumberInput = ['basicPay2005', 'joiningPayInPayBand', 'festivalAdvance', 'carAdvance', 'twoWheelerAdvance', 'computerAdvance', 'otherPayables', 'incrementEligibilityMonths'].includes(name);
+    const isNumberInput = ['joiningBasicPay5thPC', 'joiningPayInPayBand', 'festivalAdvance', 'carAdvance', 'twoWheelerAdvance', 'computerAdvance', 'otherPayables', 'incrementEligibilityMonths'].includes(name);
     
     if (type === 'checkbox') {
         const { checked } = e.target as HTMLInputElement;
@@ -105,7 +106,7 @@ const PayrollForm: React.FC<PayrollFormProps> = ({ onCalculate, isLoading }) => 
         setFormData(prev => ({
             ...prev,
             joiningPostId: postId,
-            joiningScaleId: selectedPost.scaleId,
+            joiningScaleId6thPC: selectedPost.scaleId,
             joiningLevel: selectedPost.level.toString(),
         }));
     } else {
@@ -313,22 +314,22 @@ const PayrollForm: React.FC<PayrollFormProps> = ({ onCalculate, isLoading }) => 
            {joiningPeriod === 'pre2006' && (
               <>
                   <div>
-                      <Label htmlFor="joiningScaleId">{t('payScaleAsOf2005')}</Label>
-                      <Select name="joiningScaleId" id="joiningScaleId" value={formData.joiningScaleId} onChange={handleChange} required disabled={!isCustomPost}>
-                        {PAY_SCALES_6TH_PC.map(ps => (<option key={ps.id} value={ps.id}>{ps.scale}</option>))}
+                      <Label htmlFor="joiningScaleId5thPC">{t('payScale5thPC')}</Label>
+                      <Select name="joiningScaleId5thPC" id="joiningScaleId5thPC" value={formData.joiningScaleId5thPC} onChange={handleChange} required >
+                        {PAY_SCALES_5TH_PC.map(ps => (<option key={ps.id} value={ps.id}>{ps.scale}</option>))}
                       </Select>
                   </div>
                   <div>
-                      <Label htmlFor="basicPay2005">{t('basicPayInScale')}</Label>
-                      <Input type="number" name="basicPay2005" id="basicPay2005" value={formData.basicPay2005 ?? ''} onChange={handleChange} required />
+                      <Label htmlFor="joiningBasicPay5thPC">{t('basicPayAtJoining')}</Label>
+                      <Input type="number" name="joiningBasicPay5thPC" id="joiningBasicPay5thPC" value={formData.joiningBasicPay5thPC ?? ''} onChange={handleChange} required />
                   </div>
               </>
            )}
            {joiningPeriod === '6thPC' && (
               <>
                    <div>
-                      <Label htmlFor="joiningScaleId">{t('payBandGradePay')}</Label>
-                       <Select name="joiningScaleId" id="joiningScaleId" value={formData.joiningScaleId} onChange={handleChange} required disabled={!isCustomPost}>
+                      <Label htmlFor="joiningScaleId6thPC">{t('payBandGradePay')}</Label>
+                       <Select name="joiningScaleId6thPC" id="joiningScaleId6thPC" value={formData.joiningScaleId6thPC} onChange={handleChange} required disabled={!isCustomPost}>
                         {PAY_SCALES_6TH_PC.map(ps => (<option key={ps.id} value={ps.id}>{`${ps.payBand} + ${ps.gradePay} GP`}</option>))}
                       </Select>
                   </div>

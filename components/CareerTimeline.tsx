@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { PayrollResult as PayrollResultType } from '../types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/Card';
@@ -9,11 +10,11 @@ interface CareerTimelineProps {
 }
 
 export const CareerTimeline: React.FC<CareerTimelineProps> = ({ result }) => {
-    const { employeeDetails } = result;
+    const { employeeDetails, appliedRevisions } = result;
     const { dateOfJoining, promotions, retirementDate, selectionGradeDate, specialGradeDate, superGradeDate, retirementAge, stagnationIncrementDates, dateOfRelief } = employeeDetails;
     const { t } = useLanguage();
 
-    const events: { dateStr: string; date: Date; title: string; description: string; type: 'joining' | 'promotion' | 'grade' | 'retirement' | 'stagnation' | 'transfer' }[] = [];
+    const events: { dateStr: string; date: Date; title: string; description: string; type: 'joining' | 'promotion' | 'grade' | 'retirement' | 'stagnation' | 'transfer' | 'revision' }[] = [];
 
     if (dateOfJoining && dateOfJoining !== 'N/A') {
         events.push({
@@ -46,6 +47,18 @@ export const CareerTimeline: React.FC<CareerTimelineProps> = ({ result }) => {
             });
         }
     });
+    
+    if (appliedRevisions) {
+        appliedRevisions.forEach(rev => {
+            events.push({
+                dateStr: rev.date.toLocaleDateString('en-GB', { timeZone: 'UTC' }),
+                date: rev.date,
+                title: 'Pay Scale Revision (2010)',
+                description: rev.description,
+                type: 'revision',
+            });
+        });
+    }
 
     if (selectionGradeDate) {
          events.push({

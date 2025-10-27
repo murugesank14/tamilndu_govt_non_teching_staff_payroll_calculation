@@ -1,31 +1,55 @@
-import { CityGrade, PayScale } from './types';
-
-export interface Post {
-  id: string;
-  name: string;
-  scaleId: string; // Corresponds to PAY_SCALES_6TH_PC id
-  level: number; // Corresponds to 7th PC Level
-}
+import { CityGrade, PayScale, Post, PayRevision2010, PayScale5thPC } from './types';
 
 // Sorted by Level for easier dropdown navigation
 export const POSTS: Post[] = [
-    { id: 'office-assistant', name: 'Office Assistant', scaleId: '2550-55-2660-60-3200', level: 1 },
-    { id: 'record-clerk', name: 'Record Clerk', scaleId: '2610-60-3150-65-3540', level: 2 },
-    { id: 'record-assistant', name: 'Record Assistant', scaleId: '2610-60-3150-65-3540', level: 2 },
-    { id: 'jeep-driver', name: 'Jeep Driver', scaleId: '4000-100-6000', level: 8 },
-    { id: 'junior-assistant', name: 'Junior Assistant', scaleId: '4000-100-6000', level: 8 },
-    { id: 'panchayat-clerk', name: 'Panchayat Clerk', scaleId: '4000-100-6000', level: 8 },
-    { id: 'typist', name: 'Typist', scaleId: '4000-100-6000', level: 8 },
-    { id: 'steno-typist-g3', name: 'Steno-Typist Grade-III', scaleId: '4000-100-6000', level: 8 },
-    { id: 'assistant', name: 'Assistant', scaleId: '5000-150-8000', level: 11 },
-    { id: 'accountant', name: 'Accountant', scaleId: '5000-150-8000', level: 11 },
-    { id: 'superintendent', name: 'Superintendent', scaleId: '5500-175-9000', level: 13 },
-    { id: 'manager', name: 'Manager', scaleId: '5500-175-9000', level: 13 },
-    { id: 'assistant-inspector', name: 'Assistant Inspector', scaleId: '6500-200-10500', level: 16 },
-    { id: 'deputy-inspector', name: 'Deputy Inspector', scaleId: '7000-225-11500', level: 18 },
-    { id: 'inspector', name: 'Inspector', scaleId: '8000-275-13500', level: 22 },
-    { id: 'assistant-director', name: 'Assistant Director', scaleId: '10000-325-15200', level: 25 },
-    { id: 'deputy-director', name: 'Deputy Director', scaleId: '12000-375-16500', level: 26 },
+    { id: 'office-assistant', name: 'Office Assistant', scaleId: 'PB1A-1300', level: 1 },
+    { id: 'record-clerk', name: 'Record Clerk', scaleId: 'PB1A-1400', level: 2 },
+    { id: 'record-assistant', name: 'Record Assistant', scaleId: 'PB1A-1400', level: 2 },
+    { id: 'lab-asst-collegiate', name: 'Laboratory Assistant (Collegiate Education)', scaleId: 'PB1-1900', level: 5 },
+    { id: 'assistant-secretariat', name: 'Assistant (Secretariat)', scaleId: 'PB1-2200', level: 7 },
+    { id: 'jeep-driver', name: 'Jeep Driver', scaleId: 'PB1-2400', level: 8 },
+    { id: 'junior-assistant', name: 'Junior Assistant', scaleId: 'PB1-2400', level: 8 },
+    { id: 'asst-agri-officer', name: 'Assistant Agricultural Officer', scaleId: 'PB1-2400', level: 8 },
+    { id: 'panchayat-clerk', name: 'Panchayat Clerk', scaleId: 'PB1-2400', level: 8 },
+    { id: 'typist', name: 'Typist', scaleId: 'PB1-2400', level: 8 },
+    { id: 'steno-typist-g3', name: 'Steno-Typist Grade-III', scaleId: 'PB1-2400', level: 8 },
+    { id: 'assistant', name: 'Assistant', scaleId: 'PB2-4200', level: 11 },
+    { id: 'accountant', name: 'Accountant', scaleId: 'PB2-4200', level: 11 },
+    { id: 'superintendent', name: 'Superintendent', scaleId: 'PB2-4400', level: 13 },
+    { id: 'jr-employment-officer', name: 'Junior Employment Officer', scaleId: 'PB2-4400', level: 13 },
+    { id: 'manager', name: 'Manager', scaleId: 'PB2-4400', level: 13 },
+    { id: 'assistant-inspector', name: 'Assistant Inspector', scaleId: 'PB2-4600', level: 16 },
+    { id: 'deputy-inspector', name: 'Deputy Inspector', scaleId: 'PB2-4800', level: 18 },
+    { id: 'inspector', name: 'Inspector', scaleId: 'PB3-5400', level: 22 },
+    { id: 'assistant-director', name: 'Assistant Director', scaleId: 'PB3-6600', level: 25 },
+    { id: 'deputy-director', name: 'Deputy Director', scaleId: 'PB3-7600', level: 26 },
+];
+
+export const PAY_REVISIONS_2010: PayRevision2010[] = [
+  {
+    postId: 'assistant-secretariat',
+    revisedScaleId: 'PB1-2400',
+    revisedLevel: 8,
+    description: 'Pay revised from GP 2200 to GP 2400 (G.O.Ms.No.256)',
+  },
+  {
+    postId: 'asst-agri-officer',
+    revisedScaleId: 'PB1-2800',
+    revisedLevel: 10,
+    description: 'Pay revised from GP 2400 to GP 2800 (G.O.Ms.No.258)',
+  },
+  {
+    postId: 'jr-employment-officer',
+    revisedScaleId: 'PB2-4800',
+    revisedLevel: 18,
+    description: 'Pay revised from GP 4400 to GP 4800 (G.O.Ms.No.274)',
+  },
+  {
+    postId: 'lab-asst-collegiate',
+    revisedScaleId: 'PB2-4200',
+    revisedLevel: 11,
+    description: 'Pay revised from GP 1900 to GP 4200 (G.O.Ms.No.271)',
+  },
 ];
 
 
@@ -53,7 +77,7 @@ export const PAY_MATRIX: { [level: number]: number[] } = {
     7: [19000, 19600, 20200, 20800, 21400, 22000, 22700, 23400, 24100, 24800, 25500, 26300, 27100, 27900, 28700, 29600, 30500, 31400, 32300, 33300, 34300, 35300, 36400, 37500, 38600, 39800, 41000, 42200, 43500, 44800, 46100, 47500, 48900, 50400, 51900, 53500, 55100, 56800, 58500, 60300],
     8: [19500, 20100, 20700, 21300, 21900, 22600, 23300, 24000, 24700, 25400, 26200, 27000, 27800, 28600, 29500, 30400, 31300, 32200, 33200, 34200, 35200, 36300, 37400, 38500, 39700, 40900, 42100, 43400, 44700, 46000, 47400, 48800, 50300, 51800, 53400, 55000, 56700, 58400, 60200, 62000],
     9: [20000, 20600, 21200, 21800, 22500, 23200, 23900, 24600, 25300, 26100, 26900, 27700, 28500, 29400, 30300, 31200, 32100, 33100, 34100, 35100, 36200, 37300, 38400, 39600, 40800, 42000, 43300, 44600, 45900, 47300, 48700, 50200, 51700, 53300, 54900, 56500, 58200, 59900, 61700, 63600],
-    10: [20600, 21200, 21800, 22500, 23200, 23900, 24600, 25300, 26100, 26900, 27700, 28500, 29400, 30300, 31200, 32100, 33100, 34100, 35100, 36200, 37300, 38400, 39600, 40800, 42000, 43300, 44600, 45900, 47300, 48700, 50200, 51700, 53300, 54900, 56500, 58200, 59900, 61700, 63600, 65500],
+    10: [20600, 21200, 21800, 22500, 23200, 23900, 24600, 25300, 26100, 26900, 27700, 28500, 29400, 30300, 31200, 32100, 33100, 34100, 35100, 36200, 37300, 38400, 39600, 40800, 42000, 43300, 44600, 45900, 47300, 48700, 50200, 51700, 53300, 54900, 56500, 58200, 59900, 61700, 65500],
     11: [35400, 36500, 37600, 38700, 39900, 41100, 42300, 43600, 44900, 46200, 47600, 49000, 50500, 52000, 53600, 55200, 56900, 58600, 60400, 62200, 64100, 66000, 68000, 70000, 72100, 74300, 76500, 78800, 81200, 83600, 86100, 88700, 91400, 94100, 96900, 99800, 102800, 105900, 109100, 112400],
     12: [35600, 36700, 37800, 38900, 40100, 41300, 42500, 43800, 45100, 46500, 47900, 49300, 50800, 52300, 53900, 55500, 57200, 58900, 60700, 62500, 64400, 66300, 68300, 70300, 72400, 74600, 76800, 79100, 81500, 83900, 86400, 89000, 91700, 94500, 97300, 100200, 103200, 106300, 109500, 112800],
     13: [35900, 37000, 38100, 39200, 40400, 41600, 42800, 44100, 45400, 46800, 48200, 49600, 51100, 52600, 54200, 55800, 57500, 59200, 61000, 62800, 64700, 66600, 68600, 70700, 72800, 75000, 77300, 79600, 82000, 84500, 87000, 89600, 92300, 95100, 98000, 100900, 103900, 107000, 110200, 113500],
@@ -81,78 +105,106 @@ export const PAY_MATRIX: { [level: number]: number[] } = {
 export const LEVELS = Object.keys(PAY_MATRIX).map(Number);
 
 export const PAY_SCALES_6TH_PC: PayScale[] = [
-  { id: '2550-55-2660-60-3200', scale: '2550-55-2660-60-3200', payBand: 'PB-1A (4800-10000)', gradePay: 1300 },
-  { id: '2610-60-3150-65-3540', scale: '2610-60-3150-65-3540', payBand: 'PB-1A (4800-10000)', gradePay: 1400 },
-  { id: '2650-65-3300-70-4000', scale: '2650-65-3300-70-4000', payBand: 'PB-1A (4800-10000)', gradePay: 1650 },
-  { id: '2750-70-3800-75-4400', scale: '2750-70-3800-75-4400', payBand: 'PB-1 (5200-20200)', gradePay: 1800 },
-  { id: '3050-75-3950-80-4590', scale: '3050-75-3950-80-4590', payBand: 'PB-1 (5200-20200)', gradePay: 1900 },
-  { id: '3200-85-4900', scale: '3200-85-4900', payBand: 'PB-1 (5200-20200)', gradePay: 2000 },
-  { id: '3625-85-4900', scale: '3625-85-4900', payBand: 'PB-1 (5200-20200)', gradePay: 2200 },
-  { id: '4000-100-6000', scale: '4000-100-6000', payBand: 'PB-1 (5200-20200)', gradePay: 2400 },
-  { id: '4300-100-6000', scale: '4300-100-6000', payBand: 'PB-1 (5200-20200)', gradePay: 2600 },
-  { id: '4500-125-7000', scale: '4500-125-7000', payBand: 'PB-1 (5200-20200)', gradePay: 2800 },
-  { id: '5000-150-8000', scale: '5000-150-8000', payBand: 'PB-2 (9300-34800)', gradePay: 4200 },
-  { id: '5300-150-8300', scale: '5300-150-8300', payBand: 'PB-2 (9300-34800)', gradePay: 4300 },
-  { id: '5500-175-9000', scale: '5500-175-9000', payBand: 'PB-2 (9300-34800)', gradePay: 4400 },
-  { id: '5700-175-9200', scale: '5700-175-9200 (*)', payBand: 'PB-2 (9300-34800)', gradePay: 4450 },
-  { id: '5900-200-9900', scale: '5900-200-9900', payBand: 'PB-2 (9300-34800)', gradePay: 4500 },
-  { id: '6500-200-10500', scale: '6500-200-10500', payBand: 'PB-2 (9300-34800)', gradePay: 4600 },
-  { id: '6500-200-11100', scale: '6500-200-11100', payBand: 'PB-2 (9300-34800)', gradePay: 4700 },
-  { id: '7000-225-11500', scale: '7000-225-11500 (*)', payBand: 'PB-2 (9300-34800)', gradePay: 4800 },
-  { id: '7500-250-12000', scale: '7500-250-12000 (**)', payBand: 'PB-2 (9300-34800)', gradePay: 4900 },
-  { id: '8000-275-13500', scale: '8000-275-13500', payBand: 'PB-3 (15600-39100)', gradePay: 5400 },
-  { id: '9100-275-14050', scale: '9100-275-14050', payBand: 'PB-3 (15600-39100)', gradePay: 5700 },
-  { id: '9650-300-15050', scale: '9650-300-15050', payBand: 'PB-3 (15600-39100)', gradePay: 6000 },
-  { id: '10000-325-15200', scale: '10000-325-15200', payBand: 'PB-3 (15600-39100)', gradePay: 6600 },
-  { id: '12000-375-16500', scale: '12000-375-16500', payBand: 'PB-3 (15600-39100)', gradePay: 7600 },
-  { id: '12750-375-16500', scale: '12750-375-16500', payBand: 'PB-3 (15600-39100)', gradePay: 7700 },
-  { id: '14300-400-18300', scale: '14300-400-18300', payBand: 'PB-4 (37400-67000)', gradePay: 8700 },
-  { id: '15000-400-18600', scale: '15000-400-18600', payBand: 'PB-4 (37400-67000)', gradePay: 8800 },
-  { id: '16400-450-20000', scale: '16400-450-20000', payBand: 'PB-4 (37400-67000)', gradePay: 8900 },
-  { id: '17400-500-21900', scale: '17400-500-21900', payBand: 'PB-4 (37400-67000)', gradePay: 10000 },
+  { id: 'PB1A-1300', scale: '2550-55-2660-60-3200', payBand: 'PB-1A (4800-10000)', gradePay: 1300 },
+  { id: 'PB1A-1400', scale: '2610-60-3150-65-3540', payBand: 'PB-1A (4800-10000)', gradePay: 1400 },
+  { id: 'PB1A-1650', scale: '2650-65-3300-70-4000', payBand: 'PB-1A (4800-10000)', gradePay: 1650 },
+  { id: 'PB1-1800', scale: '2750-70-3800-75-4400', payBand: 'PB-1 (5200-20200)', gradePay: 1800 },
+  { id: 'PB1-1900', scale: '3050-75-3950-80-4590', payBand: 'PB-1 (5200-20200)', gradePay: 1900 },
+  { id: 'PB1-2000', scale: '3200-85-4900', payBand: 'PB-1 (5200-20200)', gradePay: 2000 },
+  { id: 'PB1-2200', scale: '3625-85-4900 (*)', payBand: 'PB-1 (5200-20200)', gradePay: 2200 },
+  { id: 'PB1-2400', scale: '4000-100-6000', payBand: 'PB-1 (5200-20200)', gradePay: 2400 },
+  { id: 'PB1-2600', scale: '4300-100-6000', payBand: 'PB-1 (5200-20200)', gradePay: 2600 },
+  { id: 'PB1-2800', scale: '4500-125-7000', payBand: 'PB-1 (5200-20200)', gradePay: 2800 },
+  { id: 'PB2-4200', scale: '5000-150-8000', payBand: 'PB-2 (9300-34800)', gradePay: 4200 },
+  { id: 'PB2-4300', scale: '5300-150-8300', payBand: 'PB-2 (9300-34800)', gradePay: 4300 },
+  { id: 'PB2-4400', scale: '5500-175-9000', payBand: 'PB-2 (9300-34800)', gradePay: 4400 },
+  { id: 'PB2-4450', scale: '5700-175-9200 (*)', payBand: 'PB-2 (9300-34800)', gradePay: 4450 },
+  { id: 'PB2-4500', scale: '5900-200-9900', payBand: 'PB-2 (9300-34800)', gradePay: 4500 },
+  { id: 'PB2-4600', scale: '6500-200-10500', payBand: 'PB-2 (9300-34800)', gradePay: 4600 },
+  { id: 'PB2-4700', scale: '6500-200-11100', payBand: 'PB-2 (9300-34800)', gradePay: 4700 },
+  { id: 'PB2-4800', scale: '7000-225-11500 (*)', payBand: 'PB-2 (9300-34800)', gradePay: 4800 },
+  { id: 'PB2-4900', scale: '7500-250-12000 (**)', payBand: 'PB-2 (9300-34800)', gradePay: 4900 },
+  { id: 'PB3-5400', scale: '8000-275-13500', payBand: 'PB-3 (15600-39100)', gradePay: 5400 },
+  { id: 'PB3-5700', scale: '9100-275-14050', payBand: 'PB-3 (15600-39100)', gradePay: 5700 },
+  { id: 'PB3-6000', scale: '9650-300-15050', payBand: 'PB-3 (15600-39100)', gradePay: 6000 },
+  { id: 'PB3-6600', scale: '10000-325-15200', payBand: 'PB-3 (15600-39100)', gradePay: 6600 },
+  { id: 'PB3-7600', scale: '12000-375-16500', payBand: 'PB-3 (15600-39100)', gradePay: 7600 },
+  { id: 'PB3-7700', scale: '12750-375-16500', payBand: 'PB-3 (15600-39100)', gradePay: 7700 },
+  { id: 'PB4-8700', scale: '14300-400-18300', payBand: 'PB-4 (37400-67000)', gradePay: 8700 },
+  { id: 'PB4-8800', scale: '15000-400-18600', payBand: 'PB-4 (37400-67000)', gradePay: 8800 },
+  { id: 'PB4-8900', scale: '16400-450-20000', payBand: 'PB-4 (37400-67000)', gradePay: 8900 },
+  { id: 'PB4-10000', scale: '17400-500-21900', payBand: 'PB-4 (37400-67000)', gradePay: 10000 },
 ];
 
-export const DA_RATES: { date: Date; rate: number; commission: number }[] = [
+export const PAY_SCALES_5TH_PC: PayScale5thPC[] = PAY_SCALES_6TH_PC.map(p => ({
+    id: p.id,
+    scale: p.scale,
+}));
+
+const DA_RATES_5TH_PC = [
+  { date: new Date('1998-01-01T00:00:00Z'), rate: 27, commission: 5 },
+  { date: new Date('1998-07-01T00:00:00Z'), rate: 32, commission: 5 },
+  { date: new Date('1999-01-01T00:00:00Z'), rate: 41, commission: 5 },
+  { date: new Date('1999-07-01T00:00:00Z'), rate: 45, commission: 5 },
+  { date: new Date('2000-01-01T00:00:00Z'), rate: 49, commission: 5 },
+  { date: new Date('2001-01-01T00:00:00Z'), rate: 53, commission: 5 },
+  { date: new Date('2001-07-01T00:00:00Z'), rate: 55, commission: 5 },
+  { date: new Date('2002-01-01T00:00:00Z'), rate: 59, commission: 5 },
+  { date: new Date('2002-07-01T00:00:00Z'), rate: 64, commission: 5 },
+  { date: new Date('2003-01-01T00:00:00Z'), rate: 67, commission: 5 },
+  { date: new Date('2003-07-01T00:00:00Z'), rate: 71, commission: 5 },
+  { date: new Date('2004-01-01T00:00:00Z'), rate: 74, commission: 5 },
+  { date: new Date('2004-07-01T00:00:00Z'), rate: 79, commission: 5 },
+  { date: new Date('2005-01-01T00:00:00Z'), rate: 82, commission: 5 },
+  { date: new Date('2005-07-01T00:00:00Z'), rate: 85, commission: 5 },
+];
+
+
+const DA_RATES_6TH_PC = [
   // 6th Pay Commission
-  { date: new Date('2006-01-01'), rate: 0, commission: 6 },
-  { date: new Date('2006-07-01'), rate: 2, commission: 6 },
-  { date: new Date('2007-01-01'), rate: 6, commission: 6 },
-  { date: new Date('2007-07-01'), rate: 9, commission: 6 },
-  { date: new Date('2008-01-01'), rate: 12, commission: 6 },
-  { date: new Date('2008-07-01'), rate: 16, commission: 6 },
-  { date: new Date('2009-01-01'), rate: 22, commission: 6 },
-  { date: new Date('2009-07-01'), rate: 27, commission: 6 },
-  { date: new Date('2010-01-01'), rate: 35, commission: 6 },
-  { date: new Date('2010-07-01'), rate: 45, commission: 6 },
-  { date: new Date('2011-01-01'), rate: 51, commission: 6 },
-  { date: new Date('2011-07-01'), rate: 58, commission: 6 },
-  { date: new Date('2012-01-01'), rate: 65, commission: 6 },
-  { date: new Date('2012-07-01'), rate: 72, commission: 6 },
-  { date: new Date('2013-01-01'), rate: 80, commission: 6 },
-  { date: new Date('2013-07-01'), rate: 90, commission: 6 },
-  { date: new Date('2014-01-01'), rate: 100, commission: 6 },
-  { date: new Date('2014-07-01'), rate: 107, commission: 6 },
-  { date: new Date('2015-01-01'), rate: 113, commission: 6 },
-  { date: new Date('2015-07-01'), rate: 119, commission: 6 },
-  // 7th Pay Commission
-  { date: new Date('2016-01-01'), rate: 0, commission: 7 },
-  { date: new Date('2016-07-01'), rate: 2, commission: 7 },
-  { date: new Date('2017-01-01'), rate: 4, commission: 7 },
-  { date: new Date('2017-07-01'), rate: 5, commission: 7 },
-  { date: new Date('2018-01-01'), rate: 7, commission: 7 },
-  { date: new Date('2018-07-01'), rate: 9, commission: 7 },
-  { date: new Date('2019-01-01'), rate: 12, commission: 7 },
-  { date: new Date('2019-07-01'), rate: 17, commission: 7 },
-  { date: new Date('2021-07-01'), rate: 28, commission: 7 }, // After COVID freeze
-  { date: new Date('2021-10-01'), rate: 31, commission: 7 },
-  { date: new Date('2022-01-01'), rate: 34, commission: 7 },
-  { date: new Date('2022-07-01'), rate: 38, commission: 7 },
-  { date: new Date('2023-01-01'), rate: 42, commission: 7 },
-  { date: new Date('2023-07-01'), rate: 46, commission: 7 },
-  { date: new Date('2024-01-01'), rate: 50, commission: 7 },
-  { date: new Date('2024-07-01'), rate: 53, commission: 7 },
+  { date: new Date('2006-01-01T00:00:00Z'), rate: 0, commission: 6 },
+  { date: new Date('2006-07-01T00:00:00Z'), rate: 2, commission: 6 },
+  { date: new Date('2007-01-01T00:00:00Z'), rate: 6, commission: 6 },
+  { date: new Date('2007-07-01T00:00:00Z'), rate: 9, commission: 6 },
+  { date: new Date('2008-01-01T00:00:00Z'), rate: 12, commission: 6 },
+  { date: new Date('2008-07-01T00:00:00Z'), rate: 16, commission: 6 },
+  { date: new Date('2009-01-01T00:00:00Z'), rate: 22, commission: 6 },
+  { date: new Date('2009-07-01T00:00:00Z'), rate: 27, commission: 6 },
+  { date: new Date('2010-01-01T00:00:00Z'), rate: 35, commission: 6 },
+  { date: new Date('2010-07-01T00:00:00Z'), rate: 45, commission: 6 },
+  { date: new Date('2011-01-01T00:00:00Z'), rate: 51, commission: 6 },
+  { date: new Date('2011-07-01T00:00:00Z'), rate: 58, commission: 6 },
+  { date: new Date('2012-01-01T00:00:00Z'), rate: 65, commission: 6 },
+  { date: new Date('2012-07-01T00:00:00Z'), rate: 72, commission: 6 },
+  { date: new Date('2013-01-01T00:00:00Z'), rate: 80, commission: 6 },
+  { date: new Date('2013-07-01T00:00:00Z'), rate: 90, commission: 6 },
+  { date: new Date('2014-01-01T00:00:00Z'), rate: 100, commission: 6 },
+  { date: new Date('2014-07-01T00:00:00Z'), rate: 107, commission: 6 },
+  { date: new Date('2015-01-01T00:00:00Z'), rate: 113, commission: 6 },
+  { date: new Date('2015-07-01T00:00:00Z'), rate: 119, commission: 6 },
 ];
 
+const DA_RATES_7TH_PC = [
+  // 7th Pay Commission
+  { date: new Date('2016-01-01T00:00:00Z'), rate: 0, commission: 7 },
+  { date: new Date('2016-07-01T00:00:00Z'), rate: 2, commission: 7 },
+  { date: new Date('2017-01-01T00:00:00Z'), rate: 4, commission: 7 },
+  { date: new Date('2017-07-01T00:00:00Z'), rate: 5, commission: 7 },
+  { date: new Date('2018-01-01T00:00:00Z'), rate: 7, commission: 7 },
+  { date: new Date('2018-07-01T00:00:00Z'), rate: 9, commission: 7 },
+  { date: new Date('2019-01-01T00:00:00Z'), rate: 12, commission: 7 },
+  { date: new Date('2019-07-01T00:00:00Z'), rate: 17, commission: 7 },
+  { date: new Date('2021-07-01T00:00:00Z'), rate: 28, commission: 7 }, // After COVID freeze
+  { date: new Date('2021-10-01T00:00:00Z'), rate: 31, commission: 7 },
+  { date: new Date('2022-01-01T00:00:00Z'), rate: 34, commission: 7 },
+  { date: new Date('2022-07-01T00:00:00Z'), rate: 38, commission: 7 },
+  { date: new Date('2023-01-01T00:00:00Z'), rate: 42, commission: 7 },
+  { date: new Date('2023-07-01T00:00:00Z'), rate: 46, commission: 7 },
+  { date: new Date('2024-01-01T00:00:00Z'), rate: 50, commission: 7 },
+  { date: new Date('2024-07-01T00:00:00Z'), rate: 53, commission: 7 },
+];
+
+export const DA_RATES: { date: Date; rate: number; commission: number }[] = [...DA_RATES_5TH_PC, ...DA_RATES_6TH_PC, ...DA_RATES_7TH_PC].sort((a, b) => a.date.getTime() - b.date.getTime());
 
 type HraSlab = {
   payRange: [number, number];
@@ -183,6 +235,13 @@ type HraSlab6thPC = {
     payRange: [number, number];
     rates: { [key: string]: number };
 };
+
+export const HRA_SLABS_5TH_PC: HraSlab6thPC[] = [
+    { payRange: [0, 4000], rates: { 'Grade I(a)': 400, 'Grade I(b)': 350, 'Grade II': 200, 'Grade III': 150, 'Unclassified': 100 } },
+    { payRange: [4001, 8000], rates: { 'Grade I(a)': 600, 'Grade I(b)': 500, 'Grade II': 350, 'Grade III': 250, 'Unclassified': 150 } },
+    { payRange: [8001, 999999], rates: { 'Grade I(a)': 800, 'Grade I(b)': 700, 'Grade II': 500, 'Grade III': 300, 'Unclassified': 200 } },
+];
+
 
 export const HRA_SLABS_6TH_PC_PRE_2009: HraSlab6thPC[] = [
     { payRange: [0, 8000], rates: { 'Grade I(a)': 600, 'Grade I(b)': 600, 'Grade II': 400, 'Grade III': 200, 'Unclassified': 150 } },

@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { PayrollResult as PayrollResultType } from '../types';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/Card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/Card';
 import { Button } from './ui/Button';
 import { PayProgressionChart } from './PayProgressionChart';
 import { CareerTimeline } from './CareerTimeline';
@@ -33,7 +34,7 @@ const formatCurrencyForExport = (amount: number) => {
 
 
 const PayrollResult: React.FC<PayrollResultProps> = ({ result }) => {
-  const { employeeDetails, fixation6thPC, fixation7thPC, yearlyCalculations } = result;
+  const { employeeDetails, fixation6thPC, fixation7thPC, yearlyCalculations, appliedRevisions } = result;
   const { t } = useLanguage();
 
     const handleExportFixationPDF = () => {
@@ -431,6 +432,24 @@ const PayrollResult: React.FC<PayrollResultProps> = ({ result }) => {
         </CardContent>
       </Card>
       
+      {appliedRevisions && appliedRevisions.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('payRevisionSummary')}</CardTitle>
+            <CardDescription>{t('payRevisionDesc')}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ul className="list-disc pl-5 space-y-2 text-sm text-gray-700">
+              {appliedRevisions.map((rev, index) => (
+                <li key={index}>
+                  <span className="font-semibold">{rev.date.toLocaleDateString('en-GB', { timeZone: 'UTC' })}:</span> {rev.description}
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <PayProgressionChart yearlyCalculations={yearlyCalculations} />
         <CareerTimeline result={result} />

@@ -39,6 +39,8 @@ export const translations = {
     calculatedRetirementDate: "Calculated Retirement Date / கணக்கிடப்பட்ட ஓய்வு தேதி",
     postAtJoining: "Post at Joining / சேரும்போது பதவி",
     customPostName: "Custom Post Name / தனிப்பயன் பதவி பெயர்",
+    payScale5thPC: "Pay Scale (5th PC) / ஊதிய விகிதம் (5வது ஊதியக் குழு)",
+    basicPayAtJoining: "Basic Pay at Joining / சேரும்போது அடிப்படை ஊதியம்",
     payScaleAsOf2005: "Pay Scale (as of 31-12-2005) / ஊதிய விகிதம் (31-12-2005 நிலவரப்படி)",
     basicPayInScale: "Basic Pay in the above scale / மேற்கண்ட ஊதிய விகிதத்தில் அடிப்படை ஊதியம்",
     payBandGradePay: "Pay Band + Grade Pay / ஊதியப் பட்டை + தர ஊதியம்",
@@ -97,6 +99,8 @@ export const translations = {
     exportReportPDF: "Report (PDF) / அறிக்கை (PDF)",
     exportExcel: "Excel / எக்செல்",
     exportWord: "Word / வேர்டு",
+    payRevisionSummary: "Pay Revision Summary (2010)",
+    payRevisionDesc: "Pay scale revisions applied as per the 2010 One Man Commission G.O.s.",
 
     // Result Table
     payrollForYear: "Payroll for {year} / {year}க்கான ஊதியம்",
@@ -148,6 +152,8 @@ export const translations = {
     calculatedRetirementDate: "கணக்கிடப்பட்ட ஓய்வு தேதி / Calculated Retirement Date",
     postAtJoining: "சேரும்போது பதவி / Post at Joining",
     customPostName: "தனிப்பயன் பதவி பெயர் / Custom Post Name",
+    payScale5thPC: "ஊதிய விகிதம் (5வது ஊதியக் குழு) / Pay Scale (5th PC)",
+    basicPayAtJoining: "சேரும்போது அடிப்படை ஊதியம் / Basic Pay at Joining",
     payScaleAsOf2005: "ஊதிய விகிதம் (31-12-2005 நிலவரப்படி) / Pay Scale (as of 31-12-2005)",
     basicPayInScale: "மேற்கண்ட ஊதிய விகிதத்தில் அடிப்படை ஊதியம் / Basic Pay in the above scale",
     payBandGradePay: "ஊதியப் பட்டை + தர ஊதியம் / Pay Band + Grade Pay",
@@ -206,6 +212,8 @@ export const translations = {
     exportReportPDF: "அறிக்கை (PDF) / Report (PDF)",
     exportExcel: "எக்செல் / Excel",
     exportWord: "வேர்டு / Word",
+    payRevisionSummary: "ஊதிய திருத்த சுருக்கம் (2010)",
+    payRevisionDesc: "2010 ஒரு நபர் ஆணையத்தின் அரசாணைகளின்படி ஊதிய விகிதத் திருத்தங்கள் பயன்படுத்தப்பட்டன.",
 
     // Result Table
     payrollForYear: "{year}க்கான ஊதியம் / Payroll for {year}",

@@ -1,3 +1,17 @@
+export interface Post {
+  id: string;
+  name: string;
+  scaleId: string;
+  level: number;
+}
+
+export interface PayRevision2010 {
+  postId: string;
+  revisedScaleId: string;
+  revisedLevel: number;
+  description: string;
+}
+
 export interface Promotion {
   id: string; // for key prop
   date: string;
@@ -35,9 +49,10 @@ export interface EmployeeInput {
   // Pay at time of joining
   joiningPostId?: string;
   joiningPostCustomName?: string;
-  basicPay2005?: number; // For pre-2006 joiners
+  joiningBasicPay5thPC?: number; // For pre-2006 joiners
+  joiningScaleId5thPC?: string; // For pre-2006 joiners
   joiningPayInPayBand?: number; // For 6th PC joiners
-  joiningScaleId?: string; // For pre-2006 OR 6th PC joiners
+  joiningScaleId6thPC?: string; // For 6th PC joiners
   joiningLevel?: string; // For 7th PC joiners
 
   selectionGradeDate: string;
@@ -72,6 +87,11 @@ export interface PayScale {
   gradePay: number;
 }
 
+export interface PayScale5thPC {
+  id: string;
+  scale: string;
+}
+
 export enum CityGrade {
   GRADE_I_A = 'Grade I(a)',
   GRADE_I_B = 'Grade I(b)',
@@ -84,11 +104,11 @@ export interface PayrollPeriod {
   period: string;
   basicPay: number;
   daRate: number;
-
   daAmount: number;
   hra: number;
   grossPay: number;
   remarks: string[];
+  commission: 5 | 6 | 7;
   payInPayBand?: number; // Optional for 6th PC
   gradePay?: number; // Optional for 6th PC
 }
@@ -113,6 +133,7 @@ export interface EmployeeDetails {
     retirementDate: string;
     retirementAge: '58' | '60';
     promotions: { post: string; date: string }[];
+    payRevisions: { description: string; date: string }[];
     selectionGradeDate?: string;
     specialGradeDate?: string;
     superGradeDate?: string;
@@ -142,4 +163,5 @@ export interface PayrollResult {
     level: number;
   };
   yearlyCalculations: PayrollYear[];
+  appliedRevisions: { description: string, date: Date }[];
 }
