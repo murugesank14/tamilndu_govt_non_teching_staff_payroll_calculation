@@ -201,7 +201,9 @@ export type RuleType =
   | { type: 'DA_REVISION'; rate: number; commission: 7 | 6 | 5 | 4 }
   | { type: 'HRA_REVISION_DA_50_PERCENT' }
   | { type: 'LEAVE_RULE_CHANGE'; leaveType: 'UnearnedLeavePrivateAffairs'; maxDays: 360 }
-  | { type: 'SERVICE_RULE_AMENDMENT'; details: string };
+  | { type: 'SERVICE_RULE_AMENDMENT'; details: string }
+  | { type: 'PAY_COMMISSION_FIXATION'; fitmentFactor: number }
+  | { type: 'PROMOTION_RULE'; rule: string; details: any };
 
 export interface GovernmentOrder {
   id: string;
@@ -210,7 +212,7 @@ export interface GovernmentOrder {
   subject: { en: string; ta: string };
   keyPoints: { en: string; ta: string };
   effectiveFrom: string; // YYYY-MM-DD
-  category: 'Establishment' | 'Technical' | 'Service';
+  category: 'Establishment' | 'Technical' | 'Service' | string; // Allow for combined strings like 'Establishment + Service'
   remarks: { en: string; ta: string };
   rule?: RuleType;
 }

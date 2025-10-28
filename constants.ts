@@ -290,6 +290,30 @@ export const HRA_SLABS_4TH_PC: HraSlab[] = [
 
 
 export const GO_DATA: GovernmentOrder[] = [
+  // Core 7th PC Rules
+  { 
+    id: 'go-303-pay-commission', 
+    department: { en: 'Finance Department', ta: 'நிதித் துறை' }, 
+    goNumberAndDate: { en: 'G.O.Ms.No.303, 11.10.2017', ta: 'அ.ஆ.(நிலை) எண் 303, 11.10.2017' }, 
+    subject: { en: 'Implementation of TN Revised Pay Rules 2017 (7th Pay Commission)', ta: 'தமிழ்நாடு திருத்திய ஊதிய விதிகள் 2017 அமலாக்கம் (7வது ஊதியக் குழு)' }, 
+    keyPoints: { en: 'Revised pay scales, pay matrix, and fixation rules based on a 2.57 fitment factor.', ta: '2.57 fitment factor அடிப்படையில் திருத்திய ஊதிய விகிதங்கள், ஊதிய அணி மற்றும் நிர்ணய விதிகள்.' }, 
+    effectiveFrom: '2016-01-01', 
+    category: 'Establishment', 
+    remarks: { en: 'The foundational G.O. for the 7th Pay Commission in Tamil Nadu.', ta: 'தமிழ்நாட்டில் 7வது ஊதியக் குழுவிற்கான அடிப்படை அரசாணை.' }, 
+    rule: { type: 'PAY_COMMISSION_FIXATION', fitmentFactor: 2.57 } 
+  },
+  { 
+    id: 'go-311-promotion-rule', 
+    department: { en: 'Finance Department', ta: 'நிதித் துறை' }, 
+    goNumberAndDate: { en: 'G.O.Ms.No.311, 25.10.2017', ta: 'அ.ஆ.(நிலை) எண் 311, 25.10.2017' }, 
+    subject: { en: 'TN Revised Pay Rules 2017 - Clarification on Promotion Fixation', ta: 'தமிழ்நாடு திருத்திய ஊதிய விதிகள் 2017 - பதவி உயர்வு நிர்ணயம் குறித்த தெளிவுரை' }, 
+    keyPoints: { en: 'Clarifies the application of Rule 22(b) for pay fixation on promotion, allowing an option for fixation from the date of next increment.', ta: 'பதவி உயர்வுக்கான ஊதிய நிர்ணயத்தில் விதி 22(பி) இன் பயன்பாட்டை தெளிவுபடுத்துகிறது, அடுத்த ஊதிய உயர்வு தேதியிலிருந்து நிர்ணயம் செய்ய விருப்பம் அளிக்கிறது.' }, 
+    effectiveFrom: '2016-01-01', 
+    category: 'Establishment', 
+    remarks: { en: 'Works in conjunction with G.O.Ms.No.303.', ta: 'அ.ஆ.(நிலை) எண் 303 உடன் இணைந்து செயல்படும்.' }, 
+    rule: { type: 'PROMOTION_RULE', rule: '22(b)', details: 'Allows option for fixation from date of promotion or date of next increment.' } 
+  },
+
   // 7th PC DA Revisions
   { id: 'go-da-2', department: { en: 'Finance Dept', ta: 'நிதித் துறை' }, goNumberAndDate: { en: 'G.O.Ms.No.303, 11.10.2017', ta: 'அ.ஆ.(நிலை) எண் 303, 11.10.2017' }, subject: { en: 'DA Revision to 2%', ta: 'அகவிலைப்படி 2% ஆக உயர்வு' }, keyPoints: { en: 'DA revised', ta: 'அ.ப. திருத்தம்' }, effectiveFrom: '2016-07-01', category: 'Establishment', remarks: { en: '', ta: '' }, rule: { type: 'DA_REVISION', rate: 2, commission: 7 } },
   { id: 'go-da-4', department: { en: 'Finance Dept', ta: 'நிதித் துறை' }, goNumberAndDate: { en: 'G.O.Ms.No.303, 11.10.2017', ta: 'அ.ஆ.(நிலை) எண் 303, 11.10.2017' }, subject: { en: 'DA Revision to 4%', ta: 'அகவிலைப்படி 4% ஆக உயர்வு' }, keyPoints: { en: 'DA revised', ta: 'அ.ப. திருத்தம்' }, effectiveFrom: '2017-01-01', category: 'Establishment', remarks: { en: '', ta: '' }, rule: { type: 'DA_REVISION', rate: 4, commission: 7 } },

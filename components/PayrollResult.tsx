@@ -173,6 +173,7 @@ const PayrollResult: React.FC<PayrollResultProps> = ({ result }) => {
                  }
                  fixationBody.push(['Pay after Notional Increment', formatCurrencyForExport(fix.payAfterNotionalIncrement)]);
                  fixationBody.push([{ content: 'New Basic Pay (Lvl ' + fix.newLevel + ')', styles: { fontStyle: 'bold' } }, { content: formatCurrencyForExport(fix.newBasic), styles: { fontStyle: 'bold' } }]);
+                 fixationBody.push([t('reference'), fix.goReference]);
                  
                  doc.autoTable({
                     startY: lastY + 4,

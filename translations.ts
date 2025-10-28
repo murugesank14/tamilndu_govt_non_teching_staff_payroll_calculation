@@ -15,7 +15,23 @@ export const translations = {
     // G.O. Viewer
     goViewerTitle: "Tamil Nadu Government Orders (G.O.)",
     goViewerDescription: "Latest Technical & Establishment orders, circulars, and rule amendments.",
+    controls: "Controls",
+    filters: "Filters",
+    filterByYear: "Filter by Year",
+    filterByCategory: "Filter by Category",
+    filterByDept: "Filter by Department",
+    allYears: "All Years",
+    allCategories: "All Categories",
+    allDepartments: "All Departments",
+    searchGOs: "Search G.O.s...",
+    viewMode: "View Mode",
+    bilingual: "Bilingual",
+    englishOnly: "English Only",
+    tamilOnly: "Tamil Only",
+    exports: "Exports",
     exportJson: "Export JSON",
+    exportGoPdf: "Export PDF",
+    exportGoCsv: "Export CSV",
     loadGoFile: "Load G.O. File",
     department: "Department",
     goNumberAndDate: "G.O. No & Date",
@@ -24,6 +40,11 @@ export const translations = {
     effectiveFrom: "Effective From",
     category: "Category",
     remarks: "Remarks",
+    goLoadSuccess: "{count} new G.O. rule(s) loaded successfully! They are now active for calculations.",
+    goLoadNoNew: "No new G.O. rules found in the file, or they have already been loaded.",
+    goLoadError: "Failed to load G.O. file. Please ensure it's a valid JSON in the correct format. Error: {error}",
+    unrecognizedFormat: "JSON file is not in a recognized G.O. format.",
+
 
     // Form Section Titles
     personalDetails: "Personal Details / தனிப்பட்ட விவரங்கள்",
@@ -126,6 +147,7 @@ export const translations = {
     payRevisionSummary: "Pay Revision Summary (2010)",
     payRevisionDesc: "Pay scale revisions applied as per the 2010 One Man Commission G.O.s.",
     promotionFixation: "Promotion Fixation Summary",
+    reference: "Reference",
 
     // Result Table
     payrollForYear: "Payroll for {year} / {year}க்கான ஊதியம்",
@@ -153,7 +175,23 @@ export const translations = {
     // G.O. Viewer
     goViewerTitle: "தமிழ்நாடு அரசாணைகள் (G.O.)",
     goViewerDescription: "சமீபத்திய தொழில்நுட்பம் மற்றும் பணியாளர் ஆணைகள், சுற்றறிக்கைகள் மற்றும் விதி திருத்தங்கள்.",
+    controls: "கட்டுப்பாடுகள்",
+    filters: "வடிகட்டிகள்",
+    filterByYear: "ஆண்டு வாரியாக வடிகட்டவும்",
+    filterByCategory: "வகை வாரியாக வடிகட்டவும்",
+    filterByDept: "துறை வாரியாக வடிகட்டவும்",
+    allYears: "அனைத்து ஆண்டுகளும்",
+    allCategories: "அனைத்து வகைகளும்",
+    allDepartments: "அனைத்து துறைகளும்",
+    searchGOs: "அரசாணைகளைத் தேடு...",
+    viewMode: "பார்வை முறை",
+    bilingual: "இருமொழி",
+    englishOnly: "ஆங்கிலம் மட்டும்",
+    tamilOnly: "தமிழ் மட்டும்",
+    exports: "ஏற்றுமதிகள்",
     exportJson: "JSON ஏற்றுமதி",
+    exportGoPdf: "PDF ஏற்றுமதி",
+    exportGoCsv: "CSV ஏற்றுமதி",
     loadGoFile: "G.O. கோப்பை ஏற்றவும்",
     department: "துறை",
     goNumberAndDate: "அ.ஆ. எண் & தேதி",
@@ -162,6 +200,11 @@ export const translations = {
     effectiveFrom: "செயலுக்கு வரும் நாள்",
     category: "வகை",
     remarks: "குறிப்புகள்",
+    goLoadSuccess: "{count} புதிய அரசாணை விதிகள் வெற்றிகரமாக ஏற்றப்பட்டன! அவை இப்போது கணக்கீடுகளுக்கு செயலில் உள்ளன.",
+    goLoadNoNew: "கோப்பில் புதிய அரசாணை விதிகள் எதுவும் இல்லை, அல்லது அவை ஏற்கனவே ஏற்றப்பட்டுள்ளன.",
+    goLoadError: "G.O. கோப்பை ஏற்றுவதில் தோல்வி. அது சரியான வடிவத்தில் உள்ளதா என்பதை உறுதிப்படுத்தவும். பிழை: {error}",
+    unrecognizedFormat: "JSON கோப்பு அங்கீகரிக்கப்பட்ட G.O. வடிவத்தில் இல்லை.",
+
 
     // Form Section Titles
     personalDetails: "தனிப்பட்ட விவரங்கள் / Personal Details",
@@ -264,6 +307,7 @@ export const translations = {
     payRevisionSummary: "ஊதிய திருத்த சுருக்கம் (2010)",
     payRevisionDesc: "2010 ஒரு நபர் ஆணையத்தின் அரசாணைகளின்படி ஊதிய விகிதத் திருத்தங்கள் பயன்படுத்தப்பட்டன.",
     promotionFixation: "பதவி உயர்வு ஊதிய நிர்ணயச் சுருக்கம்",
+    reference: "ஆதாரம்",
 
     // Result Table
     payrollForYear: "{year}க்கான ஊதியம் / Payroll for {year}",

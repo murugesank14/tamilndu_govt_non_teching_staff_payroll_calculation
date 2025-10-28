@@ -6,7 +6,6 @@ import {
     DA_RATES_4TH_PC, DA_RATES_5TH_PC, DA_RATES_6TH_PC
 } from '../constants';
 
-const FITMENT_FACTOR_7TH_PC = 2.57;
 const FITMENT_FACTOR_6TH_PC = 1.86;
 
 // Helper to parse YYYY-MM-DD string as a UTC date at midnight to avoid timezone issues.
@@ -167,6 +166,8 @@ export const calculateFullPayroll = (data: EmployeeInput, activeGoData: Governme
     }
     const ALL_DA_RATES = [...DA_RATES_4TH_PC, ...DA_RATES_5TH_PC, ...DA_RATES_6TH_PC, ...DA_RATES_7TH_PC_FROM_GO].sort((a, b) => a.date.getTime() - b.date.getTime());
     const hraRevisionGO = activeGoData.find(go => go.rule?.type === 'HRA_REVISION_DA_50_PERCENT');
+    const promotionRule22bGO = activeGoData.find(go => go.rule?.type === 'PROMOTION_RULE' && (go.rule as any).rule === '22(b)');
+    const payCommission7thGO = activeGoData.find(go => go.rule?.type === 'PAY_COMMISSION_FIXATION' && go.effectiveFrom.startsWith('2016'));
 
 
     const { dateOfJoining, calculationStartDate, calculationEndDate, promotions, annualIncrementChanges, breaksInService, selectionGradeDate, specialGradeDate, superGradeDate, stagnationIncrementDate, cityGrade, incrementEligibilityMonths, joiningPostId, joiningPostCustomName, selectionGradeTwoIncrements, specialGradeTwoIncrements, probationDeclarationDate, ...employeeDetails } = data;
@@ -327,8 +328,11 @@ export const calculateFullPayroll = (data: EmployeeInput, activeGoData: Governme
             }
 
             if (event.type === 'PAY_COMMISSION_7' && currentCommission === 6) {
+                const fitmentFactor = payCommission7thGO && (payCommission7thGO.rule as any).fitmentFactor 
+                    ? (payCommission7thGO.rule as any).fitmentFactor 
+                    : 2.57; // Fallback
                 const oldBasicPay = currentPay;
-                const multipliedPay = Math.round(oldBasicPay * FITMENT_FACTOR_7TH_PC);
+                const multipliedPay = Math.round(oldBasicPay * fitmentFactor);
                 const levelFor7PC = GRADE_PAY_TO_LEVEL[currentGradePay!];
                 if (!levelFor7PC) throw new Error(`Could not find a level for Grade Pay ${currentGradePay} at 7th PC transition.`);
                 
@@ -338,7 +342,7 @@ export const calculateFullPayroll = (data: EmployeeInput, activeGoData: Governme
                 currentGradePay = undefined;
                 currentCommission = 7;
                 fixation7thPC = { oldBasicPay, multipliedPay, initialRevisedPay: currentPay, level: currentLevel };
-                remarks.push(`Pay fixed in 7th Pay Commission as per G.O.Ms.No.40/2021.`);
+                remarks.push(`Pay fixed in 7th Pay Commission as per ${payCommission7thGO?.goNumberAndDate.en || 'G.O.Ms.No.303/2017 & G.O.Ms.No.40/2021'}.`);
             }
 
             // --- Other Events (Promotions, Increments etc.) ---
@@ -357,7 +361,8 @@ export const calculateFullPayroll = (data: EmployeeInput, activeGoData: Governme
                 const promo: Promotion = event.data;
                 const option = promo.rule22bOption || 'promotionDate';
 
-                if (currentCommission === 7 && promo.level) {
+                // Check if the promotion date is within the effective period of Rule 22(b) for 7th PC
+                if (promotionRule22bGO && event.date >= parseDateUTC(promotionRule22bGO.effectiveFrom)! && promo.level) {
                      if (option === 'nextIncrementDate') {
                         deferredPromotionFixation = { promotion: promo, oldLevel: currentLevel };
                         remarks.push(`Promoted to ${promo.post}. Pay fixation deferred to next increment date under Rule 22(b) option.`);
@@ -379,7 +384,7 @@ export const calculateFullPayroll = (data: EmployeeInput, activeGoData: Governme
                             optionUnderRule22b: 'Date of Promotion',
                             effectiveDate: currentDate.toLocaleDateString('en-GB', { timeZone: 'UTC' }),
                             oldBasic, payAfterNotionalIncrement: payAfterNotionalInc, newBasic,
-                            goReference: 'Rule 22(b) of TN Revised Pay Rules, 2017',
+                            goReference: `Rule 22(b), TNRPR 2017 (${promotionRule22bGO.goNumberAndDate.en})`,
                         });
                     }
                 }
@@ -448,7 +453,7 @@ export const calculateFullPayroll = (data: EmployeeInput, activeGoData: Governme
                         effectiveDate: currentDate.toLocaleDateString('en-GB', { timeZone: 'UTC' }),
                         oldBasic, payAfterAnnualIncrement: payAfterAnnualInc,
                         payAfterNotionalIncrement: payForFixation, newBasic,
-                        goReference: 'Rule 22(b) of TN Revised Pay Rules, 2017',
+                        goReference: `Rule 22(b), TNRPR 2017 (${promotionRule22bGO?.goNumberAndDate.en})`,
                     });
 
                     deferredPromotionFixation = null; // Clear the flag
