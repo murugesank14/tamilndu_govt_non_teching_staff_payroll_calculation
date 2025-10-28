@@ -5,6 +5,7 @@ import PayrollForm from './components/PayrollForm';
 import PayrollResult from './components/PayrollResult';
 import { HeroIcon } from './components/ui/HeroIcon';
 import { useLanguage } from './components/LanguageProvider';
+import GoViewer from './components/GoViewer';
 
 const LanguageSwitcher: React.FC = () => {
     const { language, setLanguage } = useLanguage();
@@ -33,6 +34,7 @@ const App: React.FC = () => {
   const [payrollResult, setPayrollResult] = useState<PayrollResultType | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [activeView, setActiveView] = useState<'calculator' | 'goViewer'>('calculator');
   const { t } = useLanguage();
 
   const handleCalculate = (data: EmployeeInput) => {
@@ -57,6 +59,14 @@ const App: React.FC = () => {
     }, 500);
   };
 
+  const getNavButtonClasses = (viewName: 'calculator' | 'goViewer') => {
+    const baseClasses = "px-4 py-3 text-sm font-semibold transition-colors focus:outline-none";
+    if (activeView === viewName) {
+      return `${baseClasses} text-emerald-600 border-b-2 border-emerald-600`;
+    }
+    return `${baseClasses} text-gray-500 hover:text-gray-700 hover:bg-gray-100`;
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800">
       <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-10">
@@ -74,34 +84,49 @@ const App: React.FC = () => {
         </div>
       </header>
 
-      <main className="container mx-auto p-4 md:p-6 lg:p-8">
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-          <div className="lg:col-span-2">
-            <PayrollForm onCalculate={handleCalculate} isLoading={isLoading} />
-          </div>
-          <div className="lg:col-span-3">
-            {isLoading && (
-              <div className="flex justify-center items-center h-full bg-white rounded-xl shadow-md p-8">
-                <div className="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12 mb-4 animate-spin border-t-emerald-500"></div>
-              </div>
-            )}
-            {error && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl relative shadow" role="alert">
-                <strong className="font-bold">Error: </strong>
-                <span className="block sm:inline">{error}</span>
-              </div>
-            )}
-            {payrollResult && <PayrollResult result={payrollResult} />}
-            {!payrollResult && !isLoading && !error && (
-                 <div className="bg-white rounded-xl shadow-md p-8 text-center h-full flex flex-col justify-center">
-                    <h2 className="text-2xl font-semibold text-gray-700 mb-4">{t('welcomeTitle')}</h2>
-                    <p className="text-gray-500 max-w-md mx-auto">
-                        {t('welcomeMessage')}
-                    </p>
-                </div>
-            )}
-          </div>
+      <nav className="bg-white border-b border-gray-200">
+        <div className="container mx-auto px-4 md:px-6 lg:px-8 flex">
+          <button onClick={() => setActiveView('calculator')} className={getNavButtonClasses('calculator')}>
+            {t('payrollCalculator')}
+          </button>
+          <button onClick={() => setActiveView('goViewer')} className={getNavButtonClasses('goViewer')}>
+            {t('goViewer')}
+          </button>
         </div>
+      </nav>
+
+      <main className="container mx-auto p-4 md:p-6 lg:p-8">
+         {activeView === 'calculator' ? (
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+              <div className="lg:col-span-2">
+                <PayrollForm onCalculate={handleCalculate} isLoading={isLoading} />
+              </div>
+              <div className="lg:col-span-3">
+                {isLoading && (
+                  <div className="flex justify-center items-center h-full bg-white rounded-xl shadow-md p-8">
+                    <div className="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12 mb-4 animate-spin border-t-emerald-500"></div>
+                  </div>
+                )}
+                {error && (
+                  <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl relative shadow" role="alert">
+                    <strong className="font-bold">Error: </strong>
+                    <span className="block sm:inline">{error}</span>
+                  </div>
+                )}
+                {payrollResult && <PayrollResult result={payrollResult} />}
+                {!payrollResult && !isLoading && !error && (
+                     <div className="bg-white rounded-xl shadow-md p-8 text-center h-full flex flex-col justify-center">
+                        <h2 className="text-2xl font-semibold text-gray-700 mb-4">{t('welcomeTitle')}</h2>
+                        <p className="text-gray-500 max-w-md mx-auto">
+                            {t('welcomeMessage')}
+                        </p>
+                    </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <GoViewer />
+          )}
       </main>
 
        <footer className="text-center p-4 mt-8 text-xs text-gray-500">

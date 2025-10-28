@@ -11,7 +11,7 @@ interface CareerTimelineProps {
 
 export const CareerTimeline: React.FC<CareerTimelineProps> = ({ result }) => {
     const { employeeDetails, appliedRevisions } = result;
-    const { dateOfJoining, promotions, retirementDate, selectionGradeDate, specialGradeDate, superGradeDate, retirementAge, stagnationIncrementDates, dateOfRelief } = employeeDetails;
+    const { dateOfJoining, promotions, retirementDate, selectionGradeDate, specialGradeDate, superGradeDate, retirementAge, stagnationIncrementDates, dateOfRelief, probationDeclarationDate } = employeeDetails;
     const { t } = useLanguage();
 
     const events: { dateStr: string; date: Date; title: string; description: string; type: 'joining' | 'promotion' | 'grade' | 'retirement' | 'stagnation' | 'transfer' | 'revision' }[] = [];
@@ -66,6 +66,16 @@ export const CareerTimeline: React.FC<CareerTimelineProps> = ({ result }) => {
             date: new Date(selectionGradeDate.split('/').reverse().join('-')),
             title: 'Selection Grade Awarded',
             description: 'Completed 10 years of service.',
+            type: 'grade',
+        });
+    }
+
+    if (probationDeclarationDate) {
+         events.push({
+            dateStr: probationDeclarationDate,
+            date: new Date(probationDeclarationDate.split('/').reverse().join('-')),
+            title: 'Probation Declared',
+            description: 'Successfully completed probation period.',
             type: 'grade',
         });
     }

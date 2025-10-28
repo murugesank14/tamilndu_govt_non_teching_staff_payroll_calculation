@@ -18,6 +18,7 @@ export interface Promotion {
   post: string;
   gradePay?: number; // for pre-2016
   level?: string; // for post-2016
+  rule22bOption?: 'promotionDate' | 'nextIncrementDate'; // For 7th PC promotions
 }
 
 export interface AnnualIncrementChange {
@@ -49,6 +50,8 @@ export interface EmployeeInput {
   // Pay at time of joining
   joiningPostId?: string;
   joiningPostCustomName?: string;
+  joiningBasicPay4thPC?: number; // For pre-1996 joiners
+  joiningScaleId4thPC?: string; // For pre-1996 joiners
   joiningBasicPay5thPC?: number; // For pre-2006 joiners
   joiningScaleId5thPC?: string; // For pre-2006 joiners
   joiningPayInPayBand?: number; // For 6th PC joiners
@@ -60,6 +63,7 @@ export interface EmployeeInput {
   specialGradeDate: string;
   specialGradeTwoIncrements: boolean;
   superGradeDate: string;
+  probationDeclarationDate?: string;
   stagnationIncrementDate?: string;
 
   promotions: Promotion[];
@@ -78,6 +82,11 @@ export interface EmployeeInput {
   twoWheelerAdvance?: number;
   computerAdvance?: number;
   otherPayables?: number;
+}
+
+export interface PayScale4thPC {
+  id: string;
+  scale: string;
 }
 
 export interface PayScale {
@@ -108,7 +117,7 @@ export interface PayrollPeriod {
   hra: number;
   grossPay: number;
   remarks: string[];
-  commission: 5 | 6 | 7;
+  commission: 4 | 5 | 6 | 7;
   payInPayBand?: number; // Optional for 6th PC
   gradePay?: number; // Optional for 6th PC
 }
@@ -137,6 +146,7 @@ export interface EmployeeDetails {
     selectionGradeDate?: string;
     specialGradeDate?: string;
     superGradeDate?: string;
+    probationDeclarationDate?: string;
     stagnationIncrementDates?: string[];
     // For Last Pay Certificate (LPC)
     festivalAdvance?: number;
@@ -146,9 +156,29 @@ export interface EmployeeDetails {
     otherPayables?: number;
 }
 
+export interface PromotionFixation {
+    newPost: string;
+    oldLevel: number;
+    newLevel: number;
+    promotionDate: string;
+    optionUnderRule22b: 'Date of Promotion' | 'Date of Next Increment';
+    effectiveDate: string;
+    oldBasic: number;
+    payAfterNotionalIncrement: number;
+    payAfterAnnualIncrement?: number;
+    newBasic: number;
+    goReference: string;
+}
 
 export interface PayrollResult {
   employeeDetails: EmployeeDetails;
+  fixation5thPC?: {
+    basicPay1995: number;
+    da1995: number;
+    fitmentBenefit: number;
+    totalPay: number;
+    initialRevisedPay: number;
+  };
   fixation6thPC?: {
     basicPay2005: number;
     multipliedPay: number;
@@ -162,6 +192,25 @@ export interface PayrollResult {
     initialRevisedPay: number;
     level: number;
   };
+  promotionFixations?: PromotionFixation[];
   yearlyCalculations: PayrollYear[];
   appliedRevisions: { description: string, date: Date }[];
+}
+
+export type RuleType = 
+  | { type: 'DA_REVISION'; rate: number; commission: 7 | 6 | 5 | 4 }
+  | { type: 'HRA_REVISION_DA_50_PERCENT' }
+  | { type: 'LEAVE_RULE_CHANGE'; leaveType: 'UnearnedLeavePrivateAffairs'; maxDays: 360 }
+  | { type: 'SERVICE_RULE_AMENDMENT'; details: string };
+
+export interface GovernmentOrder {
+  id: string;
+  department: { en: string; ta: string };
+  goNumberAndDate: { en: string; ta: string };
+  subject: { en: string; ta: string };
+  keyPoints: { en: string; ta: string };
+  effectiveFrom: string; // YYYY-MM-DD
+  category: 'Establishment' | 'Technical' | 'Service';
+  remarks: { en: string; ta: string };
+  rule?: RuleType;
 }

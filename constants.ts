@@ -1,4 +1,4 @@
-import { CityGrade, PayScale, Post, PayRevision2010, PayScale5thPC } from './types';
+import { CityGrade, PayScale, Post, PayRevision2010, PayScale5thPC, PayScale4thPC, GovernmentOrder } from './types';
 
 // Sorted by Level for easier dropdown navigation
 export const POSTS: Post[] = [
@@ -104,31 +104,63 @@ export const PAY_MATRIX: { [level: number]: number[] } = {
 
 export const LEVELS = Object.keys(PAY_MATRIX).map(Number);
 
+export const PAY_SCALES_4TH_PC: PayScale4thPC[] = [
+    { id: 'office-assistant', scale: '610-10-730-15-820' },
+    { id: 'junior-assistant', scale: '975-25-1150-30-1660' },
+    { id: 'assistant', scale: '1260-30-1560-40-2040' },
+    { id: 'superintendent', scale: '1320-30-1560-40-2040' },
+];
+
+export const PAY_SCALES_5TH_PC: PayScale5thPC[] = [
+  { id: 'office-assistant', scale: '2550-55-2660-60-3200' },
+  { id: 'record-clerk', scale: '2610-60-3150-65-3540' },
+  { id: 'record-assistant', scale: '2610-60-3150-65-3540' },
+  { id: 'lab-asst-collegiate', scale: '3050-75-3950-80-4590' },
+  { id: 'assistant-secretariat', scale: '3625-85-4900' },
+  { id: 'jeep-driver', scale: '4000-100-6000' },
+  { id: 'junior-assistant', scale: '4000-100-6000' },
+  { id: 'asst-agri-officer', scale: '4000-100-6000' },
+  { id: 'panchayat-clerk', scale: '4000-100-6000' },
+  { id: 'typist', scale: '4000-100-6000' },
+  { id: 'steno-typist-g3', scale: '4000-100-6000' },
+  { id: 'assistant', scale: '5000-150-8000' },
+  { id: 'accountant', scale: '5000-150-8000' },
+  { id: 'superintendent', scale: '5500-175-9000' },
+  { id: 'jr-employment-officer', scale: '5500-175-9000' },
+  { id: 'manager', scale: '5500-175-9000' },
+  { id: 'assistant-inspector', scale: '6500-200-10500' },
+  { id: 'deputy-inspector', scale: '7000-225-11500' },
+  { id: 'inspector', scale: '8000-275-13500' },
+  { id: 'assistant-director', scale: '10000-325-15200' },
+  { id: 'deputy-director', scale: '12000-375-16500' },
+];
+
+
 export const PAY_SCALES_6TH_PC: PayScale[] = [
-  { id: 'PB1A-1300', scale: '2550-55-2660-60-3200', payBand: 'PB-1A (4800-10000)', gradePay: 1300 },
-  { id: 'PB1A-1400', scale: '2610-60-3150-65-3540', payBand: 'PB-1A (4800-10000)', gradePay: 1400 },
+  { id: 'office-assistant', scale: '2550-55-2660-60-3200', payBand: 'PB-1A (4800-10000)', gradePay: 1300 },
+  { id: 'record-clerk', scale: '2610-60-3150-65-3540', payBand: 'PB-1A (4800-10000)', gradePay: 1400 },
   { id: 'PB1A-1650', scale: '2650-65-3300-70-4000', payBand: 'PB-1A (4800-10000)', gradePay: 1650 },
   { id: 'PB1-1800', scale: '2750-70-3800-75-4400', payBand: 'PB-1 (5200-20200)', gradePay: 1800 },
-  { id: 'PB1-1900', scale: '3050-75-3950-80-4590', payBand: 'PB-1 (5200-20200)', gradePay: 1900 },
+  { id: 'lab-asst-collegiate', scale: '3050-75-3950-80-4590', payBand: 'PB-1 (5200-20200)', gradePay: 1900 },
   { id: 'PB1-2000', scale: '3200-85-4900', payBand: 'PB-1 (5200-20200)', gradePay: 2000 },
-  { id: 'PB1-2200', scale: '3625-85-4900 (*)', payBand: 'PB-1 (5200-20200)', gradePay: 2200 },
-  { id: 'PB1-2400', scale: '4000-100-6000', payBand: 'PB-1 (5200-20200)', gradePay: 2400 },
+  { id: 'assistant-secretariat', scale: '3625-85-4900 (*)', payBand: 'PB-1 (5200-20200)', gradePay: 2200 },
+  { id: 'junior-assistant', scale: '4000-100-6000', payBand: 'PB-1 (5200-20200)', gradePay: 2400 },
   { id: 'PB1-2600', scale: '4300-100-6000', payBand: 'PB-1 (5200-20200)', gradePay: 2600 },
-  { id: 'PB1-2800', scale: '4500-125-7000', payBand: 'PB-1 (5200-20200)', gradePay: 2800 },
-  { id: 'PB2-4200', scale: '5000-150-8000', payBand: 'PB-2 (9300-34800)', gradePay: 4200 },
+  { id: 'asst-agri-officer', scale: '4500-125-7000', payBand: 'PB-1 (5200-20200)', gradePay: 2800 },
+  { id: 'assistant', scale: '5000-150-8000', payBand: 'PB-2 (9300-34800)', gradePay: 4200 },
   { id: 'PB2-4300', scale: '5300-150-8300', payBand: 'PB-2 (9300-34800)', gradePay: 4300 },
-  { id: 'PB2-4400', scale: '5500-175-9000', payBand: 'PB-2 (9300-34800)', gradePay: 4400 },
+  { id: 'superintendent', scale: '5500-175-9000', payBand: 'PB-2 (9300-34800)', gradePay: 4400 },
   { id: 'PB2-4450', scale: '5700-175-9200 (*)', payBand: 'PB-2 (9300-34800)', gradePay: 4450 },
   { id: 'PB2-4500', scale: '5900-200-9900', payBand: 'PB-2 (9300-34800)', gradePay: 4500 },
-  { id: 'PB2-4600', scale: '6500-200-10500', payBand: 'PB-2 (9300-34800)', gradePay: 4600 },
+  { id: 'assistant-inspector', scale: '6500-200-10500', payBand: 'PB-2 (9300-34800)', gradePay: 4600 },
   { id: 'PB2-4700', scale: '6500-200-11100', payBand: 'PB-2 (9300-34800)', gradePay: 4700 },
-  { id: 'PB2-4800', scale: '7000-225-11500 (*)', payBand: 'PB-2 (9300-34800)', gradePay: 4800 },
+  { id: 'jr-employment-officer', scale: '7000-225-11500 (*)', payBand: 'PB-2 (9300-34800)', gradePay: 4800 },
   { id: 'PB2-4900', scale: '7500-250-12000 (**)', payBand: 'PB-2 (9300-34800)', gradePay: 4900 },
-  { id: 'PB3-5400', scale: '8000-275-13500', payBand: 'PB-3 (15600-39100)', gradePay: 5400 },
+  { id: 'inspector', scale: '8000-275-13500', payBand: 'PB-3 (15600-39100)', gradePay: 5400 },
   { id: 'PB3-5700', scale: '9100-275-14050', payBand: 'PB-3 (15600-39100)', gradePay: 5700 },
   { id: 'PB3-6000', scale: '9650-300-15050', payBand: 'PB-3 (15600-39100)', gradePay: 6000 },
-  { id: 'PB3-6600', scale: '10000-325-15200', payBand: 'PB-3 (15600-39100)', gradePay: 6600 },
-  { id: 'PB3-7600', scale: '12000-375-16500', payBand: 'PB-3 (15600-39100)', gradePay: 7600 },
+  { id: 'assistant-director', scale: '10000-325-15200', payBand: 'PB-3 (15600-39100)', gradePay: 6600 },
+  { id: 'deputy-director', scale: '12000-375-16500', payBand: 'PB-3 (15600-39100)', gradePay: 7600 },
   { id: 'PB3-7700', scale: '12750-375-16500', payBand: 'PB-3 (15600-39100)', gradePay: 7700 },
   { id: 'PB4-8700', scale: '14300-400-18300', payBand: 'PB-4 (37400-67000)', gradePay: 8700 },
   { id: 'PB4-8800', scale: '15000-400-18600', payBand: 'PB-4 (37400-67000)', gradePay: 8800 },
@@ -136,12 +168,35 @@ export const PAY_SCALES_6TH_PC: PayScale[] = [
   { id: 'PB4-10000', scale: '17400-500-21900', payBand: 'PB-4 (37400-67000)', gradePay: 10000 },
 ];
 
-export const PAY_SCALES_5TH_PC: PayScale5thPC[] = PAY_SCALES_6TH_PC.map(p => ({
-    id: p.id,
-    scale: p.scale,
-}));
+export const DA_RATES_4TH_PC = [
+  { date: new Date('1985-07-01T00:00:00Z'), rate: 8, commission: 4 },
+  { date: new Date('1986-01-01T00:00:00Z'), rate: 13, commission: 4 },
+  { date: new Date('1986-07-01T00:00:00Z'), rate: 19, commission: 4 },
+  { date: new Date('1987-01-01T00:00:00Z'), rate: 26, commission: 4 },
+  { date: new Date('1987-07-01T00:00:00Z'), rate: 34, commission: 4 },
+  { date: new Date('1988-01-01T00:00:00Z'), rate: 43, commission: 4 },
+  { date: new Date('1988-07-01T00:00:00Z'), rate: 53, commission: 4 },
+  { date: new Date('1989-01-01T00:00:00Z'), rate: 65, commission: 4 },
+  { date: new Date('1989-07-01T00:00:00Z'), rate: 75, commission: 4 },
+  { date: new Date('1990-01-01T00:00:00Z'), rate: 86, commission: 4 },
+  { date: new Date('1990-07-01T00:00:00Z'), rate: 96, commission: 4 },
+  { date: new Date('1991-01-01T00:00:00Z'), rate: 109, commission: 4 },
+  { date: new Date('1991-07-01T00:00:00Z'), rate: 119, commission: 4 },
+  { date: new Date('1992-01-01T00:00:00Z'), rate: 134, commission: 4 },
+  { date: new Date('1992-07-01T00:00:00Z'), rate: 144, commission: 4 },
+  { date: new Date('1993-01-01T00:00:00Z'), rate: 157, commission: 4 },
+  { date: new Date('1993-07-01T00:00:00Z'), rate: 169, commission: 4 },
+  { date: new Date('1994-01-01T00:00:00Z'), rate: 184, commission: 4 },
+  { date: new Date('1994-07-01T00:00:00Z'), rate: 196, commission: 4 },
+  { date: new Date('1995-01-01T00:00:00Z'), rate: 214, commission: 4 },
+  { date: new Date('1995-07-01T00:00:00Z'), rate: 227, commission: 4 },
+];
 
-const DA_RATES_5TH_PC = [
+export const DA_RATES_5TH_PC = [
+  { date: new Date('1996-01-01T00:00:00Z'), rate: 0, commission: 5 },
+  { date: new Date('1996-07-01T00:00:00Z'), rate: 8, commission: 5 },
+  { date: new Date('1997-01-01T00:00:00Z'), rate: 13, commission: 5 },
+  { date: new Date('1997-07-01T00:00:00Z'), rate: 16, commission: 5 },
   { date: new Date('1998-01-01T00:00:00Z'), rate: 27, commission: 5 },
   { date: new Date('1998-07-01T00:00:00Z'), rate: 32, commission: 5 },
   { date: new Date('1999-01-01T00:00:00Z'), rate: 41, commission: 5 },
@@ -160,7 +215,7 @@ const DA_RATES_5TH_PC = [
 ];
 
 
-const DA_RATES_6TH_PC = [
+export const DA_RATES_6TH_PC = [
   // 6th Pay Commission
   { date: new Date('2006-01-01T00:00:00Z'), rate: 0, commission: 6 },
   { date: new Date('2006-07-01T00:00:00Z'), rate: 2, commission: 6 },
@@ -183,28 +238,6 @@ const DA_RATES_6TH_PC = [
   { date: new Date('2015-01-01T00:00:00Z'), rate: 113, commission: 6 },
   { date: new Date('2015-07-01T00:00:00Z'), rate: 119, commission: 6 },
 ];
-
-const DA_RATES_7TH_PC = [
-  // 7th Pay Commission
-  { date: new Date('2016-01-01T00:00:00Z'), rate: 0, commission: 7 },
-  { date: new Date('2016-07-01T00:00:00Z'), rate: 2, commission: 7 },
-  { date: new Date('2017-01-01T00:00:00Z'), rate: 4, commission: 7 },
-  { date: new Date('2017-07-01T00:00:00Z'), rate: 5, commission: 7 },
-  { date: new Date('2018-01-01T00:00:00Z'), rate: 7, commission: 7 },
-  { date: new Date('2018-07-01T00:00:00Z'), rate: 9, commission: 7 },
-  { date: new Date('2019-01-01T00:00:00Z'), rate: 12, commission: 7 },
-  { date: new Date('2019-07-01T00:00:00Z'), rate: 17, commission: 7 },
-  { date: new Date('2021-07-01T00:00:00Z'), rate: 28, commission: 7 }, // After COVID freeze
-  { date: new Date('2021-10-01T00:00:00Z'), rate: 31, commission: 7 },
-  { date: new Date('2022-01-01T00:00:00Z'), rate: 34, commission: 7 },
-  { date: new Date('2022-07-01T00:00:00Z'), rate: 38, commission: 7 },
-  { date: new Date('2023-01-01T00:00:00Z'), rate: 42, commission: 7 },
-  { date: new Date('2023-07-01T00:00:00Z'), rate: 46, commission: 7 },
-  { date: new Date('2024-01-01T00:00:00Z'), rate: 50, commission: 7 },
-  { date: new Date('2024-07-01T00:00:00Z'), rate: 53, commission: 7 },
-];
-
-export const DA_RATES: { date: Date; rate: number; commission: number }[] = [...DA_RATES_5TH_PC, ...DA_RATES_6TH_PC, ...DA_RATES_7TH_PC].sort((a, b) => a.date.getTime() - b.date.getTime());
 
 type HraSlab = {
   payRange: [number, number];
@@ -231,26 +264,53 @@ export const HRA_SLABS_7TH_PC: HraSlab[] = [
     { payRange: [64201, 999999], rates: { [CityGrade.GRADE_I_A]: 8300, [CityGrade.GRADE_I_B]: 4300, [CityGrade.GRADE_II]: 3200, [CityGrade.GRADE_III]: 2200, [CityGrade.GRADE_IV]: 850 } },
 ];
 
-type HraSlab6thPC = {
-    payRange: [number, number];
-    rates: { [key: string]: number };
-};
+export const HRA_SLABS_6TH_PC_PRE_2009: HraSlab[] = [
+    { payRange: [0, 8000], rates: { 'Grade I(a)': 600, 'Grade I(b)': 600, 'Grade II': 400, 'Grade III': 200, 'Grade IV (Unclassified)': 150 } },
+    { payRange: [8001, 13500], rates: { 'Grade I(a)': 1000, 'Grade I(b)': 1000, 'Grade II': 600, 'Grade III': 300, 'Grade IV (Unclassified)': 200 } },
+    { payRange: [13501, 999999], rates: { 'Grade I(a)': 2000, 'Grade I(b)': 2000, 'Grade II': 1000, 'Grade III': 500, 'Grade IV (Unclassified)': 300 } },
+];
 
-export const HRA_SLABS_5TH_PC: HraSlab6thPC[] = [
-    { payRange: [0, 4000], rates: { 'Grade I(a)': 400, 'Grade I(b)': 350, 'Grade II': 200, 'Grade III': 150, 'Unclassified': 100 } },
-    { payRange: [4001, 8000], rates: { 'Grade I(a)': 600, 'Grade I(b)': 500, 'Grade II': 350, 'Grade III': 250, 'Unclassified': 150 } },
-    { payRange: [8001, 999999], rates: { 'Grade I(a)': 800, 'Grade I(b)': 700, 'Grade II': 500, 'Grade III': 300, 'Unclassified': 200 } },
+export const HRA_SLABS_6TH_PC: HraSlab[] = [
+    { payRange: [0, 8000], rates: { 'Grade I(a)': 800, 'Grade I(b)': 800, 'Grade II': 500, 'Grade III': 250, 'Grade IV (Unclassified)': 200 } },
+    { payRange: [8001, 13500], rates: { 'Grade I(a)': 1200, 'Grade I(b)': 1200, 'Grade II': 750, 'Grade III': 350, 'Grade IV (Unclassified)': 250 } },
+    { payRange: [13501, 999999], rates: { 'Grade I(a)': 2500, 'Grade I(b)': 2500, 'Grade II': 1200, 'Grade III': 600, 'Grade IV (Unclassified)': 350 } },
+];
+
+export const HRA_SLABS_5TH_PC: HraSlab[] = [
+    { payRange: [0, 4000], rates: { 'Grade I(a)': 400, 'Grade I(b)': 350, 'Grade II': 200, 'Grade III': 150, 'Grade IV (Unclassified)': 100 } },
+    { payRange: [4001, 8000], rates: { 'Grade I(a)': 600, 'Grade I(b)': 500, 'Grade II': 350, 'Grade III': 250, 'Grade IV (Unclassified)': 150 } },
+    { payRange: [8001, 999999], rates: { 'Grade I(a)': 800, 'Grade I(b)': 700, 'Grade II': 500, 'Grade III': 300, 'Grade IV (Unclassified)': 200 } },
+];
+
+export const HRA_SLABS_4TH_PC: HraSlab[] = [
+    { payRange: [0, 1000], rates: { 'Grade I(a)': 150, 'Grade I(b)': 100, 'Grade II': 60, 'Grade III': 40, 'Grade IV (Unclassified)': 25 } },
+    { payRange: [1001, 1500], rates: { 'Grade I(a)': 250, 'Grade I(b)': 150, 'Grade II': 100, 'Grade III': 60, 'Grade IV (Unclassified)': 40 } },
+    { payRange: [1501, 999999], rates: { 'Grade I(a)': 350, 'Grade I(b)': 200, 'Grade II': 150, 'Grade III': 80, 'Grade IV (Unclassified)': 50 } },
 ];
 
 
-export const HRA_SLABS_6TH_PC_PRE_2009: HraSlab6thPC[] = [
-    { payRange: [0, 8000], rates: { 'Grade I(a)': 600, 'Grade I(b)': 600, 'Grade II': 400, 'Grade III': 200, 'Unclassified': 150 } },
-    { payRange: [8001, 13500], rates: { 'Grade I(a)': 1000, 'Grade I(b)': 1000, 'Grade II': 600, 'Grade III': 300, 'Unclassified': 200 } },
-    { payRange: [13501, 999999], rates: { 'Grade I(a)': 2000, 'Grade I(b)': 2000, 'Grade II': 1000, 'Grade III': 500, 'Unclassified': 300 } },
-];
-
-export const HRA_SLABS_6TH_PC: HraSlab6thPC[] = [
-    { payRange: [0, 8000], rates: { 'Grade I(a)': 800, 'Grade I(b)': 800, 'Grade II': 500, 'Grade III': 250, 'Unclassified': 200 } },
-    { payRange: [8001, 13500], rates: { 'Grade I(a)': 1200, 'Grade I(b)': 1200, 'Grade II': 750, 'Grade III': 350, 'Unclassified': 250 } },
-    { payRange: [13501, 999999], rates: { 'Grade I(a)': 2500, 'Grade I(b)': 2500, 'Grade II': 1200, 'Grade III': 600, 'Unclassified': 350 } },
+export const GO_DATA: GovernmentOrder[] = [
+  // 7th PC DA Revisions
+  { id: 'go-da-2', department: { en: 'Finance Dept', ta: 'நிதித் துறை' }, goNumberAndDate: { en: 'G.O.Ms.No.303, 11.10.2017', ta: 'அ.ஆ.(நிலை) எண் 303, 11.10.2017' }, subject: { en: 'DA Revision to 2%', ta: 'அகவிலைப்படி 2% ஆக உயர்வு' }, keyPoints: { en: 'DA revised', ta: 'அ.ப. திருத்தம்' }, effectiveFrom: '2016-07-01', category: 'Establishment', remarks: { en: '', ta: '' }, rule: { type: 'DA_REVISION', rate: 2, commission: 7 } },
+  { id: 'go-da-4', department: { en: 'Finance Dept', ta: 'நிதித் துறை' }, goNumberAndDate: { en: 'G.O.Ms.No.303, 11.10.2017', ta: 'அ.ஆ.(நிலை) எண் 303, 11.10.2017' }, subject: { en: 'DA Revision to 4%', ta: 'அகவிலைப்படி 4% ஆக உயர்வு' }, keyPoints: { en: 'DA revised', ta: 'அ.ப. திருத்தம்' }, effectiveFrom: '2017-01-01', category: 'Establishment', remarks: { en: '', ta: '' }, rule: { type: 'DA_REVISION', rate: 4, commission: 7 } },
+  { id: 'go-da-5', department: { en: 'Finance Dept', ta: 'நிதித் துறை' }, goNumberAndDate: { en: 'G.O.Ms.No.303, 11.10.2017', ta: 'அ.ஆ.(நிலை) எண் 303, 11.10.2017' }, subject: { en: 'DA Revision to 5%', ta: 'அகவிலைப்படி 5% ஆக உயர்வு' }, keyPoints: { en: 'DA revised', ta: 'அ.ப. திருத்தம்' }, effectiveFrom: '2017-07-01', category: 'Establishment', remarks: { en: '', ta: '' }, rule: { type: 'DA_REVISION', rate: 5, commission: 7 } },
+  { id: 'go-da-7', department: { en: 'Finance Dept', ta: 'நிதித் துறை' }, goNumberAndDate: { en: 'G.O.Ms.No.123, 10.04.2018', ta: 'அ.ஆ.(நிலை) எண் 123, 10.04.2018' }, subject: { en: 'DA Revision to 7%', ta: 'அகவிலைப்படி 7% ஆக உயர்வு' }, keyPoints: { en: 'DA revised', ta: 'அ.ப. திருத்தம்' }, effectiveFrom: '2018-01-01', category: 'Establishment', remarks: { en: '', ta: '' }, rule: { type: 'DA_REVISION', rate: 7, commission: 7 } },
+  { id: 'go-da-9', department: { en: 'Finance Dept', ta: 'நிதித் துறை' }, goNumberAndDate: { en: 'G.O.Ms.No.313, 18.09.2018', ta: 'அ.ஆ.(நிலை) எண் 313, 18.09.2018' }, subject: { en: 'DA Revision to 9%', ta: 'அகவிலைப்படி 9% ஆக உயர்வு' }, keyPoints: { en: 'DA revised', ta: 'அ.ப. திருத்தம்' }, effectiveFrom: '2018-07-01', category: 'Establishment', remarks: { en: '', ta: '' }, rule: { type: 'DA_REVISION', rate: 9, commission: 7 } },
+  { id: 'go-da-12', department: { en: 'Finance Dept', ta: 'நிதித் துறை' }, goNumberAndDate: { en: 'G.O.Ms.No.89, 11.03.2019', ta: 'அ.ஆ.(நிலை) எண் 89, 11.03.2019' }, subject: { en: 'DA Revision to 12%', ta: 'அகவிலைப்படி 12% ஆக உயர்வு' }, keyPoints: { en: 'DA revised', ta: 'அ.ப. திருத்தம்' }, effectiveFrom: '2019-01-01', category: 'Establishment', remarks: { en: '', ta: '' }, rule: { type: 'DA_REVISION', rate: 12, commission: 7 } },
+  { id: 'go-da-17', department: { en: 'Finance Dept', ta: 'நிதித் துறை' }, goNumberAndDate: { en: 'G.O.Ms.No.325, 27.09.2019', ta: 'அ.ஆ.(நிலை) எண் 325, 27.09.2019' }, subject: { en: 'DA Revision to 17%', ta: 'அகவிலைப்படி 17% ஆக உயர்வு' }, keyPoints: { en: 'DA revised', ta: 'அ.ப. திருத்தம்' }, effectiveFrom: '2019-07-01', category: 'Establishment', remarks: { en: '', ta: '' }, rule: { type: 'DA_REVISION', rate: 17, commission: 7 } },
+  { id: 'go-da-28', department: { en: 'Finance Dept', ta: 'நிதித் துறை' }, goNumberAndDate: { en: 'G.O.Ms.No.283, 01.11.2021', ta: 'அ.ஆ.(நிலை) எண் 283, 01.11.2021' }, subject: { en: 'DA Revision to 28%', ta: 'அகவிலைப்படி 28% ஆக உயர்வு' }, keyPoints: { en: 'DA revised after freeze', ta: 'முடக்கத்திற்குப் பிறகு அ.ப. திருத்தம்' }, effectiveFrom: '2021-07-01', category: 'Establishment', remarks: { en: '', ta: '' }, rule: { type: 'DA_REVISION', rate: 28, commission: 7 } },
+  { id: 'go-da-31', department: { en: 'Finance Dept', ta: 'நிதித் துறை' }, goNumberAndDate: { en: 'G.O.Ms.No.3, 01.01.2022', ta: 'அ.ஆ.(நிலை) எண் 3, 01.01.2022' }, subject: { en: 'DA Revision to 31%', ta: 'அகவிலைப்படி 31% ஆக உயர்வு' }, keyPoints: { en: 'DA revised from 17% to 31%', ta: 'அ.ப. 17%லிருந்து 31%ஆக உயர்வு' }, effectiveFrom: '2022-01-01', category: 'Establishment', remarks: { en: '', ta: '' }, rule: { type: 'DA_REVISION', rate: 31, commission: 7 } },
+  { id: 'go-da-34', department: { en: 'Finance Dept', ta: 'நிதித் துறை' }, goNumberAndDate: { en: 'G.O.Ms.No.230, 01.08.2022', ta: 'அ.ஆ.(நிலை) எண் 230, 01.08.2022' }, subject: { en: 'DA Revision to 34%', ta: 'அகவிலைப்படி 34% ஆக உயர்வு' }, keyPoints: { en: 'DA revised', ta: 'அ.ப. திருத்தம்' }, effectiveFrom: '2022-07-01', category: 'Establishment', remarks: { en: '', ta: '' }, rule: { type: 'DA_REVISION', rate: 34, commission: 7 } },
+  { id: 'go-da-38', department: { en: 'Finance Dept', ta: 'நிதித் துறை' }, goNumberAndDate: { en: 'G.O.Ms.No.3, 02.01.2023', ta: 'அ.ஆ.(நிலை) எண் 3, 02.01.2023' }, subject: { en: 'DA Revision to 38%', ta: 'அகவிலைப்படி 38% ஆக உயர்வு' }, keyPoints: { en: 'DA revised', ta: 'அ.ப. திருத்தம்' }, effectiveFrom: '2023-01-01', category: 'Establishment', remarks: { en: '', ta: '' }, rule: { type: 'DA_REVISION', rate: 38, commission: 7 } },
+  { id: 'go-da-42', department: { en: 'Finance Dept', ta: 'நிதித் துறை' }, goNumberAndDate: { en: 'G.O.Ms.No.126, 17.05.2023', ta: 'அ.ஆ.(நிலை) எண் 126, 17.05.2023' }, subject: { en: 'DA Revision to 42%', ta: 'அகவிலைப்படி 42% ஆக உயர்வு' }, keyPoints: { en: 'DA revised', ta: 'அ.ப. திருத்தம்' }, effectiveFrom: '2023-04-01', category: 'Establishment', remarks: { en: '', ta: '' }, rule: { type: 'DA_REVISION', rate: 42, commission: 7 } },
+  { id: 'go-da-46', department: { en: 'Finance Dept', ta: 'நிதித் துறை' }, goNumberAndDate: { en: 'G.O.Ms.No.289, 23.10.2023', ta: 'அ.ஆ.(நிலை) எண் 289, 23.10.2023' }, subject: { en: 'DA Revision to 46%', ta: 'அகவிலைப்படி 46% ஆக உயர்வு' }, keyPoints: { en: 'DA revised', ta: 'அ.ப. திருத்தம்' }, effectiveFrom: '2023-07-01', category: 'Establishment', remarks: { en: '', ta: '' }, rule: { type: 'DA_REVISION', rate: 46, commission: 7 } },
+  { id: 'go-da-50', department: { en: 'Finance Dept', ta: 'நிதித் துறை' }, goNumberAndDate: { en: 'G.O.Ms.No. 40, 10.02.2024', ta: 'அ.ஆ.(நிலை) எண் 40, 10.02.2024' }, subject: { en: 'DA Revision to 50%', ta: 'அகவிலைப்படி 50% ஆக உயர்வு' }, keyPoints: { en: 'DA revised', ta: 'அ.ப. திருத்தம்' }, effectiveFrom: '2024-01-01', category: 'Establishment', remarks: { en: '', ta: '' }, rule: { type: 'DA_REVISION', rate: 50, commission: 7 } },
+  { id: 'go-1', department: { en: 'Finance Department', ta: 'நிதித் துறை' }, goNumberAndDate: { en: 'G.O.(Ms) No. 317, 27.09.2024', ta: 'அ.ஆ.(நிலை) எண் 317, 27.09.2024' }, subject: { en: 'Dearness Allowance - Revision from 50% to 53%', ta: 'அகவிலைப்படி - 50% லிருந்து 53% ஆக உயர்த்துதல்' }, keyPoints: { en: 'Dearness Allowance for Tamil Nadu Government employees, teachers, and pensioners has been increased from 50% to 53% of Basic Pay.', ta: 'தமிழ்நாடு அரசு ஊழியர்கள், ஆசிரியர்கள் மற்றும் ஓய்வூதியதாரர்களுக்கான அகவிலைப்படி 50% லிருந்து 53% ஆக உயர்த்தப்பட்டுள்ளது.' }, effectiveFrom: '2024-07-01', category: 'Establishment', remarks: { en: 'Aligns with the Central Government 7th CPC recommendations.', ta: 'மத்திய அரசு 7வது ஊதியக் குழு பரிந்துரைகளுடன் இணங்குகிறது.' }, rule: { type: 'DA_REVISION', rate: 53, commission: 7 } },
+  
+  // HRA Revision Rule
+  { id: 'go-hra-rev', department: { en: 'Finance Department', ta: 'நிதித் துறை' }, goNumberAndDate: { en: 'G.O.(Ms) No. 83, 21.03.2024', ta: 'அ.ஆ.(நிலை) எண் 83, 21.03.2024' }, subject: { en: 'House Rent Allowance - Revision of rates on DA crossing 50%', ta: 'வீட்டு வாடகைப்படி - அகவிலைப்படி 50% ஐ தாண்டும்போது விகிதங்கள் திருத்தம்' }, keyPoints: { en: 'HRA rates for Y and Z class cities are revised to 20% and 10% of basic pay respectively, once DA reaches 50%.', ta: 'அகவிலைப்படி 50% ஐ எட்டியவுடன், Y மற்றும் Z வகுப்பு நகரங்களுக்கான வீட்டு வாடகைப்படி விகிதங்கள் அடிப்படை ஊதியத்தில் முறையே 20% மற்றும் 10% ஆக திருத்தப்படுகின்றன.' }, effectiveFrom: '2024-01-01', category: 'Establishment', remarks: { en: 'This order is triggered when DA reaches 50%.', ta: 'அகவிலைப்படி 50% ஐ எட்டும்போது இந்த ஆணை செயல்படுத்தப்படும்.' }, rule: { type: 'HRA_REVISION_DA_50_PERCENT' } },
+  
+  // Other G.O.s
+  { id: 'go-2', department: { en: 'Public Works Department (PWD)', ta: 'பொதுப்பணித் துறை (பொ.ப.து)' }, goNumberAndDate: { en: 'G.O.(Ms) No. 142, 15.05.2024', ta: 'அ.ஆ.(நிலை) எண் 142, 15.05.2024' }, subject: { en: 'Service Rules - Amendment to Tamil Nadu Engineering Service Rules', ta: 'பணி விதிகள் - தமிழ்நாடு பொறியியல் பணி விதிகளில் திருத்தம்' }, keyPoints: { en: 'A new promotion quota has been introduced for the post of Assistant Executive Engineer (AEE) from the feeder category of Assistant Engineer (AE).', ta: 'உதவிப் பொறியாளர் (உ.பொ) பதவியிலிருந்து உதவி செயற் பொறியாளர் (உ.செ.பொ) பதவிக்கு புதிய பதவி உயர்வு ஒதுக்கீடு அறிமுகப்படுத்தப்பட்டுள்ளது.' }, effectiveFrom: '2024-06-01', category: 'Technical', remarks: { en: 'Supersedes G.O. Ms. No. 112/2021.', ta: 'அ.ஆ.(நிலை) எண் 112/2021-ஐ இது ரத்து செய்கிறது.' }, rule: { type: 'SERVICE_RULE_AMENDMENT', details: 'AE to AEE promotion quota amendment' } },
+  { id: 'go-3', department: { en: 'P & AR Department', ta: 'பணியாளர் மற்றும் நிர்வாக சீர்திருத்தத் துறை' }, goNumberAndDate: { en: 'G.O.(Ms) No. 88, 12.08.2024', ta: 'அ.ஆ.(நிலை) எண் 88, 12.08.2024' }, subject: { en: 'Leave Rules - Enhancement of Unearned Leave on Private Affairs', ta: 'விடுப்பு விதிகள் - சொந்த விவகாரங்களுக்கான ஈட்டா விடுப்பு உயர்வு' }, keyPoints: { en: 'The maximum limit for Unearned Leave on Private Affairs for permanent Government servants is enhanced from 180 days to 360 days in the entire service.', ta: 'நிரந்தர அரசு ஊழியர்களுக்கான சொந்த விவகாரங்களுக்கான ஈட்டா விடுப்பின் அதிகபட்ச வரம்பு முழுப் பணிக்காலத்திற்கும் 180 நாட்களில் இருந்து 360 நாட்களாக உயர்த்தப்பட்டுள்ளது.' }, effectiveFrom: '2024-08-12', category: 'Service', remarks: { en: 'Applicable to all permanent government employees.', ta: 'அனைத்து நிரந்தர அரசு ஊழியர்களுக்கும் பொருந்தும்.' }, rule: { type: 'LEAVE_RULE_CHANGE', leaveType: 'UnearnedLeavePrivateAffairs', maxDays: 360 } },
 ];

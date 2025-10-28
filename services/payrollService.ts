@@ -1,9 +1,11 @@
 
-import { EmployeeInput, PayrollResult, PayrollYear, PayrollPeriod, CityGrade, Promotion, Post, PayRevision2010, PayScale } from '../types';
+
+import { EmployeeInput, PayrollResult, PayrollYear, PayrollPeriod, CityGrade, Promotion, Post, PayRevision2010, PayScale, GovernmentOrder, PromotionFixation } from '../types';
 import { 
-    PAY_MATRIX, GRADE_PAY_TO_LEVEL, DA_RATES, HRA_SLABS_7TH_PC, 
-    PAY_SCALES_6TH_PC, HRA_SLABS_6TH_PC, HRA_SLABS_6TH_PC_PRE_2009, HRA_SLABS_5TH_PC, POSTS,
-    PAY_REVISIONS_2010
+    PAY_MATRIX, GRADE_PAY_TO_LEVEL, HRA_SLABS_7TH_PC, 
+    PAY_SCALES_6TH_PC, HRA_SLABS_6TH_PC, HRA_SLABS_6TH_PC_PRE_2009, HRA_SLABS_5TH_PC, HRA_SLABS_4TH_PC, POSTS,
+    PAY_REVISIONS_2010, PAY_SCALES_5TH_PC, PAY_SCALES_4TH_PC,
+    DA_RATES_4TH_PC, DA_RATES_5TH_PC, DA_RATES_6TH_PC, GO_DATA
 } from '../constants';
 
 const FITMENT_FACTOR_7TH_PC = 2.57;
@@ -25,19 +27,24 @@ function findPayInMatrix(pay: number, level: number): number {
   return newPay || levelPayScale[levelPayScale.length - 1];
 }
 
-function parse5thPCScale(scale: string): { stages: { from: number, to: number, inc: number }[], max: number } {
+function parseSlabScale(scale: string): { stages: { from: number, to: number, inc: number }[], max: number } {
     const parts = scale.replace(/\s/g, '').split('-').map(Number);
     if (parts.some(isNaN)) return { stages: [], max: 0 };
     const stages = [];
     for (let i = 0; i < parts.length - 2; i += 2) {
-        stages.push({ from: parts[i], to: parts[i+2], inc: parts[i+1] });
+        // Handle cases like 900-20-1100 where 'to' is the next 'from'
+        const from = parts[i];
+        const inc = parts[i+1];
+        const to = parts[i+2];
+        stages.push({ from, to, inc });
     }
     return { stages, max: parts[parts.length - 1] };
 }
 
-function getIncrement5thPC(currentPay: number, scaleString: string, steps: number = 1): number {
+
+function getIncrementForSlabScale(currentPay: number, scaleString: string, steps: number = 1): number {
     let newPay = currentPay;
-    const scale = parse5thPCScale(scaleString);
+    const scale = parseSlabScale(scaleString);
     if(scale.stages.length === 0) return newPay;
     
     for (let i = 0; i < steps; i++) {
@@ -47,19 +54,34 @@ function getIncrement5thPC(currentPay: number, scaleString: string, steps: numbe
         }
         let incrementApplied = false;
         for (const stage of scale.stages) {
+            // If current pay is within a stage (e.g., between 900 and 1100 for 900-20-1100)
             if (newPay < stage.to) {
                 newPay += stage.inc;
                 incrementApplied = true;
                 break;
             }
         }
-        if (!incrementApplied) { // If pay is already at or above the last 'from' value
+        if (!incrementApplied) { // If pay is at or above the last 'from' value
              newPay += scale.stages[scale.stages.length - 1].inc;
         }
         
         if(newPay > scale.max) newPay = scale.max;
     }
     return newPay;
+}
+
+function findPayInSlabScale(pay: number, scaleString: string): number {
+    const scale = parseSlabScale(scaleString);
+    if (scale.stages.length === 0) return pay;
+
+    // If pay is below the minimum, start from minimum
+    if (pay < scale.stages[0].from) return scale.stages[0].from;
+    
+    let currentStagePay = scale.stages[0].from;
+    while(currentStagePay < pay && currentStagePay < scale.max) {
+        currentStagePay = getIncrementForSlabScale(currentStagePay, scaleString, 1);
+    }
+    return Math.min(currentStagePay, scale.max);
 }
 
 
@@ -89,75 +111,140 @@ function getIncrement(currentPay: number, level: number, steps: number, commissi
     }
 }
 
-function getHra(basicPay: number, cityGrade: string, date: Date): number {
+function getHra(basicPay: number, cityGrade: string, date: Date, daRate: number, hraRevisionGO: GovernmentOrder | undefined): { hra: number, revised: boolean, goRef?: string } {
     const is7thPC = date >= new Date('2016-01-01T00:00:00Z');
-    const is6thPC = date >= new Date('2006-01-01T00:00:00Z');
-    
-    if (is7thPC) {
-        const slab = HRA_SLABS_7TH_PC.find(s => basicPay >= s.payRange[0] && basicPay <= s.payRange[1]);
-        if (!slab) return 0;
-        return slab.rates[cityGrade as CityGrade] || 0;
-    } else if (is6thPC) {
-        const effectiveSlabs = date < new Date('2009-06-01T00:00:00Z') ? HRA_SLABS_6TH_PC_PRE_2009 : HRA_SLABS_6TH_PC;
-        const slab = effectiveSlabs.find(s => basicPay >= s.payRange[0] && basicPay <= s.payRange[1]);
-        if (!slab) return 0;
-        return slab.rates[cityGrade as CityGrade] || 0;
-    } else { // 5th PC
-        const slab = HRA_SLABS_5TH_PC.find(s => basicPay >= s.payRange[0] && basicPay <= s.payRange[1]);
-        if (!slab) return 0;
-        return slab.rates[cityGrade as CityGrade] || 0;
+
+    // TN G.O.(Ms) No.83, Dated: 21.03.2024 - HRA revision when DA crosses 50%
+    if (is7thPC && daRate >= 50 && hraRevisionGO && date >= parseDateUTC(hraRevisionGO.effectiveFrom)!) {
+        let revisedHra = 0;
+        let isRevised = false;
+        const minHra = 1800; // As per G.O. for Y/Z cities
+
+        if (cityGrade === CityGrade.GRADE_I_A) { // 'Y' Category - Chennai UA
+            revisedHra = Math.round(basicPay * 0.20);
+            isRevised = true;
+        } else if (cityGrade === CityGrade.GRADE_I_B) { // 'Z' Category - Other Major Cities
+            revisedHra = Math.round(basicPay * 0.10);
+            isRevised = true;
+        }
+
+        if (isRevised) {
+            // As per G.O, for other places, the old slab rates continue.
+            return { hra: Math.max(revisedHra, minHra), revised: true, goRef: hraRevisionGO.goNumberAndDate.en };
+        }
     }
+    
+    let slab;
+    if (is7thPC) {
+        slab = HRA_SLABS_7TH_PC.find(s => basicPay >= s.payRange[0] && basicPay <= s.payRange[1]);
+    } else if (date >= new Date('2006-01-01T00:00:00Z')) { // 6th PC
+        const effectiveSlabs = date < new Date('2009-06-01T00:00:00Z') ? HRA_SLABS_6TH_PC_PRE_2009 : HRA_SLABS_6TH_PC;
+        slab = effectiveSlabs.find(s => basicPay >= s.payRange[0] && basicPay <= s.payRange[1]);
+    } else if (date >= new Date('1996-01-01T00:00:00Z')) { // 5th PC
+        slab = HRA_SLABS_5TH_PC.find(s => basicPay >= s.payRange[0] && basicPay <= s.payRange[1]);
+    } else { // 4th PC
+        slab = HRA_SLABS_4TH_PC.find(s => basicPay >= s.payRange[0] && basicPay <= s.payRange[1]);
+    }
+
+    if (!slab) return { hra: 0, revised: false };
+    return { hra: slab.rates[cityGrade as CityGrade] || 0, revised: false };
 }
 
 
 export const calculateFullPayroll = (data: EmployeeInput): PayrollResult => {
     // --- 1. SETUP & INITIALIZATION ---
-    const { dateOfJoining, calculationStartDate, calculationEndDate, promotions, annualIncrementChanges, breaksInService, selectionGradeDate, specialGradeDate, superGradeDate, stagnationIncrementDate, cityGrade, incrementEligibilityMonths, joiningPostId, joiningPostCustomName, selectionGradeTwoIncrements, specialGradeTwoIncrements, ...employeeDetails } = data;
+    
+    // --- Build Rule Sets from G.O. Data ---
+    const DA_RATES_7TH_PC_FROM_GO = GO_DATA
+        .filter(go => go.rule?.type === 'DA_REVISION' && go.rule.commission === 7)
+        .map(go => {
+            const rule = go.rule as { type: 'DA_REVISION'; rate: number; commission: 7 };
+            return { date: parseDateUTC(go.effectiveFrom)!, rate: rule.rate, commission: 7, goRef: go.goNumberAndDate.en };
+        });
+    // Add the initial 0% rate if not present in a GO.
+    if (!DA_RATES_7TH_PC_FROM_GO.some(r => r.date.getTime() === new Date('2016-01-01T00:00:00Z').getTime())) {
+        DA_RATES_7TH_PC_FROM_GO.push({
+             date: new Date('2016-01-01T00:00:00Z'), rate: 0, commission: 7, goRef: '7th Pay Commission Implementation'
+        });
+    }
+    const ALL_DA_RATES = [...DA_RATES_4TH_PC, ...DA_RATES_5TH_PC, ...DA_RATES_6TH_PC, ...DA_RATES_7TH_PC_FROM_GO].sort((a, b) => a.date.getTime() - b.date.getTime());
+    const hraRevisionGO = GO_DATA.find(go => go.rule?.type === 'HRA_REVISION_DA_50_PERCENT');
+
+
+    const { dateOfJoining, calculationStartDate, calculationEndDate, promotions, annualIncrementChanges, breaksInService, selectionGradeDate, specialGradeDate, superGradeDate, stagnationIncrementDate, cityGrade, incrementEligibilityMonths, joiningPostId, joiningPostCustomName, selectionGradeTwoIncrements, specialGradeTwoIncrements, probationDeclarationDate, ...employeeDetails } = data;
     
     const doj = parseDateUTC(dateOfJoining);
     const calcStartDate = parseDateUTC(calculationStartDate);
     let calcEndDate = parseDateUTC(calculationEndDate);
     const reliefDate = parseDateUTC(employeeDetails.dateOfRelief);
+    const probDate = parseDateUTC(probationDeclarationDate);
 
     if (!doj || !calcStartDate || !calcEndDate) {
       throw new Error('Please fill all required fields: Date of Joining and Calculation Period.');
     }
-     if (doj < new Date('1998-01-01T00:00:00Z')) {
-        throw new Error('Calculations before 01-01-1998 are not supported yet.');
+     if (doj < new Date('1984-10-01T00:00:00Z')) {
+        throw new Error('Calculations before 01-10-1984 are not supported yet.');
     }
 
     if(reliefDate && reliefDate < calcEndDate) {
         calcEndDate = reliefDate;
     }
     
+    // Increment postponement due to break in service (LOP/EOL)
+    const totalLopDays = breaksInService.reduce((total, breakItem) => {
+        const start = parseDateUTC(breakItem.startDate);
+        const end = parseDateUTC(breakItem.endDate);
+        if (start && end && end >= start) {
+            const diffTime = end.getTime() - start.getTime();
+            const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24)) + 1; // Inclusive
+            return total + diffDays;
+        }
+        return total;
+    }, 0);
+
+    const effectiveDojForIncrement = new Date(doj);
+    effectiveDojForIncrement.setUTCDate(effectiveDojForIncrement.getUTCDate() + totalLopDays);
+    
     // --- State Variables for Simulation ---
     let currentPay: number;
-    let currentCommission: 5 | 6 | 7;
+    let currentCommission: 4 | 5 | 6 | 7;
     let currentLevel: number = 0;
     let currentPipb: number | undefined = undefined;
     let currentGradePay: number | undefined = undefined;
+    let current4thPCScaleString: string | undefined = undefined;
     let current5thPCScaleString: string | undefined = undefined;
     let currentPostId: string | undefined = joiningPostId;
+    let deferredPromotionFixation: { promotion: Promotion, oldLevel: number } | null = null;
 
+    let fixation5thPC: PayrollResult['fixation5thPC'] | undefined = undefined;
     let fixation6thPC: PayrollResult['fixation6thPC'] | undefined = undefined;
     let fixation7thPC: PayrollResult['fixation7thPC'] | undefined = undefined;
+    const promotionFixations: PromotionFixation[] = [];
     const appliedRevisions: { description: string, date: Date }[] = [];
     const stagnationIncrementDates: string[] = [];
     
     // --- 2. INITIAL PAY FIXATION (at Date of Joining) ---
-    const fixedDate1998 = new Date('1998-01-01T00:00:00Z');
+    const fixedDate1996 = new Date('1996-01-01T00:00:00Z');
     const fixedDate2006 = new Date('2006-01-01T00:00:00Z');
     const fixedDate2016 = new Date('2016-01-01T00:00:00Z');
 
-    if (doj < fixedDate2006) {
+    if (doj < fixedDate1996) { // 4th PC
+        currentCommission = 4;
+        const { joiningBasicPay4thPC, joiningScaleId4thPC } = data;
+        if (joiningBasicPay4thPC === undefined || !joiningScaleId4thPC) throw new Error("For pre-1996 joiners, 4th PC Pay Scale and Basic Pay at joining are required.");
+        const scaleInfo = PAY_SCALES_4TH_PC.find(s => s.id === joiningScaleId4thPC);
+        if(!scaleInfo) throw new Error(`Invalid 4th PC Scale ID: ${joiningScaleId4thPC}`);
+        currentPay = joiningBasicPay4thPC;
+        current4thPCScaleString = scaleInfo.scale;
+    } else if (doj < fixedDate2006) { // 5th PC
         currentCommission = 5;
         const { joiningBasicPay5thPC, joiningScaleId5thPC } = data;
         if (joiningBasicPay5thPC === undefined || !joiningScaleId5thPC) throw new Error("For pre-2006 joiners, 5th PC Pay Scale and Basic Pay at joining are required.");
-        const scaleInfo = PAY_SCALES_6TH_PC.find(s => s.id === joiningScaleId5thPC);
+        const scaleInfo = PAY_SCALES_5TH_PC.find(s => s.id === joiningScaleId5thPC);
         if(!scaleInfo) throw new Error(`Invalid 5th PC Scale ID: ${joiningScaleId5thPC}`);
         currentPay = joiningBasicPay5thPC;
         current5thPCScaleString = scaleInfo.scale;
-    } else if (doj < fixedDate2016) {
+    } else if (doj < fixedDate2016) { // 6th PC
         currentCommission = 6;
         const { joiningPayInPayBand, joiningScaleId6thPC } = data;
         if (joiningPayInPayBand === undefined || !joiningScaleId6thPC) throw new Error("For 6th PC joiners, Pay in Pay Band and Scale are required.");
@@ -166,7 +253,7 @@ export const calculateFullPayroll = (data: EmployeeInput): PayrollResult => {
         currentPipb = joiningPayInPayBand;
         currentGradePay = scaleInfo.gradePay;
         currentPay = currentPipb + currentGradePay;
-    } else {
+    } else { // 7th PC
         currentCommission = 7;
         const { joiningLevel } = data;
         if (!joiningLevel) throw new Error("For 7th PC joiners, Pay Level is required.");
@@ -176,7 +263,8 @@ export const calculateFullPayroll = (data: EmployeeInput): PayrollResult => {
 
     // --- 3. BUILD CHRONOLOGICAL EVENT LIST ---
     const events: { date: Date, type: string, data?: any, priority: number }[] = [
-        ...DA_RATES.map(da => ({ date: da.date, type: 'DA_CHANGE', data: da, priority: 1 })),
+        ...ALL_DA_RATES.map(da => ({ date: da.date, type: 'DA_CHANGE', data: da, priority: 1 })),
+        { date: fixedDate1996, type: 'PAY_COMMISSION_5', priority: 2 },
         { date: fixedDate2006, type: 'PAY_COMMISSION_6', priority: 2 },
         { date: fixedDate2016, type: 'PAY_COMMISSION_7', priority: 2 },
     ];
@@ -192,6 +280,7 @@ export const calculateFullPayroll = (data: EmployeeInput): PayrollResult => {
     const yearlyCalculationsMap: Map<number, PayrollPeriod[]> = new Map();
     let currentDate = new Date(doj);
     let currentDaRate = 0;
+    let firstIncrementApplied = false;
     const sortedIncrementChanges = [...annualIncrementChanges].filter(c => c.effectiveDate).sort((a, b) => parseDateUTC(a.effectiveDate)!.getTime() - parseDateUTC(b.effectiveDate)!.getTime());
     
     while (currentDate <= calcEndDate) {
@@ -202,9 +291,29 @@ export const calculateFullPayroll = (data: EmployeeInput): PayrollResult => {
         const monthEvents = events.filter(e => e.date.getUTCFullYear() === currentDate.getUTCFullYear() && e.date.getUTCMonth() === currentDate.getUTCMonth()).sort((a,b) => a.priority - b.priority);
         
         for (const event of monthEvents) {
-            const eventDate = event.date;
             
             // --- PAY COMMISSION FIXATION ---
+            if (event.type === 'PAY_COMMISSION_5' && currentCommission === 4) {
+                 const basicPay1995 = currentPay;
+                 // As per G.O. 162, DA was 148% of Basic Pay. Using a flat rate for simplicity.
+                 const da1995 = Math.floor(basicPay1995 * 1.48); 
+                 const fitmentBenefit = Math.max(Math.round(basicPay1995 * 0.20), 50);
+                 const totalPay = basicPay1995 + da1995 + fitmentBenefit;
+
+                 const scaleInfo4th = PAY_SCALES_4TH_PC.find(s => s.scale === current4thPCScaleString);
+                 if (!scaleInfo4th) throw new Error(`Could not find 4th PC scale mapping for ${current4thPCScaleString}`);
+                 
+                 const scaleInfo5th = PAY_SCALES_5TH_PC.find(s => s.id === scaleInfo4th.id);
+                 if (!scaleInfo5th) throw new Error(`Could not find 5th PC scale equivalent for 4th PC ID ${scaleInfo4th.id}`);
+
+                 currentPay = findPayInSlabScale(totalPay, scaleInfo5th.scale);
+                 current5thPCScaleString = scaleInfo5th.scale;
+                 current4thPCScaleString = undefined;
+                 currentCommission = 5;
+                 fixation5thPC = { basicPay1995, da1995, fitmentBenefit, totalPay, initialRevisedPay: currentPay };
+                 remarks.push(`Pay fixed in 5th Pay Commission as per G.O.Ms.No.162/1998.`);
+            }
+
             if (event.type === 'PAY_COMMISSION_6' && currentCommission === 5) {
                 const basicPay2005 = currentPay;
                 const multipliedPay = Math.round(basicPay2005 * FITMENT_FACTOR_6TH_PC);
@@ -239,7 +348,45 @@ export const calculateFullPayroll = (data: EmployeeInput): PayrollResult => {
                 // ... logic as before ...
             }
 
-            if(event.type === 'DA_CHANGE' && event.data.commission === currentCommission) currentDaRate = event.data.rate;
+            if(event.type === 'DA_CHANGE' && event.data.commission === currentCommission) {
+                currentDaRate = event.data.rate;
+                if (event.data.goRef && !event.data.goRef.includes('Implementation')) {
+                    remarks.push(`DA revised to ${currentDaRate}% as per ${event.data.goRef}.`);
+                }
+            }
+            
+            if (event.type === 'PROMOTION') {
+                const promo: Promotion = event.data;
+                const option = promo.rule22bOption || 'promotionDate';
+
+                if (currentCommission === 7 && promo.level) {
+                     if (option === 'nextIncrementDate') {
+                        deferredPromotionFixation = { promotion: promo, oldLevel: currentLevel };
+                        remarks.push(`Promoted to ${promo.post}. Pay fixation deferred to next increment date under Rule 22(b) option.`);
+                    } else {
+                        const oldBasic = currentPay;
+                        const oldLevel = currentLevel;
+                        const newLevel = parseInt(promo.level, 10);
+                        
+                        const { newPay: payAfterNotionalInc } = getIncrement(oldBasic, oldLevel, 1, 7);
+                        const newBasic = findPayInMatrix(payAfterNotionalInc, newLevel);
+
+                        currentPay = newBasic;
+                        currentLevel = newLevel;
+                        
+                        remarks.push(`Pay fixed on promotion to ${promo.post} under Rule 22(b).`);
+                        promotionFixations.push({
+                            newPost: promo.post, oldLevel, newLevel,
+                            promotionDate: parseDateUTC(promo.date)!.toLocaleDateString('en-GB', { timeZone: 'UTC' }),
+                            optionUnderRule22b: 'Date of Promotion',
+                            effectiveDate: currentDate.toLocaleDateString('en-GB', { timeZone: 'UTC' }),
+                            oldBasic, payAfterNotionalIncrement: payAfterNotionalInc, newBasic,
+                            goReference: 'Rule 22(b) of TN Revised Pay Rules, 2017',
+                        });
+                    }
+                }
+                 // Handle promotions for other commissions if necessary...
+            }
 
             let steps = 0;
             let eventName = '';
@@ -251,10 +398,11 @@ export const calculateFullPayroll = (data: EmployeeInput): PayrollResult => {
             }
 
             if (steps > 0 && !didIncrementThisMonth) {
-                if(currentCommission === 5) {
-                    currentPay = getIncrement5thPC(currentPay, current5thPCScaleString!, steps);
+                if(currentCommission <= 5) {
+                    const scale = currentCommission === 4 ? current4thPCScaleString! : current5thPCScaleString!;
+                    currentPay = getIncrementForSlabScale(currentPay, scale, steps);
                 } else {
-                    const { newPay, newPipb } = getIncrement(currentPay, currentLevel, steps, currentCommission, currentGradePay);
+                    const { newPay, newPipb } = getIncrement(currentPay, currentLevel, steps, currentCommission as 6 | 7, currentGradePay);
                     currentPay = newPay;
                     if(newPipb !== undefined) currentPipb = newPipb;
                 }
@@ -262,9 +410,6 @@ export const calculateFullPayroll = (data: EmployeeInput): PayrollResult => {
                 didIncrementThisMonth = true;
             }
 
-            if (event.type === 'PROMOTION') {
-                // ... promotion logic as before, for all 3 commissions ...
-            }
         } // End of event loop for the month
 
         // --- Annual Increment ---
@@ -274,16 +419,59 @@ export const calculateFullPayroll = (data: EmployeeInput): PayrollResult => {
         if (currentDate.getUTCMonth() === incrementMonth && !didIncrementThisMonth) {
              const cutoffDate = new Date(currentDate);
              cutoffDate.setUTCMonth(cutoffDate.getUTCMonth() - (incrementEligibilityMonths ?? 6));
-             if (doj <= cutoffDate) {
-                if(currentCommission === 5) {
-                    currentPay = getIncrement5thPC(currentPay, current5thPCScaleString!);
-                } else {
-                    const { newPay, newPipb } = getIncrement(currentPay, currentLevel, 1, currentCommission, currentGradePay);
-                    currentPay = newPay;
-                    if(newPipb !== undefined) currentPipb = newPipb;
+             if (effectiveDojForIncrement <= cutoffDate) {
+                // Check if probation is declared (only for the first increment)
+                if (!firstIncrementApplied && probDate && currentDate < probDate) {
+                    remarks.push('Annual Increment deferred pending probation declaration.');
+                } else if (deferredPromotionFixation && deferredPromotionFixation.oldLevel === currentLevel) {
+                    // This is the increment date for the deferred promotion
+                    const oldBasic = currentPay;
+                    const oldLevel = currentLevel;
+                    const newLevel = parseInt(deferredPromotionFixation.promotion.level!, 10);
+
+                    // 1. Grant annual increment in the lower post
+                    const { newPay: payAfterAnnualInc } = getIncrement(oldBasic, oldLevel, 1, 7);
+                    remarks.push('Annual Increment applied in lower post.');
+
+                    // 2. Grant notional promotion increment
+                    const { newPay: payForFixation } = getIncrement(payAfterAnnualInc, oldLevel, 1, 7);
+                    
+                    // 3. Fix pay in higher level
+                    const newBasic = findPayInMatrix(payForFixation, newLevel);
+
+                    currentPay = newBasic;
+                    currentLevel = newLevel;
+
+                    remarks.push(`Pay fixed on promotion to ${deferredPromotionFixation.promotion.post} under Rule 22(b) option.`);
+                    promotionFixations.push({
+                        newPost: deferredPromotionFixation.promotion.post, oldLevel, newLevel,
+                        promotionDate: parseDateUTC(deferredPromotionFixation.promotion.date)!.toLocaleDateString('en-GB', { timeZone: 'UTC' }),
+                        optionUnderRule22b: 'Date of Next Increment',
+                        effectiveDate: currentDate.toLocaleDateString('en-GB', { timeZone: 'UTC' }),
+                        oldBasic, payAfterAnnualIncrement: payAfterAnnualInc,
+                        payAfterNotionalIncrement: payForFixation, newBasic,
+                        goReference: 'Rule 22(b) of TN Revised Pay Rules, 2017',
+                    });
+
+                    deferredPromotionFixation = null; // Clear the flag
+                    didIncrementThisMonth = true;
+                    if (!firstIncrementApplied) firstIncrementApplied = true;
+
+                } else { // Normal annual increment
+                    if(currentCommission <= 5) {
+                        const scale = currentCommission === 4 ? current4thPCScaleString! : current5thPCScaleString!;
+                        currentPay = getIncrementForSlabScale(currentPay, scale);
+                    } else {
+                        const { newPay, newPipb } = getIncrement(currentPay, currentLevel, 1, currentCommission as 6 | 7, currentGradePay);
+                        currentPay = newPay;
+                        if(newPipb !== undefined) currentPipb = newPipb;
+                    }
+                    remarks.push('Annual Increment applied.');
+                    didIncrementThisMonth = true;
+                    if (!firstIncrementApplied) {
+                        firstIncrementApplied = true;
+                    }
                 }
-                remarks.push('Annual Increment applied.');
-                didIncrementThisMonth = true;
              }
         }
         
@@ -293,7 +481,10 @@ export const calculateFullPayroll = (data: EmployeeInput): PayrollResult => {
             if (!yearlyCalculationsMap.has(year)) yearlyCalculationsMap.set(year, []);
 
             const daAmount = Math.round(currentPay * (currentDaRate / 100));
-            const hra = getHra(currentPay, cityGrade, currentDate);
+            const { hra, revised: hraRevised, goRef: hraGoRef } = getHra(currentPay, cityGrade, currentDate, currentDaRate, hraRevisionGO);
+            if (hraRevised && hraGoRef) {
+                remarks.push(`HRA revised as per ${hraGoRef} (DA>=50%).`);
+            }
             const grossPay = currentPay + daAmount + hra;
 
             yearlyCalculationsMap.get(year)!.push({
@@ -327,7 +518,6 @@ export const calculateFullPayroll = (data: EmployeeInput): PayrollResult => {
             ...employeeDetails,
             dateOfBirth: parseDateUTC(employeeDetails.dateOfBirth)!.toLocaleDateString('en-GB', { timeZone: 'UTC' }),
             dateOfJoining: doj.toLocaleDateString('en-GB', { timeZone: 'UTC' }),
-            // Fix: Access dateOfJoiningInOffice from the employeeDetails object.
             dateOfJoiningInOffice: parseDateUTC(employeeDetails.dateOfJoiningInOffice)!.toLocaleDateString('en-GB', { timeZone: 'UTC' }),
             dateOfRelief: reliefDate ? reliefDate.toLocaleDateString('en-GB', { timeZone: 'UTC' }) : undefined,
             retirementDate: retirementDateStr,
@@ -337,10 +527,13 @@ export const calculateFullPayroll = (data: EmployeeInput): PayrollResult => {
             selectionGradeDate: selectionGradeDate ? parseDateUTC(selectionGradeDate)!.toLocaleDateString('en-GB', { timeZone: 'UTC' }) : undefined,
             specialGradeDate: specialGradeDate ? parseDateUTC(specialGradeDate)!.toLocaleDateString('en-GB', { timeZone: 'UTC' }) : undefined,
             superGradeDate: superGradeDate ? parseDateUTC(superGradeDate)!.toLocaleDateString('en-GB', { timeZone: 'UTC' }) : undefined,
+            probationDeclarationDate: probationDeclarationDate ? parseDateUTC(probationDeclarationDate)!.toLocaleDateString('en-GB', { timeZone: 'UTC' }) : undefined,
             stagnationIncrementDates: stagnationIncrementDates.length > 0 ? stagnationIncrementDates : undefined,
         },
+        fixation5thPC,
         fixation6thPC,
         fixation7thPC,
+        promotionFixations: promotionFixations.length > 0 ? promotionFixations : undefined,
         yearlyCalculations,
         appliedRevisions,
     };

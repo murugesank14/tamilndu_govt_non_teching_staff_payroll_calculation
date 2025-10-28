@@ -1,6 +1,7 @@
 
+
 import React from 'react';
-import { PayrollResult as PayrollResultType } from '../types';
+import { PayrollResult as PayrollResultType, PromotionFixation } from '../types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/Card';
 import { Button } from './ui/Button';
 import { PayProgressionChart } from './PayProgressionChart';
@@ -32,9 +33,45 @@ const formatCurrencyForExport = (amount: number) => {
     return `Rs. ${new Intl.NumberFormat('en-IN', { minimumFractionDigits: 0 }).format(amount)}`;
 };
 
+const PromotionFixationCard: React.FC<{ fixations: PromotionFixation[] }> = ({ fixations }) => {
+    const { t } = useLanguage();
+    return (
+    <Card>
+        <CardHeader>
+            <CardTitle>{t('promotionFixation')}</CardTitle>
+            <CardDescription>Pay fixation details as per Rule 22(b) of TN Revised Pay Rules, 2017.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+            {fixations.map((fix, index) => (
+            <div key={index} className="p-4 border rounded-lg bg-gray-50/80">
+                <h4 className="font-semibold text-md mb-2">
+                    Fixation for Promotion to: <span className="text-blue-600">{fix.newPost}</span>
+                </h4>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-y-3 gap-x-2 text-sm">
+                    <div><p className="text-gray-500">Promotion Date</p><p className="font-medium">{fix.promotionDate}</p></div>
+                    <div><p className="text-gray-500">Option Exercised</p><p className="font-medium">{fix.optionUnderRule22b}</p></div>
+                    <div><p className="text-gray-500">Effective Date</p><p className="font-semibold text-green-600">{fix.effectiveDate}</p></div>
+                    
+                    <div><p className="text-gray-500">Old Basic (Lvl {fix.oldLevel})</p><p className="font-medium">{formatCurrency(fix.oldBasic)}</p></div>
+                    
+                    {fix.payAfterAnnualIncrement && 
+                        <div><p className="text-gray-500">After Annual Inc.</p><p className="font-medium">{formatCurrency(fix.payAfterAnnualIncrement)}</p></div>
+                    }
+
+                    <div><p className="text-gray-500">After Notional Inc.</p><p className="font-medium">{formatCurrency(fix.payAfterNotionalIncrement)}</p></div>
+                    
+                    <div><p className="text-gray-500">New Basic (Lvl {fix.newLevel})</p><p className="font-bold text-lg text-blue-700">{formatCurrency(fix.newBasic)}</p></div>
+                </div>
+                <p className="text-xs text-gray-400 mt-2">Ref: {fix.goReference}</p>
+            </div>
+            ))}
+        </CardContent>
+    </Card>
+)};
+
 
 const PayrollResult: React.FC<PayrollResultProps> = ({ result }) => {
-  const { employeeDetails, fixation6thPC, fixation7thPC, yearlyCalculations, appliedRevisions } = result;
+  const { employeeDetails, fixation5thPC, fixation6thPC, fixation7thPC, yearlyCalculations, appliedRevisions, promotionFixations } = result;
   const { t } = useLanguage();
 
     const handleExportFixationPDF = () => {
@@ -47,16 +84,40 @@ const PayrollResult: React.FC<PayrollResultProps> = ({ result }) => {
 
         doc.setFont('times', 'normal');
         doc.setFontSize(12);
-        const introText = `As per the Tamil Nadu Revised Pay Rules, 2017 (G.O.Ms.No.303, Dated 11th October 2017), the pay for Thiru/Tmt. ${employeeDetails.employeeName}, ${employeeDetails.joiningPost}, is fixed as follows:`;
+        const introText = `As per the Tamil Nadu Revised Pay Rules, the pay for Thiru/Tmt. ${employeeDetails.employeeName}, ${employeeDetails.joiningPost}, is fixed as follows:`;
         const splitIntro = doc.splitTextToSize(introText, 180);
         doc.text(splitIntro, 14, 25);
         
-        let lastY = 45;
+        let lastY = 40;
+        let sectionCounter = 1;
+
+        if (fixation5thPC) {
+            doc.setFont('times', 'bold');
+            doc.text(`${sectionCounter}. Fixation into 5th Pay Commission (w.e.f. 01.01.1996)`, 14, lastY);
+            // Fix: Explicitly type body as any[] to allow mixed types (string[] and object[] with styles) for jspdf-autotable.
+            const body: any[] = [
+                ['Basic Pay as on 31.12.1995', formatCurrencyForExport(fixation5thPC.basicPay1995)],
+                ['Dearness Allowance @ 148%', formatCurrencyForExport(fixation5thPC.da1995)],
+                ['Fitment Benefit (20% of BP, Min Rs.50)', formatCurrencyForExport(fixation5thPC.fitmentBenefit)],
+                ['Total Emoluments', formatCurrencyForExport(fixation5thPC.totalPay)],
+                [{ content: 'Revised Pay in the 5th PC Scale', styles: { fontStyle: 'bold' } }, { content: formatCurrencyForExport(fixation5thPC.initialRevisedPay), styles: { fontStyle: 'bold' } }],
+            ];
+             doc.autoTable({
+                startY: lastY + 4,
+                body: body,
+                theme: 'striped',
+                styles: { fontSize: 10, cellPadding: 2.5 },
+                columnStyles: { 0: { fontStyle: 'bold', cellWidth: 80 } }
+            });
+            lastY = (doc as any).lastAutoTable.finalY + 8;
+            sectionCounter++;
+        }
 
         if (fixation6thPC) {
             doc.setFont('times', 'bold');
-            doc.text('1. Fixation into 6th Pay Commission (w.e.f. 01.01.2006)', 14, lastY);
-            const body = [
+            doc.text(`${sectionCounter}. Fixation into 6th Pay Commission (w.e.f. 01.01.2006)`, 14, lastY);
+            // Fix: Explicitly type body as any[] to allow mixed types for jspdf-autotable.
+            const body: any[] = [
                 ['Basic Pay as on 31.12.2005', formatCurrencyForExport(fixation6thPC.basicPay2005)],
                 ['Pay after multiplication by Fitment Factor of 1.86', formatCurrencyForExport(fixation6thPC.multipliedPay)],
                 ['Pay in the revised Pay Band (PB)', formatCurrencyForExport(fixation6thPC.initialPayInPayBand)],
@@ -70,28 +131,60 @@ const PayrollResult: React.FC<PayrollResultProps> = ({ result }) => {
                 styles: { fontSize: 10, cellPadding: 2.5 },
                 columnStyles: { 0: { fontStyle: 'bold', cellWidth: 80 } }
             });
-            lastY = (doc as any).lastAutoTable.finalY;
+            lastY = (doc as any).lastAutoTable.finalY + 8;
+            sectionCounter++;
         }
         
         if (fixation7thPC) {
-            const startY = lastY + 12;
             doc.setFont('times', 'bold');
-            doc.text('2. Fixation into 7th Pay Commission (w.e.f. 01.01.2016)', 14, startY);
-            const body = [
+            doc.text(`${sectionCounter}. Fixation into 7th Pay Commission (w.e.f. 01.01.2016)`, 14, lastY);
+            // Fix: Explicitly type body as any[] to allow mixed types for jspdf-autotable.
+            const body: any[] = [
                 ['Basic Pay as on 31.12.2015', formatCurrencyForExport(fixation7thPC.oldBasicPay)],
                 ['Pay after multiplication by Fitment Factor of 2.57', formatCurrencyForExport(fixation7thPC.multipliedPay)],
                 ['Applicable Level in Pay Matrix', `Level ${fixation7thPC.level}`],
                 [{ content: 'Revised Pay in the applicable Level', styles: { fontStyle: 'bold' } }, { content: formatCurrencyForExport(fixation7thPC.initialRevisedPay), styles: { fontStyle: 'bold' } }],
             ];
             doc.autoTable({
-                startY: startY + 4,
+                startY: lastY + 4,
                 body: body,
                 theme: 'striped',
                 styles: { fontSize: 10, cellPadding: 2.5 },
                 columnStyles: { 0: { fontStyle: 'bold', cellWidth: 80 } }
             });
-            lastY = (doc as any).lastAutoTable.finalY;
+            lastY = (doc as any).lastAutoTable.finalY + 8;
+            sectionCounter++;
         }
+
+        if(promotionFixations) {
+             doc.setFont('times', 'bold');
+             doc.text(`${sectionCounter}. Promotion Fixation under Rule 22(b)`, 14, lastY);
+             promotionFixations.forEach((fix, index) => {
+                 // Fix: Explicitly type fixationBody as any[] to allow mixed types for jspdf-autotable.
+                 let fixationBody: any[] = [
+                     ['Promotion to', `${fix.newPost} (Level ${fix.newLevel})`],
+                     ['Promotion Date', fix.promotionDate],
+                     ['Option Exercised', fix.optionUnderRule22b],
+                     ['Effective Date of Fixation', fix.effectiveDate],
+                     ['Basic Pay before fixation (Lvl ' + fix.oldLevel + ')', formatCurrencyForExport(fix.oldBasic)],
+                 ];
+                 if(fix.payAfterAnnualIncrement) {
+                      fixationBody.push(['Pay after Annual Increment', formatCurrencyForExport(fix.payAfterAnnualIncrement)]);
+                 }
+                 fixationBody.push(['Pay after Notional Increment', formatCurrencyForExport(fix.payAfterNotionalIncrement)]);
+                 fixationBody.push([{ content: 'New Basic Pay (Lvl ' + fix.newLevel + ')', styles: { fontStyle: 'bold' } }, { content: formatCurrencyForExport(fix.newBasic), styles: { fontStyle: 'bold' } }]);
+                 
+                 doc.autoTable({
+                    startY: lastY + 4,
+                    body: fixationBody,
+                    theme: 'striped',
+                    styles: { fontSize: 10, cellPadding: 2 },
+                    columnStyles: { 0: { fontStyle: 'bold', cellWidth: 80 } }
+                });
+                lastY = (doc as any).lastAutoTable.finalY;
+             });
+        }
+
 
         doc.setFont('times', 'normal');
         doc.text('Signature of Head of Office / Department', 195, lastY + 30, { align: 'right' });
@@ -139,9 +232,12 @@ const PayrollResult: React.FC<PayrollResultProps> = ({ result }) => {
 
         // Pay Fixations
         let lastTableY = (doc as any).lastAutoTable.finalY + 10;
-        if (fixation6thPC || fixation7thPC) {
+        if (fixation5thPC || fixation6thPC || fixation7thPC) {
             doc.text('Initial Pay Fixations', 14, lastTableY);
             const fixationBody = [];
+            if(fixation5thPC) {
+                fixationBody.push([`5th PC (01-01-1996)`, formatCurrencyForExport(fixation5thPC.basicPay1995), 'G.O.162 Formula', formatCurrencyForExport(fixation5thPC.totalPay), formatCurrencyForExport(fixation5thPC.initialRevisedPay)]);
+            }
             if(fixation6thPC) {
                 fixationBody.push([`6th PC (01-01-2006)`, formatCurrencyForExport(fixation6thPC.basicPay2005), 'x 1.86', `${formatCurrencyForExport(fixation6thPC.initialPayInPayBand)} (PIPB)`, `${formatCurrencyForExport(fixation6thPC.initialRevisedBasicPay)}`]);
             }
@@ -168,7 +264,7 @@ const PayrollResult: React.FC<PayrollResultProps> = ({ result }) => {
             doc.autoTable({
                 startY: lastTableY + 4,
                 head: [['Period', 'Basic Pay', 'DA', 'HRA', 'Gross Pay']],
-                body: tableBody,
+                body: tableBody as any,
                 theme: 'striped',
                 styles: { fontSize: 8 },
             });
@@ -200,7 +296,8 @@ const PayrollResult: React.FC<PayrollResultProps> = ({ result }) => {
         
         doc.setFont('times', 'bold');
         doc.text('1. Rate of Pay and Allowances Drawn:', 14, lastY + 10);
-        const payBody = [
+        // Fix: Explicitly type payBody as any[] to allow mixed types for jspdf-autotable.
+        const payBody: any[] = [
             ['Basic Pay', formatCurrencyForExport(lastPeriod.basicPay)],
             ['Dearness Allowance', `${formatCurrencyForExport(lastPeriod.daAmount)} (${lastPeriod.daRate}%)`],
             ['House Rent Allowance', formatCurrencyForExport(lastPeriod.hra)],
@@ -275,6 +372,9 @@ const PayrollResult: React.FC<PayrollResultProps> = ({ result }) => {
 
       const fixationHeader = [ [], ['Pay Fixation Details'], ['Commission', 'Old Basic Pay', 'Factor', 'Intermediate Pay', 'New Basic Pay']];
       const fixationData = [];
+       if(fixation5thPC) {
+            fixationData.push([`5th PC (01-01-1996)`, fixation5thPC.basicPay1995, 'G.O.162 Formula', fixation5thPC.totalPay, fixation5thPC.initialRevisedPay]);
+       }
        if(fixation6thPC) {
             fixationData.push([`6th PC (01-01-2006)`, fixation6thPC.basicPay2005, 'x 1.86', `${fixation6thPC.initialPayInPayBand} (PIPB)`, fixation6thPC.initialRevisedBasicPay]);
         }
@@ -318,11 +418,14 @@ const PayrollResult: React.FC<PayrollResultProps> = ({ result }) => {
         `).join('');
 
         let fixationHtml = '';
-        if (fixation6thPC || fixation7thPC) {
+        if (fixation5thPC || fixation6thPC || fixation7thPC) {
             fixationHtml += `<h2>Initial Pay Fixations</h2>
           <table>
             <thead><tr><th>Commission</th><th>Old Basic Pay</th><th>Factor</th><th>Intermediate Pay</th><th>New Basic Pay</th></tr></thead>
             <tbody>`;
+            if (fixation5thPC) {
+                 fixationHtml += `<tr><td>5th PC (01-01-1996)</td><td>${formatCurrencyForExport(fixation5thPC.basicPay1995)}</td><td>G.O.162 Formula</td><td>${formatCurrencyForExport(fixation5thPC.totalPay)}</td><td>${formatCurrencyForExport(fixation5thPC.initialRevisedPay)}</td></tr>`;
+            }
             if (fixation6thPC) {
                  fixationHtml += `<tr><td>6th PC (01-01-2006)</td><td>${formatCurrencyForExport(fixation6thPC.basicPay2005)}</td><td>x 1.86</td><td>${formatCurrencyForExport(fixation6thPC.initialPayInPayBand)} (PIPB)</td><td>${formatCurrencyForExport(fixation6thPC.initialRevisedBasicPay)}</td></tr>`;
             }
@@ -414,6 +517,7 @@ const PayrollResult: React.FC<PayrollResultProps> = ({ result }) => {
             {employeeDetails.selectionGradeDate && <div><p className="text-gray-500">{t('selectionGradeDate')}</p><p className="font-semibold">{employeeDetails.selectionGradeDate}</p></div>}
             {employeeDetails.specialGradeDate && <div><p className="text-gray-500">{t('specialGradeDate')}</p><p className="font-semibold">{employeeDetails.specialGradeDate}</p></div>}
             {employeeDetails.superGradeDate && <div><p className="text-gray-500">{t('superGradeDate')}</p><p className="font-semibold">{employeeDetails.superGradeDate}</p></div>}
+            {employeeDetails.probationDeclarationDate && <div><p className="text-gray-500">{t('probationDeclarationDate')}</p><p className="font-semibold">{employeeDetails.probationDeclarationDate}</p></div>}
             {employeeDetails.stagnationIncrementDates && employeeDetails.stagnationIncrementDates.length > 0 && 
               <div className="col-span-full"><p className="text-gray-500">{t('stagnationIncrementDate')}</p><p className="font-semibold">{employeeDetails.stagnationIncrementDates.join(', ')}</p></div>
             }
@@ -432,6 +536,10 @@ const PayrollResult: React.FC<PayrollResultProps> = ({ result }) => {
         </CardContent>
       </Card>
       
+      {promotionFixations && promotionFixations.length > 0 && (
+          <PromotionFixationCard fixations={promotionFixations} />
+      )}
+
       {appliedRevisions && appliedRevisions.length > 0 && (
         <Card>
           <CardHeader>

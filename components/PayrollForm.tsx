@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { EmployeeInput, CityGrade, Promotion, AnnualIncrementChange, BreakInService } from '../types';
-import { PAY_SCALES_6TH_PC, LEVELS, GRADE_PAY_OPTIONS, POSTS, PAY_SCALES_5TH_PC } from '../constants';
+import { PAY_SCALES_6TH_PC, LEVELS, GRADE_PAY_OPTIONS, POSTS, PAY_SCALES_5TH_PC, PAY_SCALES_4TH_PC } from '../constants';
 import { Input } from './ui/Input';
 import { Button } from './ui/Button';
 import { Select } from './ui/Select';
@@ -30,6 +30,8 @@ const initialFormData: Omit<EmployeeInput, 'promotions' | 'annualIncrementChange
     
     joiningPostId: 'custom',
     joiningPostCustomName: '',
+    joiningBasicPay4thPC: undefined,
+    joiningScaleId4thPC: PAY_SCALES_4TH_PC[1].id,
     joiningBasicPay5thPC: undefined,
     joiningScaleId5thPC: PAY_SCALES_5TH_PC[10].id,
     joiningPayInPayBand: undefined,
@@ -41,12 +43,13 @@ const initialFormData: Omit<EmployeeInput, 'promotions' | 'annualIncrementChange
     specialGradeDate: '',
     specialGradeTwoIncrements: true,
     superGradeDate: '',
+    probationDeclarationDate: '',
     stagnationIncrementDate: '',
     
     incrementEligibilityMonths: 6,
 
     cityGrade: CityGrade.GRADE_III,
-    calculationStartDate: '1998-01-01',
+    calculationStartDate: '1984-10-01',
     calculationEndDate: new Date().toISOString().split('T')[0],
     
     festivalAdvance: undefined,
@@ -89,7 +92,7 @@ const PayrollForm: React.FC<PayrollFormProps> = ({ onCalculate, isLoading }) => 
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    const isNumberInput = ['joiningBasicPay5thPC', 'joiningPayInPayBand', 'festivalAdvance', 'carAdvance', 'twoWheelerAdvance', 'computerAdvance', 'otherPayables', 'incrementEligibilityMonths'].includes(name);
+    const isNumberInput = ['joiningBasicPay4thPC', 'joiningBasicPay5thPC', 'joiningPayInPayBand', 'festivalAdvance', 'carAdvance', 'twoWheelerAdvance', 'computerAdvance', 'otherPayables', 'incrementEligibilityMonths'].includes(name);
     
     if (type === 'checkbox') {
         const { checked } = e.target as HTMLInputElement;
@@ -131,7 +134,7 @@ const PayrollForm: React.FC<PayrollFormProps> = ({ onCalculate, isLoading }) => 
   
   const addPromotion = () => {
     const newId = Date.now().toString();
-    setPromotions(prev => [...prev, { id: newId, date: '', post: '', level: '12' }]);
+    setPromotions(prev => [...prev, { id: newId, date: '', post: '', level: '12', rule22bOption: 'promotionDate' }]);
     setDuplicatePromotionError(prev => ({...prev, [newId]: null}));
   };
   
@@ -199,8 +202,10 @@ const PayrollForm: React.FC<PayrollFormProps> = ({ onCalculate, isLoading }) => 
   
   const joiningDate = formData.dateOfJoining ? new Date(formData.dateOfJoining) : null;
   const joiningPeriod = joiningDate 
-      ? (joiningDate < new Date('2006-01-01') ? 'pre2006' : (joiningDate < new Date('2016-01-01') ? '6thPC' : '7thPC')) 
-      : null;
+    ? (joiningDate < new Date('1996-01-01') ? '4thPC'
+    : (joiningDate < new Date('2006-01-01') ? '5thPC'
+    : (joiningDate < new Date('2016-01-01') ? '6thPC' : '7thPC')))
+    : null;
   
   const hasDuplicateErrors = Object.values(duplicatePromotionError).some(error => error !== null);
 
@@ -293,7 +298,8 @@ const PayrollForm: React.FC<PayrollFormProps> = ({ onCalculate, isLoading }) => 
       <Card>
         <CardHeader>
           <CardTitle>{t('payAtJoining')}</CardTitle>
-          {joiningPeriod === 'pre2006' && <CardDescription>{t('payAtJoiningDescPre2006')}</CardDescription>}
+          {joiningPeriod === '4thPC' && <CardDescription>{t('payAtJoiningDesc4thPC')}</CardDescription>}
+          {joiningPeriod === '5thPC' && <CardDescription>{t('payAtJoiningDesc5thPC')}</CardDescription>}
           {joiningPeriod === '6thPC' && <CardDescription>{t('payAtJoiningDesc6thPC')}</CardDescription>}
           {joiningPeriod === '7thPC' && <CardDescription>{t('payAtJoiningDesc7thPC')}</CardDescription>}
         </CardHeader>
@@ -311,7 +317,21 @@ const PayrollForm: React.FC<PayrollFormProps> = ({ onCalculate, isLoading }) => 
                   <Input type="text" name="joiningPostCustomName" id="joiningPostCustomName" value={formData.joiningPostCustomName ?? ''} onChange={handleChange} required />
               </div>
             )}
-           {joiningPeriod === 'pre2006' && (
+           {joiningPeriod === '4thPC' && (
+              <>
+                  <div>
+                      <Label htmlFor="joiningScaleId4thPC">{t('payScale4thPC')}</Label>
+                      <Select name="joiningScaleId4thPC" id="joiningScaleId4thPC" value={formData.joiningScaleId4thPC} onChange={handleChange} required >
+                        {PAY_SCALES_4TH_PC.map(ps => (<option key={ps.id} value={ps.id}>{ps.scale}</option>))}
+                      </Select>
+                  </div>
+                  <div>
+                      <Label htmlFor="joiningBasicPay4thPC">{t('basicPayAtJoining')}</Label>
+                      <Input type="number" name="joiningBasicPay4thPC" id="joiningBasicPay4thPC" value={formData.joiningBasicPay4thPC ?? ''} onChange={handleChange} required />
+                  </div>
+              </>
+           )}
+           {joiningPeriod === '5thPC' && (
               <>
                   <div>
                       <Label htmlFor="joiningScaleId5thPC">{t('payScale5thPC')}</Label>
@@ -372,6 +392,11 @@ const PayrollForm: React.FC<PayrollFormProps> = ({ onCalculate, isLoading }) => 
                  <div>
                   <Label htmlFor="superGradeDate">{t('superGradeDate')}</Label>
                   <Input type="date" name="superGradeDate" id="superGradeDate" value={formData.superGradeDate} onChange={handleChange} />
+                </div>
+                <div>
+                  <Label htmlFor="probationDeclarationDate">{t('probationDeclarationDate')}</Label>
+                  <Input type="date" name="probationDeclarationDate" id="probationDeclarationDate" value={formData.probationDeclarationDate ?? ''} onChange={handleChange} />
+                  <p className="text-xs text-gray-500 mt-1">{t('probationHelpText')}</p>
                 </div>
                  <div>
                   <Label htmlFor="stagnationIncrementDate">{t('stagnationIncrementDate')}</Label>
@@ -479,6 +504,28 @@ const PayrollForm: React.FC<PayrollFormProps> = ({ onCalculate, isLoading }) => 
                                   <option value="">Select Level</option>
                                   {LEVELS.map(level => <option key={level} value={level}>{level}</option>)}
                               </Select>
+                          </div>
+                      )}
+
+                      {promo.date && new Date(promo.date) >= new Date('2016-01-01') && (
+                          <div className="pt-2">
+                              <Label className="font-semibold">{t('optionUnder22b')}</Label>
+                              <div className="mt-2 flex flex-col sm:flex-row sm:items-center sm:space-x-6 space-y-2 sm:space-y-0 text-sm">
+                                  <label className="flex items-center">
+                                      <input type="radio" name={`rule22bOption_${promo.id}`} value="promotionDate" 
+                                      checked={promo.rule22bOption === 'promotionDate'} 
+                                      onChange={() => handlePromotionChange(promo.id, 'rule22bOption', 'promotionDate')} 
+                                      className="form-radio" />
+                                      <span className="ml-2">{t('optionDateOfPromotion')}</span>
+                                  </label>
+                                  <label className="flex items-center">
+                                      <input type="radio" name={`rule22bOption_${promo.id}`} value="nextIncrementDate" 
+                                      checked={promo.rule22bOption === 'nextIncrementDate'}
+                                      onChange={() => handlePromotionChange(promo.id, 'rule22bOption', 'nextIncrementDate')}
+                                      className="form-radio" />
+                                      <span className="ml-2">{t('optionNextIncrement')}</span>
+                                  </label>
+                              </div>
                           </div>
                       )}
                   </div>
