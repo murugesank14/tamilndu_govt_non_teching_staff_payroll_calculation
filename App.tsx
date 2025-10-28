@@ -68,6 +68,8 @@ const App: React.FC = () => {
     }
     return `${baseClasses} text-gray-500 hover:text-gray-700 hover:bg-gray-100`;
   }
+  
+  const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800">
@@ -131,7 +133,10 @@ const App: React.FC = () => {
           )}
       </main>
 
-       <footer className="text-center p-4 mt-8 text-xs text-gray-500">
+       <footer className="text-center p-4 mt-8 text-xs text-gray-500 space-y-2">
+           <p className="font-semibold text-green-700 bg-green-50 p-2 rounded-md">
+             {t('rulesSyncedMessage', { date: today })}
+           </p>
           <p>&copy; {new Date().getFullYear()} TN Payroll Calculator. All Rights Reserved.</p>
        </footer>
     </div>

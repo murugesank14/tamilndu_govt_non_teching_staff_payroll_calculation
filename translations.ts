@@ -44,6 +44,7 @@ export const translations = {
     goLoadNoNew: "No new G.O. rules found in the file, or they have already been loaded.",
     goLoadError: "Failed to load G.O. file. Please ensure it's a valid JSON in the correct format. Error: {error}",
     unrecognizedFormat: "JSON file is not in a recognized G.O. format.",
+    rulesSyncedMessage: "All Tamil Nadu Government Establishment Rules synced successfully as on {date}.",
 
 
     // Form Section Titles
@@ -204,6 +205,7 @@ export const translations = {
     goLoadNoNew: "கோப்பில் புதிய அரசாணை விதிகள் எதுவும் இல்லை, அல்லது அவை ஏற்கனவே ஏற்றப்பட்டுள்ளன.",
     goLoadError: "G.O. கோப்பை ஏற்றுவதில் தோல்வி. அது சரியான வடிவத்தில் உள்ளதா என்பதை உறுதிப்படுத்தவும். பிழை: {error}",
     unrecognizedFormat: "JSON கோப்பு அங்கீகரிக்கப்பட்ட G.O. வடிவத்தில் இல்லை.",
+    rulesSyncedMessage: "அனைத்து தமிழ்நாடு அரசு பணியாளர் விதிகளும் {date} நிலவரப்படி வெற்றிகரமாக ஒத்திசைக்கப்பட்டன.",
 
 
     // Form Section Titles
