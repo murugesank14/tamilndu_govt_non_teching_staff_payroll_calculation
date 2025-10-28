@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { EmployeeInput, PayrollResult as PayrollResultType } from './types';
+import { EmployeeInput, PayrollResult as PayrollResultType, GovernmentOrder } from './types';
 import { calculateFullPayroll } from './services/payrollService';
 import PayrollForm from './components/PayrollForm';
 import PayrollResult from './components/PayrollResult';
 import { HeroIcon } from './components/ui/HeroIcon';
 import { useLanguage } from './components/LanguageProvider';
 import GoViewer from './components/GoViewer';
+import { GO_DATA } from './constants';
 
 const LanguageSwitcher: React.FC = () => {
     const { language, setLanguage } = useLanguage();
@@ -35,6 +36,7 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [activeView, setActiveView] = useState<'calculator' | 'goViewer'>('calculator');
+  const [activeGoData, setActiveGoData] = useState<GovernmentOrder[]>(GO_DATA);
   const { t } = useLanguage();
 
   const handleCalculate = (data: EmployeeInput) => {
@@ -45,7 +47,7 @@ const App: React.FC = () => {
     // Simulate async calculation
     setTimeout(() => {
       try {
-        const result = calculateFullPayroll(data);
+        const result = calculateFullPayroll(data, activeGoData);
         setPayrollResult(result);
       } catch (e) {
         if (e instanceof Error) {
@@ -125,7 +127,7 @@ const App: React.FC = () => {
               </div>
             </div>
           ) : (
-            <GoViewer />
+            <GoViewer goData={activeGoData} onGoDataUpdate={setActiveGoData} />
           )}
       </main>
 

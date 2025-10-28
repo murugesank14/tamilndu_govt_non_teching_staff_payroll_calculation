@@ -1,11 +1,9 @@
-
-
 import { EmployeeInput, PayrollResult, PayrollYear, PayrollPeriod, CityGrade, Promotion, Post, PayRevision2010, PayScale, GovernmentOrder, PromotionFixation } from '../types';
 import { 
     PAY_MATRIX, GRADE_PAY_TO_LEVEL, HRA_SLABS_7TH_PC, 
     PAY_SCALES_6TH_PC, HRA_SLABS_6TH_PC, HRA_SLABS_6TH_PC_PRE_2009, HRA_SLABS_5TH_PC, HRA_SLABS_4TH_PC, POSTS,
     PAY_REVISIONS_2010, PAY_SCALES_5TH_PC, PAY_SCALES_4TH_PC,
-    DA_RATES_4TH_PC, DA_RATES_5TH_PC, DA_RATES_6TH_PC, GO_DATA
+    DA_RATES_4TH_PC, DA_RATES_5TH_PC, DA_RATES_6TH_PC
 } from '../constants';
 
 const FITMENT_FACTOR_7TH_PC = 2.57;
@@ -151,11 +149,11 @@ function getHra(basicPay: number, cityGrade: string, date: Date, daRate: number,
 }
 
 
-export const calculateFullPayroll = (data: EmployeeInput): PayrollResult => {
+export const calculateFullPayroll = (data: EmployeeInput, activeGoData: GovernmentOrder[]): PayrollResult => {
     // --- 1. SETUP & INITIALIZATION ---
     
     // --- Build Rule Sets from G.O. Data ---
-    const DA_RATES_7TH_PC_FROM_GO = GO_DATA
+    const DA_RATES_7TH_PC_FROM_GO = activeGoData
         .filter(go => go.rule?.type === 'DA_REVISION' && go.rule.commission === 7)
         .map(go => {
             const rule = go.rule as { type: 'DA_REVISION'; rate: number; commission: 7 };
@@ -168,7 +166,7 @@ export const calculateFullPayroll = (data: EmployeeInput): PayrollResult => {
         });
     }
     const ALL_DA_RATES = [...DA_RATES_4TH_PC, ...DA_RATES_5TH_PC, ...DA_RATES_6TH_PC, ...DA_RATES_7TH_PC_FROM_GO].sort((a, b) => a.date.getTime() - b.date.getTime());
-    const hraRevisionGO = GO_DATA.find(go => go.rule?.type === 'HRA_REVISION_DA_50_PERCENT');
+    const hraRevisionGO = activeGoData.find(go => go.rule?.type === 'HRA_REVISION_DA_50_PERCENT');
 
 
     const { dateOfJoining, calculationStartDate, calculationEndDate, promotions, annualIncrementChanges, breaksInService, selectionGradeDate, specialGradeDate, superGradeDate, stagnationIncrementDate, cityGrade, incrementEligibilityMonths, joiningPostId, joiningPostCustomName, selectionGradeTwoIncrements, specialGradeTwoIncrements, probationDeclarationDate, ...employeeDetails } = data;
