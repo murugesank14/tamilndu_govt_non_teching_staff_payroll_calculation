@@ -10,6 +10,8 @@ export const translations = {
     welcomePensionMessage: 'Enter retirement details on the left and click "Calculate Pension" to see the benefit breakdown.',
     welcomeGpfMessage: 'Enter GPF account details and click "Calculate GPF Statement" to generate the annual report.',
     welcomeLeaveMessage: 'Enter current leave balances and add transactions to calculate your updated leave account.',
+    welcomeAuditTrackerMessage: 'Use the form on the left to add or edit audit paras. The dashboard will show all entries and recovery progress.',
+
 
     // Navigation
     payrollCalculator: "Payroll Calculator",
@@ -17,6 +19,7 @@ export const translations = {
     gpfCalculator: "GPF Calculator",
     leaveCalculator: "Leave Calculator",
     goViewer: "G.O. Viewer",
+    auditTracker: "Audit Para & Recovery",
 
     // G.O. Viewer
     goViewerTitle: "Tamil Nadu Government Orders (G.O.)",
@@ -86,7 +89,8 @@ export const translations = {
     currentLeaveBalances: "Current Leave Balances",
     leaveActions: "Leave Actions",
     leaveActionsDesc: "Add transactions like availing, surrendering, or crediting leave.",
-
+    auditParaFormTitle: "Audit Para Entry",
+    auditParaFormDesc: "Add or edit audit para details and track recovery.",
 
     // Form Labels
     employeeName: "Employee Name / ஊழியர் பெயர்",
@@ -173,6 +177,16 @@ export const translations = {
     commutedLeave: "Commuted Leave",
     surrender15Days: "Surrender 15 Days EL",
     surrender30Days: "Surrender 30 Days EL",
+    yearOfAudit: "Year of Audit",
+    auditType: "Audit Type",
+    paraNumber: "Audit Para No / தணிக்கைக் குறிப்பு எண்",
+    paraSubject: "Subject / பொருள்",
+    officerResponsible: "Officer / Section Responsible",
+    recoveryAmount: "Recovery Amount (₹)",
+    irregularityNature: "Nature of Irregularity",
+    recoveryProgress: "Recovery Progress (₹) / திரும்பப்பெறுதல் முன்னேற்றம்",
+    complianceStatus: "Compliance Status",
+    actionTakenReport: "Remarks / Action Taken Report",
     
     // Form Placeholders & Help Text
     enterFullName: "Enter full name / முழு பெயரை உள்ளிடவும்",
@@ -202,7 +216,24 @@ export const translations = {
     calculateGpf: "Calculate GPF Statement",
     calculateLeave: "Calculate Leave Account",
     calculating: "Calculating... / கணக்கிடப்படுகிறது...",
+    savePara: "Save Para",
+    newParaEntry: "New Entry",
 
+    // Audit Tracker
+    auditDashboardTitle: "Audit Para Dashboard",
+    totalParas: "Total Paras",
+    totalRecoveryAmount: "Total Recovery Amount",
+    totalPendingAmount: "Total Pending Amount",
+    filterByStatus: "Filter by Status",
+    allStatus: "All Status",
+    status: "Status",
+    actions: "Actions",
+    edit: "Edit",
+    delete: "Delete",
+    setReminder: "Set Reminder",
+    reminderSet: "Reminder set for Para {paraNo}!",
+    deleteConfirmation: "Are you sure you want to delete Para No. {paraNo}?",
+    
     // Result Section
     employeeSummary: "Employee Summary / பணியாளர் சுருக்கம்",
     payProgression: "Pay Progression / ஊதிய வளர்ச்சி",
@@ -279,7 +310,7 @@ export const translations = {
     welcomePensionMessage: "இடதுபுறத்தில் ஓய்வூதிய விவரங்களை உள்ளிட்டு, பலன்களின் முறிவைக் காண 'ஓய்வூதியத்தைக் கணக்கிடுக' என்பதைக் கிளிக் செய்யவும்.",
     welcomeGpfMessage: "GPF கணக்கு விவரங்களை உள்ளிட்டு, ஆண்டு அறிக்கையை உருவாக்க 'GPF அறிக்கையைக் கணக்கிடுக' என்பதைக் கிளிக் செய்யவும்.",
     welcomeLeaveMessage: "தற்போதைய விடுப்பு இருப்புகளை உள்ளிட்டு, உங்கள் புதுப்பிக்கப்பட்ட விடுப்பு கணக்கைக் கணக்கிட பரிவர்த்தனைகளைச் சேர்க்கவும்.",
-
+    welcomeAuditTrackerMessage: "தணிக்கைக் குறிப்புகளைச் சேர்க்க அல்லது திருத்த இடதுபுறத்தில் உள்ள படிவத்தைப் பயன்படுத்தவும். டாஷ்போர்டு அனைத்து பதிவுகளையும் மீட்பு முன்னேற்றத்தையும் காண்பிக்கும்.",
 
     // Navigation
     payrollCalculator: "ஊதியக் கணக்கிடு",
@@ -287,6 +318,7 @@ export const translations = {
     gpfCalculator: "GPF கணக்கிடு",
     leaveCalculator: "விடுப்புக் கணக்கிடு",
     goViewer: "அரசாணைகள்",
+    auditTracker: "தணிக்கை & மீட்பு",
 
     // G.O. Viewer
     goViewerTitle: "தமிழ்நாடு அரசாணைகள் (G.O.)",
@@ -356,6 +388,8 @@ export const translations = {
     currentLeaveBalances: "தற்போதைய விடுப்பு இருப்புகள்",
     leaveActions: "விடுப்பு நடவடிக்கைகள்",
     leaveActionsDesc: "விடுப்பு எடுத்தல், ஒப்படைத்தல் அல்லது வரவு வைத்தல் போன்ற பரிவர்த்தனைகளைச் சேர்க்கவும்.",
+    auditParaFormTitle: "தணிக்கைக் குறிப்பு பதிவு",
+    auditParaFormDesc: "தணிக்கைக் குறிப்பு விவரங்களைச் சேர்த்து அல்லது திருத்தி மீட்பைக் கண்காணிக்கவும்.",
 
 
     // Form Labels
@@ -443,6 +477,16 @@ export const translations = {
     commutedLeave: "மாற்று விடுப்பு",
     surrender15Days: "15 நாட்கள் EL ஒப்படைப்பு",
     surrender30Days: "30 நாட்கள் EL ஒப்படைப்பு",
+    yearOfAudit: "தணிக்கை ஆண்டு",
+    auditType: "தணிக்கை வகை",
+    paraNumber: "தணிக்கைக் குறிப்பு எண்",
+    paraSubject: "பொருள்",
+    officerResponsible: "பொறுப்பான அலுவலர் / பிரிவு",
+    recoveryAmount: "மீட்புத் தொகை (₹)",
+    irregularityNature: "முறைப்படுத்தலின் தன்மை",
+    recoveryProgress: "திரும்பப்பெறுதல் முன்னேற்றம் (₹)",
+    complianceStatus: "இணக்க நிலை",
+    actionTakenReport: "குறிப்புகள் / எடுக்கப்பட்ட நடவடிக்கை அறிக்கை",
 
     // Form Placeholders & Help Text
     enterFullName: "முழு பெயரை உள்ளிடவும் / Enter full name",
@@ -472,7 +516,24 @@ export const translations = {
     calculateGpf: "GPF அறிக்கையைக் கணக்கிடு",
     calculateLeave: "விடுப்புக் கணக்கைக் கணக்கிடு",
     calculating: "கணக்கிடப்படுகிறது... / Calculating...",
+    savePara: "குறிப்பை சேமி",
+    newParaEntry: "புதிய பதிவு",
     
+    // Audit Tracker
+    auditDashboardTitle: "தணிக்கை குறிப்பு டாஷ்போர்டு",
+    totalParas: "மொத்த குறிப்புகள்",
+    totalRecoveryAmount: "மொத்த மீட்பு தொகை",
+    totalPendingAmount: "மொத்த நிலுவைத் தொகை",
+    filterByStatus: "நிலை வாரியாக வடிகட்டவும்",
+    allStatus: "அனைத்து நிலைகளும்",
+    status: "நிலை",
+    actions: "செயல்கள்",
+    edit: "திருத்து",
+    delete: "நீக்கு",
+    setReminder: "நினைவூட்டியை அமைக்கவும்",
+    reminderSet: "குறிப்பு எண் {paraNo}-க்கு நினைவூட்டி அமைக்கப்பட்டது!",
+    deleteConfirmation: "குறிப்பு எண் {paraNo}-ஐ நீக்க விரும்புகிறீர்களா?",
+
     // Result Section
     employeeSummary: "பணியாளர் சுருக்கம் / Employee Summary",
     payProgression: "ஊதிய வளர்ச்சி / Pay Progression",

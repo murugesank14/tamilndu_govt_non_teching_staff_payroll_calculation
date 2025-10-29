@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { EmployeeInput, PayrollResult as PayrollResultType, GovernmentOrder, PensionInput, PensionResult as PensionResultType, GPFInput, GPFResult as GPFResultType, LeaveInput, LeaveResult as LeaveResultType } from './types';
+import { EmployeeInput, PayrollResult as PayrollResultType, GovernmentOrder, PensionInput, PensionResult as PensionResultType, GPFInput, GPFResult as GPFResultType, LeaveInput, LeaveResult as LeaveResultType, AuditPara } from './types';
 import { calculateFullPayroll, calculatePension, calculateGPF, calculateLeave } from './services/payrollService';
 import PayrollForm from './components/PayrollForm';
 import PayrollResult from './components/PayrollResult';
@@ -13,7 +14,9 @@ import GPFForm from './components/GPFForm';
 import GPFResult from './components/GPFResult';
 import LeaveForm from './components/LeaveForm';
 import LeaveResult from './components/LeaveResult';
-import { CalendarDaysIcon, CircleDollarSignIcon, SheetIcon, LandmarkIcon } from './components/ui/Icons';
+import AuditParaForm from './components/AuditParaForm';
+import AuditParaResult from './components/AuditParaResult';
+import { CalendarDaysIcon, CircleDollarSignIcon, SheetIcon, LandmarkIcon, AlertTriangleIcon } from './components/ui/Icons';
 
 
 const LanguageSwitcher: React.FC = () => {
@@ -39,13 +42,15 @@ const LanguageSwitcher: React.FC = () => {
     )
 }
 
-type ActiveView = 'calculator' | 'pensionCalculator' | 'gpfCalculator' | 'leaveCalculator' | 'goViewer';
+type ActiveView = 'calculator' | 'pensionCalculator' | 'gpfCalculator' | 'leaveCalculator' | 'auditTracker' | 'goViewer';
 
 const App: React.FC = () => {
   const [payrollResult, setPayrollResult] = useState<PayrollResultType | null>(null);
   const [pensionResult, setPensionResult] = useState<PensionResultType | null>(null);
   const [gpfResult, setGpfResult] = useState<GPFResultType | null>(null);
   const [leaveResult, setLeaveResult] = useState<LeaveResultType | null>(null);
+  const [auditParas, setAuditParas] = useState<AuditPara[]>([]);
+  const [editingAuditPara, setEditingAuditPara] = useState<AuditPara | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [activeView, setActiveView] = useState<ActiveView>('calculator');
@@ -135,6 +140,31 @@ const App: React.FC = () => {
         }
     }, 500);
   };
+  
+  const handleSaveAuditPara = (para: AuditPara) => {
+    setAuditParas(prev => {
+        const existingIndex = prev.findIndex(p => p.id === para.id);
+        if (existingIndex > -1) {
+            const newParas = [...prev];
+            newParas[existingIndex] = para;
+            return newParas;
+        } else {
+            return [...prev, para];
+        }
+    });
+    setEditingAuditPara(null); // Reset editing state
+  };
+
+  const handleDeleteAuditPara = (id: string) => {
+      setAuditParas(prev => prev.filter(p => p.id !== id));
+  };
+  
+  const handleEditAuditPara = (id: string) => {
+      const paraToEdit = auditParas.find(p => p.id === id);
+      if(paraToEdit) {
+          setEditingAuditPara(paraToEdit);
+      }
+  };
 
 
   const getNavButtonClasses = (viewName: ActiveView) => {
@@ -175,12 +205,23 @@ const App: React.FC = () => {
     if (activeView === 'leaveCalculator' && leaveResult) {
         return <LeaveResult result={leaveResult} />;
     }
+    if (activeView === 'auditTracker') {
+        return <AuditParaResult 
+                    paras={auditParas} 
+                    onEdit={handleEditAuditPara}
+                    onDelete={handleDeleteAuditPara}
+                />;
+    }
     
     // Default welcome message for all calculators
     let welcomeMessage = t('welcomeMessage');
     if (activeView === 'pensionCalculator') welcomeMessage = t('welcomePensionMessage');
     if (activeView === 'gpfCalculator') welcomeMessage = t('welcomeGpfMessage');
     if (activeView === 'leaveCalculator') welcomeMessage = t('welcomeLeaveMessage');
+    // FIX: This comparison is invalid because the `activeView` type has been narrowed by the early return for 'auditTracker' above.
+    // The AuditParaResult component handles its own empty state, so this welcome message is not needed here.
+    // if (activeView === 'auditTracker') welcomeMessage = t('welcomeAuditTrackerMessage');
+
 
     return (
         <div className="bg-white rounded-xl shadow-md p-8 text-center h-full flex flex-col justify-center">
@@ -224,6 +265,9 @@ const App: React.FC = () => {
           <button onClick={() => setActiveView('leaveCalculator')} className={getNavButtonClasses('leaveCalculator')}>
              <CalendarDaysIcon className="w-4 h-4" />{t('leaveCalculator')}
           </button>
+          <button onClick={() => setActiveView('auditTracker')} className={getNavButtonClasses('auditTracker')}>
+            <AlertTriangleIcon className="w-4 h-4" />{t('auditTracker')}
+          </button>
           <button onClick={() => setActiveView('goViewer')} className={getNavButtonClasses('goViewer')}>
             {t('goViewer')}
           </button>
@@ -265,6 +309,20 @@ const App: React.FC = () => {
              <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
               <div className="lg:col-span-2">
                 <LeaveForm onCalculate={handleLeaveCalculate} isLoading={isLoading} />
+              </div>
+              <div className="lg:col-span-3">
+                {renderContent()}
+              </div>
+            </div>
+          )}
+          {activeView === 'auditTracker' && (
+             <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+              <div className="lg:col-span-2">
+                <AuditParaForm 
+                    onSave={handleSaveAuditPara} 
+                    editingPara={editingAuditPara}
+                    onClearEditing={() => setEditingAuditPara(null)}
+                />
               </div>
               <div className="lg:col-span-3">
                 {renderContent()}

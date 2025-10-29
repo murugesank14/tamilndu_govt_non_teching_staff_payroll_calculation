@@ -338,3 +338,18 @@ export interface LeaveResult {
   };
   transactionLog: LeaveTransaction[];
 }
+
+// --- Audit Para & Recovery Tracker Types ---
+export interface AuditPara {
+  id: string;
+  year: string;
+  auditType: 'Local Fund' | 'AG' | 'Internal';
+  paraNumber: string;
+  subject: string;
+  officerResponsible: string;
+  recoveryAmount: number;
+  irregularityNature: 'Establishment' | 'Works' | 'Revenue' | 'Others';
+  recoveryProgress: number;
+  complianceStatus: 'Not Submitted' | 'Submitted' | 'Dropped';
+  remarks: string;
+}
