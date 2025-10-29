@@ -170,6 +170,7 @@ export const calculateFullPayroll = (data: EmployeeInput, activeGoData: Governme
     const promotionRule22bGO = activeGoData.find(go => go.rule?.type === 'PROMOTION_RULE' && (go.rule as any).rule === '22(b)');
     const payCommission7thGO = activeGoData.find(go => go.rule?.type === 'PAY_COMMISSION_FIXATION' && go.effectiveFrom.startsWith('2016'));
     const gradeFixationSplitGO = activeGoData.find(go => go.rule?.type === 'PROMOTION_RULE' && (go.rule as any).rule === 'GradeFixationLevelSplit');
+    const incrementOnGradeAwardDateGO = activeGoData.find(go => go.rule?.type === 'PROMOTION_RULE' && (go.rule as any).rule === 'IncrementOnGradeAwardDate');
 
 
     const { dateOfJoining, calculationStartDate, calculationEndDate, promotions, annualIncrementChanges, breaksInService, selectionGradeDate, specialGradeDate, superGradeDate, stagnationIncrementDate, cityGrade, incrementEligibilityMonths, joiningPostId, joiningPostCustomName, selectionGradeTwoIncrements, specialGradeTwoIncrements, probationDeclarationDate, accountTestPassDate, departmentTestPassDate, ...employeeDetails } = data;
@@ -287,6 +288,10 @@ export const calculateFullPayroll = (data: EmployeeInput, activeGoData: Governme
     while (currentDate <= calcEndDate) {
         let remarks: string[] = [];
         let didIncrementThisMonth = false;
+
+        // --- Determine current increment month for event checks ---
+        const applicableIncrementChange = sortedIncrementChanges.filter(c => parseDateUTC(c.effectiveDate)! <= currentDate).pop();
+        const currentIncrementMonth = applicableIncrementChange ? { 'jan': 0, 'apr': 3, 'jul': 6, 'oct': 9 }[applicableIncrementChange.incrementMonth] : 6; // Default July
 
         // --- Process Events for the current month ---
         const monthEvents = events.filter(e => e.date.getUTCFullYear() === currentDate.getUTCFullYear() && e.date.getUTCMonth() === currentDate.getUTCMonth()).sort((a,b) => a.priority - b.priority);
@@ -406,8 +411,29 @@ export const calculateFullPayroll = (data: EmployeeInput, activeGoData: Governme
             if ((event.type === 'SELECTION_GRADE' || event.type === 'SPECIAL_GRADE') && !didIncrementThisMonth) {
                 const isPost2016 = event.date >= new Date('2016-01-01T00:00:00Z');
                 const gradeType = event.type === 'SELECTION_GRADE' ? 'Selection Grade' : 'Special Grade';
+                
+                // G.O. 237/2013 Logic: Handle increment on the same day as grade award in 6th PC
+                const is6thPCPeriod = currentCommission === 6 && event.date < fixedDate2016;
+                const isIncrementAndGradeAwardSameDay = incrementOnGradeAwardDateGO && is6thPCPeriod && event.date.getUTCMonth() === currentIncrementMonth;
 
-                if (isPost2016 && currentCommission === 7) {
+                if (isIncrementAndGradeAwardSameDay) {
+                    // 1. Apply annual increment first
+                    const { newPay: payAfterAnnual, newPipb: pipbAfterAnnual } = getIncrement(currentPay, currentLevel, 1, 6, currentGradePay);
+                    currentPay = payAfterAnnual;
+                    if (pipbAfterAnnual !== undefined) currentPipb = pipbAfterAnnual;
+                    remarks.push(`Annual Increment applied first as per ${incrementOnGradeAwardDateGO.goNumberAndDate.en}.`);
+                    
+                    // 2. Then apply grade award on the new pay
+                    const steps = (event.type === 'SELECTION_GRADE' && event.data.twoIncrements) || 
+                                  (event.type === 'SPECIAL_GRADE' && event.data.twoIncrements) ? 2 : 1;
+                    const { newPay: payAfterGrade, newPipb: pipbAfterGrade } = getIncrement(currentPay, currentLevel, steps, 6, currentGradePay);
+                    currentPay = payAfterGrade;
+                    if (pipbAfterGrade !== undefined) currentPipb = pipbAfterGrade;
+
+                    remarks.push(`${gradeType} (${steps} increment(s)) applied on incremented pay.`);
+                    didIncrementThisMonth = true;
+
+                } else if (isPost2016 && currentCommission === 7) {
                     const splitLevel = gradeFixationSplitGO ? (gradeFixationSplitGO.rule as any).details.splitLevel : null;
                     const isNewRuleApplicable = gradeFixationSplitGO && event.date >= parseDateUTC(gradeFixationSplitGO.effectiveFrom)!;
 
@@ -450,7 +476,7 @@ export const calculateFullPayroll = (data: EmployeeInput, activeGoData: Governme
                         }
                     }
                 } else {
-                    // Pre-2016 or 6th PC logic: Apply 1 or 2 increments based on checkbox.
+                    // Pre-2016 or 6th PC logic (standard case, no same-day increment)
                     const steps = (event.type === 'SELECTION_GRADE' && event.data.twoIncrements) || 
                                   (event.type === 'SPECIAL_GRADE' && event.data.twoIncrements) ? 2 : 1;
                     
@@ -483,10 +509,7 @@ export const calculateFullPayroll = (data: EmployeeInput, activeGoData: Governme
         } // End of event loop for the month
 
         // --- Annual Increment ---
-        const applicableChange = sortedIncrementChanges.filter(c => parseDateUTC(c.effectiveDate)! <= currentDate).pop();
-        const incrementMonth = applicableChange ? { 'jan': 0, 'apr': 3, 'jul': 6, 'oct': 9 }[applicableChange.incrementMonth] : 6; // Default July
-        
-        if (currentDate.getUTCMonth() === incrementMonth && !didIncrementThisMonth) {
+        if (currentDate.getUTCMonth() === currentIncrementMonth && !didIncrementThisMonth) {
              const cutoffDate = new Date(currentDate);
              cutoffDate.setUTCMonth(cutoffDate.getUTCMonth() - (incrementEligibilityMonths ?? 6));
              if (effectiveDojForIncrement <= cutoffDate) {
