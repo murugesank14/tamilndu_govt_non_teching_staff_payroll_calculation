@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { EmployeeInput, PayrollResult as PayrollResultType, GovernmentOrder, PensionInput, PensionResult as PensionResultType, GPFInput, GPFResult as GPFResultType } from './types';
-import { calculateFullPayroll, calculatePension, calculateGPF } from './services/payrollService';
+import { EmployeeInput, PayrollResult as PayrollResultType, GovernmentOrder, PensionInput, PensionResult as PensionResultType, GPFInput, GPFResult as GPFResultType, LeaveInput, LeaveResult as LeaveResultType } from './types';
+import { calculateFullPayroll, calculatePension, calculateGPF, calculateLeave } from './services/payrollService';
 import PayrollForm from './components/PayrollForm';
 import PayrollResult from './components/PayrollResult';
 import { HeroIcon } from './components/ui/HeroIcon';
@@ -11,6 +11,9 @@ import PensionForm from './components/PensionForm';
 import PensionResult from './components/PensionResult';
 import GPFForm from './components/GPFForm';
 import GPFResult from './components/GPFResult';
+import LeaveForm from './components/LeaveForm';
+import LeaveResult from './components/LeaveResult';
+import { CalendarDaysIcon, CircleDollarSignIcon, SheetIcon, LandmarkIcon } from './components/ui/Icons';
 
 
 const LanguageSwitcher: React.FC = () => {
@@ -36,12 +39,13 @@ const LanguageSwitcher: React.FC = () => {
     )
 }
 
-type ActiveView = 'calculator' | 'pensionCalculator' | 'gpfCalculator' | 'goViewer';
+type ActiveView = 'calculator' | 'pensionCalculator' | 'gpfCalculator' | 'leaveCalculator' | 'goViewer';
 
 const App: React.FC = () => {
   const [payrollResult, setPayrollResult] = useState<PayrollResultType | null>(null);
   const [pensionResult, setPensionResult] = useState<PensionResultType | null>(null);
   const [gpfResult, setGpfResult] = useState<GPFResultType | null>(null);
+  const [leaveResult, setLeaveResult] = useState<LeaveResultType | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [activeView, setActiveView] = useState<ActiveView>('calculator');
@@ -111,9 +115,30 @@ const App: React.FC = () => {
     }, 500);
   }
 
+  const handleLeaveCalculate = (data: LeaveInput) => {
+    setIsLoading(true);
+    setError(null);
+    setLeaveResult(null);
+
+    setTimeout(() => {
+        try {
+            const result = calculateLeave(data);
+            setLeaveResult(result);
+        } catch (e) {
+            if (e instanceof Error) {
+                setError(e.message);
+            } else {
+                setError('An unknown error occurred during leave calculation.');
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    }, 500);
+  };
+
 
   const getNavButtonClasses = (viewName: ActiveView) => {
-    const baseClasses = "px-4 py-3 text-sm font-semibold transition-colors focus:outline-none";
+    const baseClasses = "flex items-center gap-2 px-4 py-3 text-sm font-semibold transition-colors focus:outline-none";
     if (activeView === viewName) {
       return `${baseClasses} text-emerald-600 border-b-2 border-emerald-600`;
     }
@@ -147,11 +172,15 @@ const App: React.FC = () => {
     if (activeView === 'gpfCalculator' && gpfResult) {
         return <GPFResult result={gpfResult} />;
     }
+    if (activeView === 'leaveCalculator' && leaveResult) {
+        return <LeaveResult result={leaveResult} />;
+    }
     
     // Default welcome message for all calculators
     let welcomeMessage = t('welcomeMessage');
     if (activeView === 'pensionCalculator') welcomeMessage = t('welcomePensionMessage');
     if (activeView === 'gpfCalculator') welcomeMessage = t('welcomeGpfMessage');
+    if (activeView === 'leaveCalculator') welcomeMessage = t('welcomeLeaveMessage');
 
     return (
         <div className="bg-white rounded-xl shadow-md p-8 text-center h-full flex flex-col justify-center">
@@ -184,13 +213,16 @@ const App: React.FC = () => {
       <nav className="bg-white border-b border-gray-200">
         <div className="container mx-auto px-4 md:px-6 lg:px-8 flex">
           <button onClick={() => setActiveView('calculator')} className={getNavButtonClasses('calculator')}>
-            {t('payrollCalculator')}
+            <SheetIcon className="w-4 h-4" /> {t('payrollCalculator')}
           </button>
            <button onClick={() => setActiveView('pensionCalculator')} className={getNavButtonClasses('pensionCalculator')}>
-            {t('pensionCalculator')}
+             <LandmarkIcon className="w-4 h-4" />{t('pensionCalculator')}
           </button>
            <button onClick={() => setActiveView('gpfCalculator')} className={getNavButtonClasses('gpfCalculator')}>
-            {t('gpfCalculator')}
+             <CircleDollarSignIcon className="w-4 h-4" />{t('gpfCalculator')}
+          </button>
+          <button onClick={() => setActiveView('leaveCalculator')} className={getNavButtonClasses('leaveCalculator')}>
+             <CalendarDaysIcon className="w-4 h-4" />{t('leaveCalculator')}
           </button>
           <button onClick={() => setActiveView('goViewer')} className={getNavButtonClasses('goViewer')}>
             {t('goViewer')}
@@ -223,6 +255,16 @@ const App: React.FC = () => {
              <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
               <div className="lg:col-span-2">
                 <GPFForm onCalculate={handleGpfCalculate} isLoading={isLoading} />
+              </div>
+              <div className="lg:col-span-3">
+                {renderContent()}
+              </div>
+            </div>
+          )}
+           {activeView === 'leaveCalculator' && (
+             <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+              <div className="lg:col-span-2">
+                <LeaveForm onCalculate={handleLeaveCalculate} isLoading={isLoading} />
               </div>
               <div className="lg:col-span-3">
                 {renderContent()}

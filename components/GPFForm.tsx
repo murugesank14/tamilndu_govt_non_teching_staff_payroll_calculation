@@ -43,7 +43,7 @@ const GPFForm: React.FC<GPFFormProps> = ({ onCalculate, isLoading }) => {
   };
 
   const handleTransactionChange = (id: string, field: keyof GPFTransaction, value: string | number) => {
-    setTransactions(prev => prev.map(t => t.id === id ? { ...t, [field]: value } : t));
+    setTransactions(prev => prev.map(transaction => transaction.id === id ? { ...transaction, [field]: value } : transaction));
   };
 
   const addTransaction = () => {
@@ -137,33 +137,33 @@ const GPFForm: React.FC<GPFFormProps> = ({ onCalculate, isLoading }) => {
           </CardHeader>
           <CardContent className="space-y-4">
              {transactions.length === 0 && <p className="text-sm text-gray-500 text-center py-4">No transactions added for this financial year.</p>}
-              {transactions.map(t => (
-                  <div key={t.id} className="p-3 border rounded-md bg-gray-50/80 space-y-3">
+              {transactions.map(transaction => (
+                  <div key={transaction.id} className="p-3 border rounded-md bg-gray-50/80 space-y-3">
                       <div className="flex justify-between items-start">
                          <div className="flex-1 space-y-1">
-                            <Label htmlFor={`trans_type_${t.id}`}>{t('transactionType')}</Label>
-                            <Select id={`trans_type_${t.id}`} value={t.type} onChange={e => handleTransactionChange(t.id, 'type', e.target.value)}>
+                            <Label htmlFor={`trans_type_${transaction.id}`}>{t('transactionType')}</Label>
+                            <Select id={`trans_type_${transaction.id}`} value={transaction.type} onChange={e => handleTransactionChange(transaction.id, 'type', e.target.value)}>
                                 <option value="advance">{t('temporaryAdvance')}</option>
                                 <option value="withdrawal">{t('partialWithdrawal')}</option>
                                 <option value="refund">{t('refundOfAdvance')}</option>
                             </Select>
                          </div>
-                         <Button type="button" onClick={() => removeTransaction(t.id)} variant="destructive" size="icon" className="ml-2 mt-5"><TrashIcon /></Button>
+                         <Button type="button" onClick={() => removeTransaction(transaction.id)} variant="destructive" size="icon" className="ml-2 mt-5"><TrashIcon /></Button>
                       </div>
                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                            <div>
-                              <Label htmlFor={`trans_date_${t.id}`}>{t('transactionDate')}</Label>
-                              <Input type="date" id={`trans_date_${t.id}`} value={t.date} onChange={e => handleTransactionChange(t.id, 'date', e.target.value)} required />
+                              <Label htmlFor={`trans_date_${transaction.id}`}>{t('transactionDate')}</Label>
+                              <Input type="date" id={`trans_date_${transaction.id}`} value={transaction.date} onChange={e => handleTransactionChange(transaction.id, 'date', e.target.value)} required />
                            </div>
                            <div>
-                              <Label htmlFor={`trans_amount_${t.id}`}>{t('transactionAmount')}</Label>
-                              <Input type="number" id={`trans_amount_${t.id}`} value={t.amount ?? ''} onChange={e => handleTransactionChange(t.id, 'amount', e.target.value)} required />
+                              <Label htmlFor={`trans_amount_${transaction.id}`}>{t('transactionAmount')}</Label>
+                              <Input type="number" id={`trans_amount_${transaction.id}`} value={transaction.amount ?? ''} onChange={e => handleTransactionChange(transaction.id, 'amount', e.target.value)} required />
                            </div>
                        </div>
-                        {t.type === 'advance' && (
+                        {transaction.type === 'advance' && (
                            <div>
-                              <Label htmlFor={`trans_installments_${t.id}`}>{t('installments')}</Label>
-                              <Input type="number" id={`trans_installments_${t.id}`} value={t.installments ?? ''} onChange={e => handleTransactionChange(t.id, 'installments', e.target.value)} />
+                              <Label htmlFor={`trans_installments_${transaction.id}`}>{t('installments')}</Label>
+                              <Input type="number" id={`trans_installments_${transaction.id}`} value={transaction.installments ?? ''} onChange={e => handleTransactionChange(transaction.id, 'installments', e.target.value)} />
                               <p className="text-xs text-gray-500 mt-1">{t('gpfInstallmentsHelp')}</p>
                            </div>
                         )}

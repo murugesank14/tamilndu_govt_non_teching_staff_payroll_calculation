@@ -9,11 +9,13 @@ export const translations = {
     welcomeMessage: 'Enter employee details on the left and click "Calculate Full Payroll" to see the detailed breakdown.',
     welcomePensionMessage: 'Enter retirement details on the left and click "Calculate Pension" to see the benefit breakdown.',
     welcomeGpfMessage: 'Enter GPF account details and click "Calculate GPF Statement" to generate the annual report.',
+    welcomeLeaveMessage: 'Enter current leave balances and add transactions to calculate your updated leave account.',
 
     // Navigation
     payrollCalculator: "Payroll Calculator",
     pensionCalculator: "Pension Calculator",
     gpfCalculator: "GPF Calculator",
+    leaveCalculator: "Leave Calculator",
     goViewer: "G.O. Viewer",
 
     // G.O. Viewer
@@ -79,6 +81,12 @@ export const translations = {
     gpfAccountDetails: "GPF Account Details",
     gpfTransactions: "Transactions during the Year",
     gpfTransactionsDesc: "Add any withdrawals, advances, or refunds made in the financial year.",
+    leaveCalculatorTitle: "Leave Account Calculator",
+    leaveCalculatorDesc: "Manage EL/HPL balances, process surrenders and leave.",
+    currentLeaveBalances: "Current Leave Balances",
+    leaveActions: "Leave Actions",
+    leaveActionsDesc: "Add transactions like availing, surrendering, or crediting leave.",
+
 
     // Form Labels
     employeeName: "Employee Name / ஊழியர் பெயர்",
@@ -152,6 +160,19 @@ export const translations = {
     temporaryAdvance: "Temporary Advance (Refundable)",
     partialWithdrawal: "Partial Withdrawal (Non-Refundable)",
     refundOfAdvance: "Refund of Advance",
+    elBalance: "Earned Leave (EL) Balance",
+    hplBalance: "Half Pay Leave (HPL) Balance",
+    actionType: "Action Type",
+    leaveType: "Leave Type",
+    numberOfDays: "Number of Days",
+    availLeave: "Avail Leave",
+    surrenderLeave: "Surrender Leave",
+    creditLeave: "Credit Leave (Half-yearly)",
+    earnedLeave: "Earned Leave (EL)",
+    halfPayLeave: "Half Pay Leave (HPL)",
+    commutedLeave: "Commuted Leave",
+    surrender15Days: "Surrender 15 Days EL",
+    surrender30Days: "Surrender 30 Days EL",
     
     // Form Placeholders & Help Text
     enterFullName: "Enter full name / முழு பெயரை உள்ளிடவும்",
@@ -174,10 +195,12 @@ export const translations = {
     addPromotion: "+ Add Promotion / + பதவி உயர்வு சேர்",
     addBreak: "+ Add Break / + இடைவெளி சேர்",
     addTransaction: "+ Add Transaction",
+    addLeaveAction: "+ Add Action",
     resetForm: "Reset Form / படிவத்தை மீட்டமை",
     calculatePayroll: "Calculate Full Payroll / முழு ஊதியத்தைக் கணக்கிடுக",
     calculatePension: "Calculate Pension",
     calculateGpf: "Calculate GPF Statement",
+    calculateLeave: "Calculate Leave Account",
     calculating: "Calculating... / கணக்கிடப்படுகிறது...",
 
     // Result Section
@@ -218,6 +241,12 @@ export const translations = {
     closingBalance: "Closing Balance (as on March 31st)",
     gpfMonthlyBreakdown: "Monthly Breakdown",
     exportGpfStatement: "Export Statement",
+    leaveAccountSummary: "Leave Account Summary",
+    leaveBalanceSummary: "Leave Balance Summary",
+    initialBalance: "Initial Balance",
+    finalBalance: "Final Balance",
+    leaveTransactionLog: "Transaction Log",
+    exportLeaveSummary: "Export Summary",
 
     // Result Table
     payrollForYear: "Payroll for {year} / {year}க்கான ஊதியம்",
@@ -233,6 +262,10 @@ export const translations = {
     withdrawal: "Withdrawal",
     refund: "Refund",
     closing: "Closing",
+    action: "Action",
+    details: "Details",
+    el: "EL",
+    hpl: "HPL",
     
   },
   ta: {
@@ -245,11 +278,14 @@ export const translations = {
     welcomeMessage: "இடதுபுறத்தில் பணியாளர் விவரங்களை உள்ளிட்டு, விரிவான முறிவைக் காண 'முழு ஊதியத்தைக் கணக்கிடுக' என்பதைக் கிளிக் செய்யவும்.",
     welcomePensionMessage: "இடதுபுறத்தில் ஓய்வூதிய விவரங்களை உள்ளிட்டு, பலன்களின் முறிவைக் காண 'ஓய்வூதியத்தைக் கணக்கிடுக' என்பதைக் கிளிக் செய்யவும்.",
     welcomeGpfMessage: "GPF கணக்கு விவரங்களை உள்ளிட்டு, ஆண்டு அறிக்கையை உருவாக்க 'GPF அறிக்கையைக் கணக்கிடுக' என்பதைக் கிளிக் செய்யவும்.",
+    welcomeLeaveMessage: "தற்போதைய விடுப்பு இருப்புகளை உள்ளிட்டு, உங்கள் புதுப்பிக்கப்பட்ட விடுப்பு கணக்கைக் கணக்கிட பரிவர்த்தனைகளைச் சேர்க்கவும்.",
+
 
     // Navigation
     payrollCalculator: "ஊதியக் கணக்கிடு",
     pensionCalculator: "ஓய்வூதியக் கணக்கிடு",
     gpfCalculator: "GPF கணக்கிடு",
+    leaveCalculator: "விடுப்புக் கணக்கிடு",
     goViewer: "அரசாணைகள்",
 
     // G.O. Viewer
@@ -315,6 +351,11 @@ export const translations = {
     gpfAccountDetails: "GPF கணக்கு விவரங்கள்",
     gpfTransactions: "ஆண்டின் போது பரிவர்த்தனைகள்",
     gpfTransactionsDesc: "நிதியாண்டில் செய்யப்பட்ட முன்பணம், திரும்பப் பெறுதல் அல்லது திரும்பச் செலுத்துதல் ஆகியவற்றைச் சேர்க்கவும்.",
+    leaveCalculatorTitle: "விடுப்புக் கணக்கு கணக்கிடு",
+    leaveCalculatorDesc: "ஈட்டிய விடுப்பு/அரைச் சம்பள விடுப்பு இருப்புகளை நிர்வகிக்கவும், ஒப்படைப்பு மற்றும் விடுப்புகளை செயலாக்கவும்.",
+    currentLeaveBalances: "தற்போதைய விடுப்பு இருப்புகள்",
+    leaveActions: "விடுப்பு நடவடிக்கைகள்",
+    leaveActionsDesc: "விடுப்பு எடுத்தல், ஒப்படைத்தல் அல்லது வரவு வைத்தல் போன்ற பரிவர்த்தனைகளைச் சேர்க்கவும்.",
 
 
     // Form Labels
@@ -389,6 +430,19 @@ export const translations = {
     temporaryAdvance: "தற்காலிக முன்பணம் (திரும்பச் செலுத்தக்கூடியது)",
     partialWithdrawal: "பகுதி திரும்பப் பெறுதல் (திரும்பச் செலுத்த முடியாதது)",
     refundOfAdvance: "முன்பணம் திரும்பச் செலுத்துதல்",
+    elBalance: "ஈட்டிய விடுப்பு (EL) இருப்பு",
+    hplBalance: "அரைச் சம்பள விடுப்பு (HPL) இருப்பு",
+    actionType: "நடவடிக்கை வகை",
+    leaveType: "விடுப்பு வகை",
+    numberOfDays: "நாட்களின் எண்ணிக்கை",
+    availLeave: "விடுப்பு எடுத்தல்",
+    surrenderLeave: "விடுப்பு ஒப்படைத்தல்",
+    creditLeave: "விடுப்பு வரவு (அரையாண்டு)",
+    earnedLeave: "ஈட்டிய விடுப்பு (EL)",
+    halfPayLeave: "அரைச் சம்பள விடுப்பு (HPL)",
+    commutedLeave: "மாற்று விடுப்பு",
+    surrender15Days: "15 நாட்கள் EL ஒப்படைப்பு",
+    surrender30Days: "30 நாட்கள் EL ஒப்படைப்பு",
 
     // Form Placeholders & Help Text
     enterFullName: "முழு பெயரை உள்ளிடவும் / Enter full name",
@@ -411,10 +465,12 @@ export const translations = {
     addPromotion: "+ பதவி உயர்வு சேர் / + Add Promotion",
     addBreak: "+ இடைவெளி சேர் / + Add Break",
     addTransaction: "+ பரிவர்த்தனை சேர்",
+    addLeaveAction: "+ நடவடிக்கை சேர்",
     resetForm: "படிவத்தை மீட்டமை / Reset Form",
     calculatePayroll: "முழு ஊதியத்தைக் கணக்கிடுக / Calculate Full Payroll",
     calculatePension: "ஓய்வூதியத்தைக் கணக்கிடு",
     calculateGpf: "GPF அறிக்கையைக் கணக்கிடு",
+    calculateLeave: "விடுப்புக் கணக்கைக் கணக்கிடு",
     calculating: "கணக்கிடப்படுகிறது... / Calculating...",
     
     // Result Section
@@ -455,6 +511,12 @@ export const translations = {
     closingBalance: "இறுதி இருப்பு (மார்ச் 31 ஆம் தேதி)",
     gpfMonthlyBreakdown: "மாதாந்திர விவரம்",
     exportGpfStatement: "அறிக்கையை ஏற்றுமதி செய்",
+    leaveAccountSummary: "விடுப்புக் கணக்குச் சுருக்கம்",
+    leaveBalanceSummary: "விடுப்பு இருப்புச் சுருக்கம்",
+    initialBalance: "தொடக்க இருப்பு",
+    finalBalance: "இறுதி இருப்பு",
+    leaveTransactionLog: "பரிவர்த்தனைப் பதிவு",
+    exportLeaveSummary: "சுருக்கத்தை ஏற்றுமதி செய்",
 
 
     // Result Table
@@ -471,6 +533,11 @@ export const translations = {
     withdrawal: "திரும்பப் பெறுதல்",
     refund: "திரும்பச் செலுத்துதல்",
     closing: "இறுதி இருப்பு",
+    action: "நடவடிக்கை",
+    details: "விவரங்கள்",
+    el: "ஈ.வி",
+    hpl: "அ.ச.வி",
+    
   }
 };
 

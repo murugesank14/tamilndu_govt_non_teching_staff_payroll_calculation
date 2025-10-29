@@ -308,3 +308,33 @@ export interface GPFResult {
   };
   closingBalance: number;
 }
+
+// --- Leave Calculator Types ---
+export interface LeaveTransaction {
+  id: string;
+  type: 'avail' | 'surrender' | 'credit';
+  leaveType?: 'el' | 'hpl' | 'commuted'; // For 'avail' type
+  days: number | undefined;
+  description: string;
+  amount?: number; // Calculated for surrenders
+}
+
+export interface LeaveInput {
+  employeeName: string;
+  basicPay: number | undefined;
+  initialElBalance: number | undefined;
+  initialHplBalance: number | undefined;
+  transactions: Omit<LeaveTransaction, 'description' | 'amount'>[];
+}
+
+export interface LeaveResult {
+  inputs: {
+    initialEl: number;
+    initialHpl: number;
+  };
+  finalBalances: {
+    finalEl: number;
+    finalHpl: number;
+  };
+  transactionLog: LeaveTransaction[];
+}

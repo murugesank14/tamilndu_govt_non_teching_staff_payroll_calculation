@@ -1,4 +1,4 @@
-import { EmployeeInput, PayrollResult, PayrollYear, PayrollPeriod, CityGrade, Promotion, Post, PayRevision2010, PayScale, GovernmentOrder, PromotionFixation, PensionInput, PensionResult, GPFInput, GPFResult, GPFMonthlyCalculation } from '../types';
+import { EmployeeInput, PayrollResult, PayrollYear, PayrollPeriod, CityGrade, Promotion, Post, PayRevision2010, PayScale, GovernmentOrder, PromotionFixation, PensionInput, PensionResult, GPFInput, GPFResult, GPFMonthlyCalculation, LeaveInput, LeaveResult, LeaveTransaction } from '../types';
 import { 
     PAY_MATRIX, GRADE_PAY_TO_LEVEL, HRA_SLABS_7TH_PC, 
     PAY_SCALES_6TH_PC, HRA_SLABS_6TH_PC, HRA_SLABS_6TH_PC_PRE_2009, HRA_SLABS_5TH_PC, HRA_SLABS_4TH_PC, POSTS,
@@ -811,4 +811,80 @@ export const calculateGPF = (data: GPFInput): GPFResult => {
         },
         closingBalance
     };
+};
+
+export const calculateLeave = (data: LeaveInput): LeaveResult => {
+  const { initialElBalance = 0, initialHplBalance = 0, basicPay = 0, transactions } = data;
+
+  if (basicPay <= 0) {
+    throw new Error("Please provide a valid Basic Pay for surrender calculations.");
+  }
+  
+  let el = initialElBalance;
+  let hpl = initialHplBalance;
+  const transactionLog: LeaveTransaction[] = [];
+
+  const currentDaRate = getDARate(new Date(), 7); // Use latest 7th PC DA rate
+  const EL_MAX_ACCUMULATION = 300;
+
+  for (const t of transactions) {
+    const days = t.days ?? 0;
+    if (days <= 0) continue;
+
+    let logEntry: LeaveTransaction = { ...t, description: '', id: t.id };
+
+    switch (t.type) {
+      case 'avail':
+        if (t.leaveType === 'el') {
+          const debit = Math.min(el, days);
+          el -= debit;
+          logEntry.description = `Availed ${debit} days of Earned Leave.`;
+        } else if (t.leaveType === 'hpl') {
+          const debit = Math.min(hpl, days);
+          hpl -= debit;
+          logEntry.description = `Availed ${debit} days of Half Pay Leave.`;
+        } else if (t.leaveType === 'commuted') {
+          const hplDebit = days * 2;
+          const actualDebit = Math.min(hpl, hplDebit);
+          hpl -= actualDebit;
+          logEntry.description = `Availed ${actualDebit / 2} days of Commuted Leave (debited ${actualDebit} HPL).`;
+        }
+        break;
+      case 'surrender':
+        const debit = Math.min(el, days);
+        if (debit > 0) {
+          el -= debit;
+          const daAmount = Math.round(basicPay * (currentDaRate / 100));
+          const oneDaySalary = (basicPay + daAmount) / 30;
+          const surrenderAmount = Math.round(oneDaySalary * debit);
+          logEntry.amount = surrenderAmount;
+          logEntry.description = `Surrendered ${debit} days of EL for ${new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(surrenderAmount)}.`;
+        } else {
+          logEntry.description = `Attempted to surrender ${days} days of EL, but balance was zero.`;
+        }
+        break;
+      case 'credit':
+        // As per rules, credit is 15 EL and 10 HPL per half year
+        const elCredit = 15;
+        const hplCredit = 10;
+        
+        el = Math.min(el + elCredit, EL_MAX_ACCUMULATION);
+        hpl += hplCredit;
+        logEntry.description = `Credited ${elCredit} days EL and ${hplCredit} days HPL for half-year.`;
+        break;
+    }
+    transactionLog.push(logEntry);
+  }
+
+  return {
+    inputs: {
+      initialEl: initialElBalance,
+      initialHpl: initialHplBalance,
+    },
+    finalBalances: {
+      finalEl: el,
+      finalHpl: hpl,
+    },
+    transactionLog,
+  };
 };
