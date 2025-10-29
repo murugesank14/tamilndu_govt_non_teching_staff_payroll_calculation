@@ -341,6 +341,10 @@ export const calculateFullPayroll = (data: EmployeeInput, activeGoData: Governme
                 currentPipb = undefined;
                 currentGradePay = undefined;
                 currentCommission = 7;
+                
+                // FIX: As per TN RPR 2017, DA is reset to 0% on the date of migration to the 7th CPC.
+                currentDaRate = 0;
+                
                 fixation7thPC = { oldBasicPay, multipliedPay, initialRevisedPay: currentPay, level: currentLevel };
                 remarks.push(`Pay fixed in 7th Pay Commission as per ${payCommission7thGO?.goNumberAndDate.en || 'G.O.Ms.No.303/2017 & G.O.Ms.No.40/2021'}.`);
             }
