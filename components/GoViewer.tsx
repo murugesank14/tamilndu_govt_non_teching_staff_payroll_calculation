@@ -8,6 +8,7 @@ import { Input } from './ui/Input';
 import { Select } from './ui/Select';
 import { HeroIcon } from './ui/HeroIcon';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/Accordion';
+import { Notification } from './ui/Notification';
 
 
 declare const XLSX: any;
@@ -151,6 +152,7 @@ const GoViewer: React.FC<GoViewerProps> = ({ goData, onGoDataUpdate }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [filters, setFilters] = useState({ year: '', category: '', department: '', searchQuery: '' });
   const [viewMode, setViewMode] = useState<ViewMode>('bilingual');
+  const [notification, setNotification] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -246,6 +248,7 @@ const GoViewer: React.FC<GoViewerProps> = ({ goData, onGoDataUpdate }) => {
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setNotification(null);
     const file = event.target.files?.[0]; if (!file) return;
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -262,16 +265,16 @@ const GoViewer: React.FC<GoViewerProps> = ({ goData, onGoDataUpdate }) => {
 
                 if (uniqueNewOrders.length > 0) {
                     onGoDataUpdate([...goData, ...uniqueNewOrders]);
-                    alert(t('goLoadSuccess', {count: uniqueNewOrders.length}));
+                    setNotification({ type: 'success', message: t('goLoadSuccess', {count: uniqueNewOrders.length}) });
                 } else {
-                    alert(t('goLoadNoNew'));
+                    setNotification({ type: 'info', message: t('goLoadNoNew') });
                 }
             } else {
                throw new Error(t('unrecognizedFormat'));
             }
         } catch (error) {
             console.error("Error parsing G.O. file:", error);
-            alert(t('goLoadError', {error: (error as Error).message}));
+            setNotification({ type: 'error', message: t('goLoadError', {error: (error as Error).message}) });
         } finally {
             if (fileInputRef.current) fileInputRef.current.value = '';
         }
@@ -283,6 +286,7 @@ const GoViewer: React.FC<GoViewerProps> = ({ goData, onGoDataUpdate }) => {
 
   return (
     <div className="space-y-6">
+        {notification && <Notification type={notification.type} message={notification.message} onDismiss={() => setNotification(null)} />}
         <Accordion type="single" collapsible className="w-full">
             <AccordionItem value="controls">
                 <AccordionTrigger>
