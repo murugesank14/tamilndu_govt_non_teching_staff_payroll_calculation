@@ -487,8 +487,14 @@ export const calculateFullPayroll = (data: EmployeeInput, activeGoData: Governme
             const year = currentDate.getUTCFullYear();
             if (!yearlyCalculationsMap.has(year)) yearlyCalculationsMap.set(year, []);
 
-            const daAmount = Math.round(currentPay * (currentDaRate / 100));
-            const { hra, revised: hraRevised, goRef: hraGoRef } = getHra(currentPay, cityGrade, currentDate, currentDaRate, hraRevisionGO);
+            // MINIMAL FIX: Enforce 0% DA for the first 6 months of the 7th Pay Commission.
+            const is7thPcDaResetPeriod = currentCommission === 7 &&
+                                         currentDate >= new Date('2016-01-01T00:00:00Z') &&
+                                         currentDate < new Date('2016-07-01T00:00:00Z');
+            const effectiveDaRate = is7thPcDaResetPeriod ? 0 : currentDaRate;
+
+            const daAmount = Math.round(currentPay * (effectiveDaRate / 100));
+            const { hra, revised: hraRevised, goRef: hraGoRef } = getHra(currentPay, cityGrade, currentDate, effectiveDaRate, hraRevisionGO);
             if (hraRevised && hraGoRef) {
                 remarks.push(`HRA revised as per ${hraGoRef} (DA>=50%).`);
             }
@@ -497,7 +503,7 @@ export const calculateFullPayroll = (data: EmployeeInput, activeGoData: Governme
             yearlyCalculationsMap.get(year)!.push({
                 period: currentDate.toLocaleString('en-GB', { month: 'short', year: 'numeric', timeZone: 'UTC' }),
                 basicPay: currentPay,
-                daRate: currentDaRate,
+                daRate: effectiveDaRate,
                 daAmount,
                 hra,
                 grossPay,
