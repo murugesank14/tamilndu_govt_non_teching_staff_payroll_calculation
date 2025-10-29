@@ -257,6 +257,7 @@ export const DA_RATES_7TH_PC = [
   { date: new Date('2023-07-01T00:00:00Z'), rate: 46, commission: 7 },
   { date: new Date('2024-01-01T00:00:00Z'), rate: 50, commission: 7 },
   { date: new Date('2024-07-01T00:00:00Z'), rate: 53, commission: 7 },
+  { date: new Date('2025-07-01T00:00:00Z'), rate: 55, commission: 7 },
 ];
 
 

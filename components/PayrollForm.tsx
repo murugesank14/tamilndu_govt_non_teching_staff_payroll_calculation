@@ -15,45 +15,46 @@ interface PayrollFormProps {
   isLoading: boolean;
 }
 
+// Pre-filled data for Murugesan K based on user request to correct the payroll report.
 const initialFormData: Omit<EmployeeInput, 'promotions' | 'annualIncrementChanges' | 'breaksInService'> = {
-    employeeName: '',
-    fatherName: '',
-    employeeNo: '',
-    cpsGpfNo: '',
-    panNumber: '',
-    bankAccountNumber: '',
-    dateOfBirth: '',
+    employeeName: 'Murugesan K',
+    fatherName: 'Kasi S',
+    employeeNo: '16010101980',
+    cpsGpfNo: '7224886',
+    panNumber: 'CJXPM7687K',
+    bankAccountNumber: '20174970639',
+    dateOfBirth: '1975-05-30',
     retirementAge: '60',
-    dateOfJoining: '',
-    dateOfJoiningInOffice: '',
+    dateOfJoining: '2012-04-12',
+    dateOfJoiningInOffice: '2013-07-05',
     dateOfRelief: '',
     
     joiningPostId: 'custom',
-    joiningPostCustomName: '',
+    joiningPostCustomName: 'Assistant Inspector',
     joiningBasicPay4thPC: undefined,
     joiningScaleId4thPC: PAY_SCALES_4TH_PC[1].id,
     joiningBasicPay5thPC: undefined,
     joiningScaleId5thPC: PAY_SCALES_5TH_PC[10].id,
-    joiningPayInPayBand: undefined,
-    joiningScaleId6thPC: PAY_SCALES_6TH_PC[12].id,
-    joiningLevel: '11',
+    joiningPayInPayBand: 9708,
+    joiningScaleId6thPC: 'PB2-4300', // Scale with Grade Pay 4300 to match 7th PC fixation to Level 12
+    joiningLevel: '12',
 
-    selectionGradeDate: '',
-    selectionGradeTwoIncrements: true,
+    selectionGradeDate: '2023-07-01',
+    selectionGradeTwoIncrements: true, // This is handled by rules, but kept for legacy
     specialGradeDate: '',
     specialGradeTwoIncrements: true,
     superGradeDate: '',
     probationDeclarationDate: '',
     stagnationIncrementDate: '',
     probationPeriod: 2,
-    accountTestPassDate: '',
+    accountTestPassDate: '2014-12-01',
     departmentTestPassDate: '',
     
     incrementEligibilityMonths: 6,
 
-    cityGrade: CityGrade.GRADE_III,
-    calculationStartDate: '1984-10-01',
-    calculationEndDate: new Date().toISOString().split('T')[0],
+    cityGrade: CityGrade.GRADE_II, // Sivagangai likely falls under Grade II
+    calculationStartDate: '2014-01-01',
+    calculationEndDate: '2025-09-30',
     
     festivalAdvance: undefined,
     carAdvance: undefined,
@@ -64,9 +65,18 @@ const initialFormData: Omit<EmployeeInput, 'promotions' | 'annualIncrementChange
 
 const PayrollForm: React.FC<PayrollFormProps> = ({ onCalculate, isLoading }) => {
   const [formData, setFormData] = useState(initialFormData);
-  const [promotions, setPromotions] = useState<Promotion[]>([]);
+  const [promotions, setPromotions] = useState<Promotion[]>([
+      // Pre-filled promotion details for Murugesan K
+      {
+          id: 'promo1',
+          date: '2023-12-29',
+          post: 'Deputy Inspector',
+          level: '18', // Corrected level for Deputy Inspector
+          rule22bOption: 'nextIncrementDate'
+      }
+  ]);
   const [annualIncrementChanges, setAnnualIncrementChanges] = useState<AnnualIncrementChange[]>([
-      { id: Date.now().toString(), effectiveDate: '', incrementMonth: 'jul' }
+      { id: Date.now().toString(), effectiveDate: initialFormData.dateOfJoining, incrementMonth: 'jul' }
   ]);
   const [breaksInService, setBreaksInService] = useState<BreakInService[]>([]);
   const [duplicatePromotionError, setDuplicatePromotionError] = useState<{[key: string]: string | null}>({});
@@ -191,7 +201,15 @@ const PayrollForm: React.FC<PayrollFormProps> = ({ onCalculate, isLoading }) => 
   }
   
   const handleReset = () => {
-      setFormData(initialFormData);
+      // Reset to a blank state, not the pre-filled one
+      const blankState: Omit<EmployeeInput, 'promotions' | 'annualIncrementChanges' | 'breaksInService'> = {
+          ...initialFormData,
+          employeeName: '', fatherName: '', employeeNo: '', cpsGpfNo: '', panNumber: '', bankAccountNumber: '',
+          dateOfBirth: '', dateOfJoining: '', dateOfJoiningInOffice: '', joiningPayInPayBand: undefined,
+          accountTestPassDate: '', selectionGradeDate: '',
+          calculationStartDate: '1984-10-01', calculationEndDate: new Date().toISOString().split('T')[0],
+      };
+      setFormData(blankState);
       setPromotions([]);
       setBreaksInService([]);
       setAnnualIncrementChanges([{ id: Date.now().toString(), effectiveDate: '', incrementMonth: 'jul' }]);
