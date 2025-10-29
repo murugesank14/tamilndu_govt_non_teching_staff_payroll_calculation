@@ -128,6 +128,7 @@ export const translations = {
     newEntrantHelpText: "Pay will be fixed at the minimum of this Level for new entrants.",
     selectDatePrompt: "Please select a Date of Joining to enter pay details.",
     typeOrSelectPost: "Type or select a post",
+    gradeFixationNotePost2016: "Pay will be fixed two cells ahead in the same level as per G.O.Ms.No.40/2021.",
 
     // Form Buttons
     addChange: "+ Add Change / + மாற்றம் சேர்",
@@ -155,7 +156,7 @@ export const translations = {
     promotionFixation: "Promotion Fixation Summary",
     reference: "Reference",
     promotionFixationMethodLabel: "Fixation Method",
-    complianceFootnote: "As per Fundamental Rule 26 and Tamil Nadu Government Servants (Conditions of Service) Act 2016; Account / Department Test increment admitted vide G.O. orders in force.",
+    complianceFootnote: "Calculations as per TN Revised Pay Rules, 2017 (G.O.Ms.No.303 & 40) & Fundamental Rules. Grade fixation as per G.O.Ms.No.40/2021.",
 
 
     // Result Table
@@ -297,6 +298,7 @@ export const translations = {
     newEntrantHelpText: "புதிய பணியாளர்களுக்கு இந்த நிலையின் குறைந்தபட்ச ஊதியம் நிர்ணயிக்கப்படும்.",
     selectDatePrompt: "ஊதிய விவரங்களை உள்ளிட, பணியில் சேரும் தேதியைத் தேர்ந்தெடுக்கவும்.",
     typeOrSelectPost: "ஒரு பதவியைத் தட்டச்சு செய்யவும் அல்லது தேர்ந்தெடுக்கவும்",
+    gradeFixationNotePost2016: "அ.ஆ.எண் 40/2021-ன்படி, ஊதியம் அதே நிலையில் இரண்டு செல்கள் முன்னோக்கி நிர்ணயிக்கப்படும்.",
 
     // Form Buttons
     addChange: "+ மாற்றம் சேர் / + Add Change",
@@ -324,7 +326,7 @@ export const translations = {
     promotionFixation: "பதவி உயர்வு ஊதிய நிர்ணயச் சுருக்கம்",
     reference: "ஆதாரம்",
     promotionFixationMethodLabel: "நிர்ணய முறை",
-    complianceFootnote: "அடிப்படை விதி 26 மற்றும் தமிழ்நாடு அரசுப் பணியாளர் (பணி நிபந்தனைகள்) சட்டம் 2016-ன்படி; கணக்கு/துறைத் தேர்வுக்கான ஊதிய உயர்வு நடைமுறையில் உள்ள அரசாணைகளின்படி அனுமதிக்கப்பட்டது.",
+    complianceFootnote: "கணக்கீடுகள் தமிழ்நாடு திருத்திய ஊதிய விதிகள், 2017 (அ.ஆ.எண் 303 & 40) மற்றும் அடிப்படை விதிகளின்படி செய்யப்பட்டுள்ளன. தர ஊதிய நிர்ணயம் அ.ஆ.எண் 40/2021-ன்படி செய்யப்பட்டுள்ளது.",
 
 
     // Result Table

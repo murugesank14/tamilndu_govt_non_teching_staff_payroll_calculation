@@ -402,17 +402,51 @@ export const calculateFullPayroll = (data: EmployeeInput, activeGoData: Governme
                 // Note: We do NOT set didIncrementThisMonth = true, as test increments are additional.
             }
 
+            if ((event.type === 'SELECTION_GRADE' || event.type === 'SPECIAL_GRADE') && !didIncrementThisMonth) {
+                const isPost2016 = event.date >= new Date('2016-01-01T00:00:00Z');
+                const gradeType = event.type === 'SELECTION_GRADE' ? 'Selection Grade' : 'Special Grade';
 
-            let steps = 0;
-            let eventName = '';
-            if (event.type.includes('GRADE')) { // Selection, Special, Super
-                steps = (event.type === 'SELECTION_GRADE' && event.data.twoIncrements) || (event.type === 'SPECIAL_GRADE' && event.data.twoIncrements) ? 2 : 1;
-                eventName = event.type.replace('_', ' ');
-            } else if (event.type === 'STAGNATION_INCREMENT') {
-                steps = 1; eventName = 'Stagnation Increment';
-            }
+                if (isPost2016 && currentCommission === 7) {
+                    // As per G.O.Ms.No.40/2021: move two cells forward in the same level.
+                    const levelPayScale = PAY_MATRIX[currentLevel];
+                    if (!levelPayScale) {
+                        remarks.push(`Cannot apply ${gradeType}: Invalid pay matrix level ${currentLevel}.`);
+                    } else {
+                        const currentIndex = levelPayScale.indexOf(currentPay);
+                        if (currentIndex === -1) {
+                            remarks.push(`Cannot apply ${gradeType}: Current pay ${currentPay} not found in Level ${currentLevel} matrix.`);
+                        } else {
+                            const newIndex = Math.min(currentIndex + 2, levelPayScale.length - 1);
+                            const newPay = levelPayScale[newIndex];
 
-            if (steps > 0 && !didIncrementThisMonth) {
+                            if (newPay > currentPay) {
+                                currentPay = newPay;
+                                remarks.push(`${gradeType} awarded. Pay fixed two cells ahead in Level ${currentLevel}. Ref: G.O.Ms.No.40/2021`);
+                            } else {
+                                remarks.push(`${gradeType} awarded, but already at maximum pay in Level ${currentLevel}.`);
+                            }
+                            didIncrementThisMonth = true;
+                        }
+                    }
+                } else {
+                    // Pre-2016 or 6th PC logic: Apply 1 or 2 increments based on checkbox.
+                    const steps = (event.type === 'SELECTION_GRADE' && event.data.twoIncrements) || 
+                                  (event.type === 'SPECIAL_GRADE' && event.data.twoIncrements) ? 2 : 1;
+                    
+                    if (currentCommission <= 5) {
+                        const scale = currentCommission === 4 ? current4thPCScaleString! : current5thPCScaleString!;
+                        currentPay = getIncrementForSlabScale(currentPay, scale, steps);
+                    } else { // 6th PC
+                        const { newPay, newPipb } = getIncrement(currentPay, currentLevel, steps, 6, currentGradePay);
+                        currentPay = newPay;
+                        if (newPipb !== undefined) currentPipb = newPipb;
+                    }
+                    remarks.push(`${gradeType} (${steps} increment(s)) applied.`);
+                    didIncrementThisMonth = true;
+                }
+            } else if (event.type === 'SUPER_GRADE' && !didIncrementThisMonth) {
+                // Super Grade logic (1 increment)
+                const steps = 1;
                 if(currentCommission <= 5) {
                     const scale = currentCommission === 4 ? current4thPCScaleString! : current5thPCScaleString!;
                     currentPay = getIncrementForSlabScale(currentPay, scale, steps);
@@ -421,7 +455,7 @@ export const calculateFullPayroll = (data: EmployeeInput, activeGoData: Governme
                     currentPay = newPay;
                     if(newPipb !== undefined) currentPipb = newPipb;
                 }
-                remarks.push(`${eventName} applied.`);
+                remarks.push(`Super Grade applied.`);
                 didIncrementThisMonth = true;
             }
 

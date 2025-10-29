@@ -212,6 +212,12 @@ const PayrollForm: React.FC<PayrollFormProps> = ({ onCalculate, isLoading }) => 
   
   const hasDuplicateErrors = Object.values(duplicatePromotionError).some(error => error !== null);
 
+  const isSgPre2016 = formData.selectionGradeDate && new Date(formData.selectionGradeDate) < new Date('2016-01-01');
+  const isSgPost2016 = formData.selectionGradeDate && new Date(formData.selectionGradeDate) >= new Date('2016-01-01');
+  const isSpGPre2016 = formData.specialGradeDate && new Date(formData.specialGradeDate) < new Date('2016-01-01');
+  const isSpGPost2016 = formData.specialGradeDate && new Date(formData.specialGradeDate) >= new Date('2016-01-01');
+
+
   return (
     <form onSubmit={handleSubmit} onReset={handleReset} className="space-y-6">
       <Card>
@@ -255,7 +261,7 @@ const PayrollForm: React.FC<PayrollFormProps> = ({ onCalculate, isLoading }) => 
                 <Input type="date" name="dateOfBirth" id="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} required />
               </div>
               <div>
-                <Label htmlFor="dateOfJoining">{t('dateOfJoiningService')}</Label>
+                <Label htmlFor="dateOfJoiningService">{t('dateOfJoiningService')}</Label>
                 <Input type="date" name="dateOfJoining" id="dateOfJoining" value={formData.dateOfJoining} onChange={handleChange} required />
               </div>
             </div>
@@ -385,12 +391,14 @@ const PayrollForm: React.FC<PayrollFormProps> = ({ onCalculate, isLoading }) => 
                 <div>
                   <Label htmlFor="selectionGradeDate">{t('selectionGradeDate')}</Label>
                   <Input type="date" name="selectionGradeDate" id="selectionGradeDate" value={formData.selectionGradeDate} onChange={handleChange} />
-                   {formData.selectionGradeDate && <div className="mt-2 text-xs"><label><input type="checkbox" name="selectionGradeTwoIncrements" checked={formData.selectionGradeTwoIncrements} onChange={handleChange} /> Apply 2 Increments</label></div>}
+                  {isSgPre2016 && <div className="mt-2 text-xs"><label><input type="checkbox" name="selectionGradeTwoIncrements" checked={formData.selectionGradeTwoIncrements} onChange={handleChange} /> Apply 2 Increments</label></div>}
+                  {isSgPost2016 && <p className="text-xs text-gray-500 mt-2">{t('gradeFixationNotePost2016')}</p>}
                 </div>
                 <div>
                   <Label htmlFor="specialGradeDate">{t('specialGradeDate')}</Label>
                   <Input type="date" name="specialGradeDate" id="specialGradeDate" value={formData.specialGradeDate} onChange={handleChange} />
-                  {formData.specialGradeDate && <div className="mt-2 text-xs"><label><input type="checkbox" name="specialGradeTwoIncrements" checked={formData.specialGradeTwoIncrements} onChange={handleChange} /> Apply 2 Increments</label></div>}
+                  {isSpGPre2016 && <div className="mt-2 text-xs"><label><input type="checkbox" name="specialGradeTwoIncrements" checked={formData.specialGradeTwoIncrements} onChange={handleChange} /> Apply 2 Increments</label></div>}
+                  {isSpGPost2016 && <p className="text-xs text-gray-500 mt-2">{t('gradeFixationNotePost2016')}</p>}
                 </div>
                  <div>
                   <Label htmlFor="superGradeDate">{t('superGradeDate')}</Label>
