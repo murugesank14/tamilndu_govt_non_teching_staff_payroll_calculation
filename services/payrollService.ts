@@ -17,6 +17,20 @@ const parseDateUTC = (dateString?: string): Date | undefined => {
 
 // --- Pay Calculation Helpers ---
 
+const getDARate = (date: Date, commission: 4 | 5 | 6 | 7): number => {
+    let schedule;
+    switch (commission) {
+        case 4: schedule = DA_RATES_4TH_PC; break;
+        case 5: schedule = DA_RATES_5TH_PC; break;
+        case 6: schedule = DA_RATES_6TH_PC; break;
+        case 7: schedule = DA_RATES_7TH_PC; break;
+        default: return 0;
+    }
+    const applicableRate = schedule.filter(r => r.date <= date).pop();
+    return applicableRate ? applicableRate.rate : 0;
+};
+
+
 function findPayInMatrix(pay: number, level: number): number {
   const levelPayScale = PAY_MATRIX[level];
   if (!levelPayScale) throw new Error(`Invalid level: ${level}`);
@@ -152,7 +166,6 @@ export const calculateFullPayroll = (data: EmployeeInput, activeGoData: Governme
     // --- 1. SETUP & INITIALIZATION ---
     
     // --- Build Rule Sets from G.O. Data ---
-    const ALL_DA_RATES = [...DA_RATES_4TH_PC, ...DA_RATES_5TH_PC, ...DA_RATES_6TH_PC, ...DA_RATES_7TH_PC].sort((a, b) => a.date.getTime() - b.date.getTime());
     const hraRevisionGO = activeGoData.find(go => go.rule?.type === 'HRA_REVISION_DA_50_PERCENT');
     const promotionRule22bGO = activeGoData.find(go => go.rule?.type === 'PROMOTION_RULE' && (go.rule as any).rule === '22(b)');
     const payCommission7thGO = activeGoData.find(go => go.rule?.type === 'PAY_COMMISSION_FIXATION' && go.effectiveFrom.startsWith('2016'));
@@ -250,7 +263,6 @@ export const calculateFullPayroll = (data: EmployeeInput, activeGoData: Governme
 
     // --- 3. BUILD CHRONOLOGICAL EVENT LIST ---
     const events: { date: Date, type: string, data?: any, priority: number }[] = [
-        ...ALL_DA_RATES.map(da => ({ date: da.date, type: 'DA_CHANGE', data: da, priority: 1 })),
         { date: fixedDate1996, type: 'PAY_COMMISSION_5', priority: 2 },
         { date: fixedDate2006, type: 'PAY_COMMISSION_6', priority: 2 },
         { date: fixedDate2016, type: 'PAY_COMMISSION_7', priority: 2 },
@@ -266,7 +278,6 @@ export const calculateFullPayroll = (data: EmployeeInput, activeGoData: Governme
     // --- 4. THE SIMULATION LOOP ---
     const yearlyCalculationsMap: Map<number, PayrollPeriod[]> = new Map();
     let currentDate = new Date(doj);
-    let currentDaRate = 0;
     let firstIncrementApplied = false;
     const sortedIncrementChanges = [...annualIncrementChanges].filter(c => c.effectiveDate).sort((a, b) => parseDateUTC(a.effectiveDate)!.getTime() - parseDateUTC(b.effectiveDate)!.getTime());
     
@@ -329,10 +340,7 @@ export const calculateFullPayroll = (data: EmployeeInput, activeGoData: Governme
                 currentPipb = undefined;
                 currentGradePay = undefined;
                 currentCommission = 7;
-                
-                // FIX: As per TN RPR 2017, DA is reset to 0% on the date of migration to the 7th CPC.
-                currentDaRate = 0;
-                
+                                
                 fixation7thPC = { oldBasicPay, multipliedPay, initialRevisedPay: currentPay, level: currentLevel };
                 remarks.push(`Pay fixed in 7th Pay Commission as per ${payCommission7thGO?.goNumberAndDate.en || 'G.O.Ms.No.303/2017 & G.O.Ms.No.40/2021'}.`);
             }
@@ -340,13 +348,6 @@ export const calculateFullPayroll = (data: EmployeeInput, activeGoData: Governme
             // --- Other Events (Promotions, Increments etc.) ---
             if (event.type.startsWith('PAY_REVISION_2010') && currentCommission === 6 && (event.data as PayRevision2010).postId === currentPostId) {
                 // ... logic as before ...
-            }
-
-            if(event.type === 'DA_CHANGE' && event.data.commission === currentCommission) {
-                currentDaRate = event.data.rate;
-                if (currentDate >= new Date('2016-07-01T00:00:00Z')) {
-                    remarks.push(`DA revised to ${currentDaRate}%.`);
-                }
             }
             
             if (event.type === 'PROMOTION') {
@@ -474,6 +475,21 @@ export const calculateFullPayroll = (data: EmployeeInput, activeGoData: Governme
         if (currentDate >= calcStartDate) {
             const year = currentDate.getUTCFullYear();
             if (!yearlyCalculationsMap.has(year)) yearlyCalculationsMap.set(year, []);
+
+            let currentDaRate = getDARate(currentDate, currentCommission);
+
+            // MINIMAL FIX: Explicitly enforce DA=0% for the first 6 months of 7th CPC.
+            if (currentCommission === 7 && currentDate.getUTCFullYear() === 2016 && currentDate.getUTCMonth() < 6) { // Jan is 0, Jun is 5
+                currentDaRate = 0;
+            }
+            
+            // Add remark for DA change
+            const previousMonthDate = new Date(currentDate);
+            previousMonthDate.setUTCMonth(previousMonthDate.getUTCMonth() - 1);
+            const previousDaRate = getDARate(previousMonthDate, currentCommission);
+            if (currentDaRate !== previousDaRate && currentDate >= new Date('2016-07-01T00:00:00Z')) {
+                remarks.push(`DA revised to ${currentDaRate}%.`);
+            }
 
             const daAmount = Math.round(currentPay * (currentDaRate / 100));
             const { hra, revised: hraRevised, goRef: hraGoRef } = getHra(currentPay, cityGrade, currentDate, currentDaRate, hraRevisionGO);
