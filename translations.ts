@@ -7,9 +7,11 @@ export const translations = {
     // Welcome Message
     welcomeTitle: "Welcome!",
     welcomeMessage: 'Enter employee details on the left and click "Calculate Full Payroll" to see the detailed breakdown.',
+    welcomePensionMessage: 'Enter retirement details on the left and click "Calculate Pension" to see the benefit breakdown.',
 
     // Navigation
     payrollCalculator: "Payroll Calculator",
+    pensionCalculator: "Pension Calculator",
     goViewer: "G.O. Viewer",
 
     // G.O. Viewer
@@ -62,7 +64,15 @@ export const translations = {
     promotions: "Promotions / பதவி உயர்வுகள்",
     breaksInService: "Breaks in Service (LOP / EOL) / பணியிடை முறிவு (சம்பளமில்லா விடுப்பு)",
     calculationPeriod: "Calculation Period / கணக்கீட்டுக் காலம்",
-
+    pensionCalculatorTitle: "Pension & Gratuity Calculator",
+    pensionCalculatorDesc: "Calculate pensionary benefits for employees retiring under the Old Pension Scheme.",
+    retirementDetails: "Retirement Details",
+    last10MonthsPay: "Last 10 Months' Basic Pay",
+    last10MonthsPayDesc: "Enter the Basic Pay for the 10 months preceding retirement.",
+    commutation: "Commutation of Pension",
+    qualifyingService: "Qualifying Service (Optional Override)",
+    qualifyingServiceDesc: "Leave blank for auto-calculation from service dates.",
+    
     // Form Labels
     employeeName: "Employee Name / ஊழியர் பெயர்",
     fatherName: "Father's Name / தந்தை பெயர்",
@@ -115,7 +125,13 @@ export const translations = {
     endDate: "End Date / இறுதி தேதி",
     calculateFrom: "Calculate From / இதிலிருந்து கணக்கிடுக",
     calculateTo: "Calculate To / இதுவரை கணக்கிடுக",
-    
+    retirementDate: "Date of Retirement",
+    month: "Month",
+    noCommutation: "No Commutation",
+    commuteOneThird: "Commute 1/3rd of Pension",
+    years: "Years",
+    months: "Months",
+
     // Form Placeholders & Help Text
     enterFullName: "Enter full name / முழு பெயரை உள்ளிடவும்",
     enterFatherName: "Enter father's name / தந்தை பெயரை உள்ளிடவும்",
@@ -137,6 +153,7 @@ export const translations = {
     addBreak: "+ Add Break / + இடைவெளி சேர்",
     resetForm: "Reset Form / படிவத்தை மீட்டமை",
     calculatePayroll: "Calculate Full Payroll / முழு ஊதியத்தைக் கணக்கிடுக",
+    calculatePension: "Calculate Pension",
     calculating: "Calculating... / கணக்கிடப்படுகிறது...",
 
     // Result Section
@@ -157,6 +174,16 @@ export const translations = {
     reference: "Reference",
     promotionFixationMethodLabel: "Fixation Method",
     complianceFootnote: "Calculations as per TN Revised Pay Rules, 2017 (G.O.Ms.No.303 & 40) & Fundamental Rules. Grade fixation as per G.O.Ms.No.40/2021.",
+    pensionSummary: "Pension Summary",
+    pensionBenefits: "Pension Benefits",
+    lumpSumBenefits: "Lump Sum Benefits (One-Time Payment)",
+    averageEmoluments: "Average Emoluments (Last 10 Months)",
+    ageAtRetirement: "Age at Retirement",
+    fullPension: "Full Pension (per month)",
+    dcrg: "Death-cum-Retirement Gratuity (DCRG)",
+    commutedValue: "Commuted Value of Pension (CVP)",
+    residuaryPension: "Residuary Pension (per month, after commutation)",
+    totalLumpSum: "Total Lump Sum Receivable",
 
 
     // Result Table
@@ -177,9 +204,11 @@ export const translations = {
     // Welcome Message
     welcomeTitle: "வருக!",
     welcomeMessage: "இடதுபுறத்தில் பணியாளர் விவரங்களை உள்ளிட்டு, விரிவான முறிவைக் காண 'முழு ஊதியத்தைக் கணக்கிடுக' என்பதைக் கிளிக் செய்யவும்.",
+    welcomePensionMessage: "இடதுபுறத்தில் ஓய்வூதிய விவரங்களை உள்ளிட்டு, பலன்களின் முறிவைக் காண 'ஓய்வூதியத்தைக் கணக்கிடுக' என்பதைக் கிளிக் செய்யவும்.",
 
     // Navigation
     payrollCalculator: "ஊதியக் கணக்கிடு",
+    pensionCalculator: "ஓய்வூதியக் கணக்கிடு",
     goViewer: "அரசாணைகள்",
 
     // G.O. Viewer
@@ -232,6 +261,14 @@ export const translations = {
     promotions: "பதவி உயர்வுகள் / Promotions",
     breaksInService: "பணியிடை முறிவு (சம்பளமில்லா விடுப்பு) / Breaks in Service (LOP / EOL)",
     calculationPeriod: "கணக்கீட்டுக் காலம் / Calculation Period",
+    pensionCalculatorTitle: "ஓய்வூதியம் மற்றும் பணிக்கொடை கணக்கிடு",
+    pensionCalculatorDesc: "பழைய ஓய்வூதியத் திட்டத்தின் கீழ் ஓய்வு பெறும் ஊழியர்களுக்கான ஓய்வூதியப் பலன்களைக் கணக்கிடுங்கள்.",
+    retirementDetails: "ஓய்வூதிய விவரங்கள்",
+    last10MonthsPay: "கடைசி 10 மாத அடிப்படை ஊதியம்",
+    last10MonthsPayDesc: "ஓய்வு பெறுவதற்கு முந்தைய 10 மாதங்களுக்கான அடிப்படை ஊதியத்தை உள்ளிடவும்.",
+    commutation: "ஓய்வூதியப் commutation",
+    qualifyingService: "தகுதியான சேவை (விருப்பத்தேர்வு மேலெழுதல்)",
+    qualifyingServiceDesc: "சேவை தேதிகளிலிருந்து தானாக கணக்கிட, காலியாக விடவும்.",
 
     // Form Labels
     employeeName: "ஊழியர் பெயர் / Employee Name",
@@ -285,6 +322,12 @@ export const translations = {
     endDate: "இறுதி தேதி / End Date",
     calculateFrom: "இதிலிருந்து கணக்கிடுக / Calculate From",
     calculateTo: "இதுவரை கணக்கிடுக / Calculate To",
+    retirementDate: "ஓய்வு பெறும் தேதி",
+    month: "மாதம்",
+    noCommutation: "Commutation இல்லை",
+    commuteOneThird: "1/3 பங்கு Commutation",
+    years: "ஆண்டுகள்",
+    months: "மாதங்கள்",
 
     // Form Placeholders & Help Text
     enterFullName: "முழு பெயரை உள்ளிடவும் / Enter full name",
@@ -307,6 +350,7 @@ export const translations = {
     addBreak: "+ இடைவெளி சேர் / + Add Break",
     resetForm: "படிவத்தை மீட்டமை / Reset Form",
     calculatePayroll: "முழு ஊதியத்தைக் கணக்கிடுக / Calculate Full Payroll",
+    calculatePension: "ஓய்வூதியத்தைக் கணக்கிடு",
     calculating: "கணக்கிடப்படுகிறது... / Calculating...",
     
     // Result Section
@@ -327,7 +371,16 @@ export const translations = {
     reference: "ஆதாரம்",
     promotionFixationMethodLabel: "நிர்ணய முறை",
     complianceFootnote: "கணக்கீடுகள் தமிழ்நாடு திருத்திய ஊதிய விதிகள், 2017 (அ.ஆ.எண் 303 & 40) மற்றும் அடிப்படை விதிகளின்படி செய்யப்பட்டுள்ளன. தர ஊதிய நிர்ணயம் அ.ஆ.எண் 40/2021-ன்படி செய்யப்பட்டுள்ளது.",
-
+    pensionSummary: "ஓய்வூதியச் சுருக்கம்",
+    pensionBenefits: "ஓய்வூதியப் பலன்கள்",
+    lumpSumBenefits: "மொத்தத் தொகை பலன்கள் (ஒரு முறை செலுத்துதல்)",
+    averageEmoluments: "சராசரி ஊதியம் (கடைசி 10 மாதங்கள்)",
+    ageAtRetirement: "ஓய்வு பெறும் போது வயது",
+    fullPension: "முழு ஓய்வூதியம் (மாதந்தோறும்)",
+    dcrg: "இறப்பு மற்றும் ஓய்வூதிய பணிக்கொடை (DCRG)",
+    commutedValue: "ஓய்வூதியத்தின் மாற்றப்பட்ட மதிப்பு (CVP)",
+    residuaryPension: "மீதமுள்ள ஓய்வூதியம் (மாதந்தோறும், commutation பிறகு)",
+    totalLumpSum: "மொத்தமாகப் பெறக்கூடிய தொகை",
 
     // Result Table
     payrollForYear: "{year}க்கான ஊதியம் / Payroll for {year}",

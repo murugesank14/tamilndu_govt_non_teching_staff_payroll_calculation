@@ -1,9 +1,10 @@
-import { EmployeeInput, PayrollResult, PayrollYear, PayrollPeriod, CityGrade, Promotion, Post, PayRevision2010, PayScale, GovernmentOrder, PromotionFixation } from '../types';
+import { EmployeeInput, PayrollResult, PayrollYear, PayrollPeriod, CityGrade, Promotion, Post, PayRevision2010, PayScale, GovernmentOrder, PromotionFixation, PensionInput, PensionResult } from '../types';
 import { 
     PAY_MATRIX, GRADE_PAY_TO_LEVEL, HRA_SLABS_7TH_PC, 
     PAY_SCALES_6TH_PC, HRA_SLABS_6TH_PC, HRA_SLABS_6TH_PC_PRE_2009, HRA_SLABS_5TH_PC, HRA_SLABS_4TH_PC, POSTS,
     PAY_REVISIONS_2010, PAY_SCALES_5TH_PC, PAY_SCALES_4TH_PC,
-    DA_RATES_4TH_PC, DA_RATES_5TH_PC, DA_RATES_6TH_PC, DA_RATES_7TH_PC
+    DA_RATES_4TH_PC, DA_RATES_5TH_PC, DA_RATES_6TH_PC, DA_RATES_7TH_PC,
+    COMMUTATION_FACTORS
 } from '../constants';
 
 const FITMENT_FACTOR_6TH_PC = 1.86;
@@ -641,5 +642,92 @@ export const calculateFullPayroll = (data: EmployeeInput, activeGoData: Governme
         promotionFixations: promotionFixations.length > 0 ? promotionFixations : undefined,
         yearlyCalculations,
         appliedRevisions,
+    };
+};
+
+export const calculatePension = (data: PensionInput): PensionResult => {
+    const { dateOfBirth, dateOfJoining, retirementDate, lastTenMonthsPay, commutationPercentage, qualifyingServiceYears, qualifyingServiceMonths } = data;
+
+    if (!dateOfBirth || !dateOfJoining || !retirementDate || lastTenMonthsPay.some(p => p.basicPay === undefined)) {
+        throw new Error("Please fill all required fields: Name, Dates, and all 10 Basic Pay entries.");
+    }
+
+    const dor = parseDateUTC(retirementDate)!;
+    const dob = parseDateUTC(dateOfBirth)!;
+    const doj = parseDateUTC(dateOfJoining)!;
+
+    // --- Calculations ---
+    let ageAtRetirement = dor.getUTCFullYear() - dob.getUTCFullYear();
+    if (dor.getUTCMonth() < dob.getUTCMonth() || (dor.getUTCMonth() === dob.getUTCMonth() && dor.getUTCDate() < dob.getUTCDate())) {
+        ageAtRetirement--;
+    }
+    const ageForCommutation = ageAtRetirement + 1;
+
+    let qsYears = qualifyingServiceYears ?? 0;
+    let qsMonths = qualifyingServiceMonths ?? 0;
+    let qualifyingServiceStr: string;
+
+    if (qualifyingServiceYears === undefined || qualifyingServiceMonths === undefined) {
+        let diff = dor.getTime() - doj.getTime();
+        let years = Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
+        let months = Math.floor((diff % (1000 * 60 * 60 * 24 * 365.25)) / (1000 * 60 * 60 * 24 * (365.25 / 12)));
+        qsYears = years;
+        qsMonths = months;
+        qualifyingServiceStr = `${years} years, ${months} months`;
+    } else {
+        qualifyingServiceStr = `${qsYears} years, ${qsMonths} months (Override)`;
+    }
+
+    const totalValidPays = lastTenMonthsPay.filter(p => p.basicPay! > 0);
+    if(totalValidPays.length !== 10) throw new Error("Please enter a valid Basic Pay for all 10 months.");
+    const sumOfPay = totalValidPays.reduce((acc, curr) => acc + curr.basicPay!, 0);
+    const averageEmoluments = sumOfPay / 10;
+    
+    const fullPension = Math.round(averageEmoluments / 2);
+
+    // DCRG Calculation
+    const daRateOnRetirement = getDARate(dor, 7); // Assuming 7th PC for DA rates on retirement
+    const lastBasicPay = lastTenMonthsPay[9].basicPay!;
+    const lastPayPlusDA = lastBasicPay + Math.round(lastBasicPay * (daRateOnRetirement / 100));
+
+    const qualifyingServiceInHalfYears = Math.min(Math.floor((qsYears + qsMonths / 12) * 2), 66);
+    let dcrg = Math.round((lastPayPlusDA / 4) * qualifyingServiceInHalfYears);
+    const DCRG_CAP = 2000000;
+    dcrg = Math.min(dcrg, DCRG_CAP);
+
+    let benefits: PensionResult['benefits'] = {
+        fullPension,
+        dcrg,
+        totalLumpSum: dcrg,
+    };
+
+    if (commutationPercentage === '33.33') {
+        const commutationFactor = COMMUTATION_FACTORS[ageForCommutation] || 0;
+        if(commutationFactor === 0) throw new Error(`Commutation factor not available for age ${ageForCommutation}. Please check rules.`);
+        const commutedPortion = Math.floor(fullPension / 3);
+        const commutedValue = Math.round(commutedPortion * 12 * commutationFactor);
+        const residuaryPension = fullPension - commutedPortion;
+        
+        benefits = {
+            ...benefits,
+            commutedValue,
+            residuaryPension,
+            totalLumpSum: dcrg + commutedValue,
+        };
+    }
+    
+    return {
+        inputs: {
+            retirementDate: dor.toLocaleDateString('en-GB', { timeZone: 'UTC' }),
+            ageAtRetirement,
+            ageForCommutation,
+        },
+        calculations: {
+            averageEmoluments,
+            qualifyingService: qualifyingServiceStr,
+            daRateOnRetirement,
+            lastPayPlusDA,
+        },
+        benefits,
     };
 };

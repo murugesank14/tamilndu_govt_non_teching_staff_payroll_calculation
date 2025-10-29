@@ -350,7 +350,7 @@ export const GO_DATA: GovernmentOrder[] = [
     department: { en: 'Finance Department', ta: 'நிதித் துறை' }, 
     goNumberAndDate: { en: 'G.O.Ms.No.237, 22.07.2013', ta: 'அ.ஆ.(நிலை) எண் 237, 22.07.2013' }, 
     subject: { en: 'Selection/Special Grade Fixation - Clarification on applying increment on the same day', ta: 'தேர்வு/சிறப்பு நிலை ஊதிய நிர்ணயம் - ஒரே நாளில் ஊதிய உயர்வு வழங்குவது குறித்த தெளிவுரை' }, 
-    keyPoints: { en: 'If the date of annual increment and the date of grade award coincide, the annual increment shall be sanctioned first, and the grade award increment shall be sanctioned on the pay so arrived.', ta: 'ஆண்டு ஊதிய உயர்வு மற்றும் தேர்வு/சிறப்பு நிலை பெறும் நாள் ஒன்றாக இருந்தால், முதலில் ஆண்டு ஊதிய உயர்வு মঞ্জুরிக்கப்பட்டு, அதன் பின் வரும் ஊதியத்தில் தேர்வு/சிறப்பு நிலைக்கான ஊதிய உயர்வு মঞ্জুরிக்கப்பட வேண்டும்.' }, 
+    keyPoints: { en: 'If the date of annual increment and the date of grade award coincide, the annual increment shall be sanctioned first, and the grade award increment shall be sanctioned on the pay so arrived.', ta: 'ஆண்டு ஊதிய உயர்வு மற்றும் தேர்வு/சிறப்பு நிலை பெறும் நாள் ஒன்றாக இருந்தால், முதலில் ஆண்டு ஊதிய உயர்வு মঞ্জुरிக்கப்பட்டு, அதன் பின் வரும் ஊதியத்தில் தேர்வு/சிறப்பு நிலைக்கான ஊதிய உயர்வு মঞ্জुरிக்கப்பட வேண்டும்.' }, 
     effectiveFrom: '2006-01-01', 
     category: 'Establishment', 
     remarks: { en: 'Applicable for grade awards during the 6th Pay Commission period (01.01.2006 to 31.12.2015).', ta: '6வது ஊதியக் குழு காலத்தில் (01.01.2006 முதல் 31.12.2015 வரை) தேர்வு/சிறப்பு நிலை பெற்றவர்களுக்குப் பொருந்தும்.' }, 
@@ -372,3 +372,18 @@ export const GO_DATA: GovernmentOrder[] = [
     rule: { type: 'PROMOTION_RULE', rule: 'GradeFixationLevelSplit', details: { splitLevel: 10 } } 
   },
 ];
+
+// As per Rule 45-B of TN Pension Rules
+export const COMMUTATION_FACTORS: { [ageNextBirthday: number]: number } = {
+  20: 9.188, 21: 9.187, 22: 9.186, 23: 9.185, 24: 9.183, 25: 9.180,
+  26: 9.177, 27: 9.174, 28: 9.170, 29: 9.165, 30: 9.160, 31: 9.153,
+  32: 9.146, 33: 9.138, 34: 9.129, 35: 9.119, 36: 9.108, 37: 9.095,
+  38: 9.081, 39: 9.066, 40: 9.049, 41: 9.031, 42: 9.011, 43: 8.990,
+  44: 8.967, 45: 8.942, 46: 8.916, 47: 8.887, 48: 8.857, 49: 8.824,
+  50: 8.790, 51: 8.752, 52: 8.712, 53: 8.669, 54: 8.623, 55: 8.572,
+  56: 8.518, 57: 8.460, 58: 8.397, 59: 8.331, 60: 8.260, 61: 8.185,
+  62: 8.106, 63: 8.022, 64: 7.934, 65: 7.842, 66: 7.746, 67: 7.645,
+  68: 7.540, 69: 7.431, 70: 7.317, 71: 7.199, 72: 7.077, 73: 6.951,
+  74: 6.821, 75: 6.687, 76: 6.550, 77: 6.409, 78: 6.265, 79: 6.119,
+  80: 5.970, 81: 5.820
+};

@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
-import { EmployeeInput, PayrollResult as PayrollResultType, GovernmentOrder } from './types';
-import { calculateFullPayroll } from './services/payrollService';
+import { EmployeeInput, PayrollResult as PayrollResultType, GovernmentOrder, PensionInput, PensionResult as PensionResultType } from './types';
+import { calculateFullPayroll, calculatePension } from './services/payrollService';
 import PayrollForm from './components/PayrollForm';
 import PayrollResult from './components/PayrollResult';
 import { HeroIcon } from './components/ui/HeroIcon';
 import { useLanguage } from './components/LanguageProvider';
 import GoViewer from './components/GoViewer';
 import { GO_DATA } from './constants';
+import PensionForm from './components/PensionForm';
+import PensionResult from './components/PensionResult';
 
 const LanguageSwitcher: React.FC = () => {
     const { language, setLanguage } = useLanguage();
@@ -31,11 +33,14 @@ const LanguageSwitcher: React.FC = () => {
     )
 }
 
+type ActiveView = 'calculator' | 'pensionCalculator' | 'goViewer';
+
 const App: React.FC = () => {
   const [payrollResult, setPayrollResult] = useState<PayrollResultType | null>(null);
+  const [pensionResult, setPensionResult] = useState<PensionResultType | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [activeView, setActiveView] = useState<'calculator' | 'goViewer'>('calculator');
+  const [activeView, setActiveView] = useState<ActiveView>('calculator');
   const [activeGoData, setActiveGoData] = useState<GovernmentOrder[]>(GO_DATA);
   const { t } = useLanguage();
 
@@ -44,7 +49,6 @@ const App: React.FC = () => {
     setError(null);
     setPayrollResult(null);
 
-    // Simulate async calculation
     setTimeout(() => {
       try {
         const result = calculateFullPayroll(data, activeGoData);
@@ -60,8 +64,29 @@ const App: React.FC = () => {
       }
     }, 500);
   };
+  
+  const handlePensionCalculate = (data: PensionInput) => {
+    setIsLoading(true);
+    setError(null);
+    setPensionResult(null);
 
-  const getNavButtonClasses = (viewName: 'calculator' | 'goViewer') => {
+    setTimeout(() => {
+        try {
+            const result = calculatePension(data);
+            setPensionResult(result);
+        } catch (e) {
+            if (e instanceof Error) {
+                setError(e.message);
+            } else {
+                setError('An unknown error occurred during pension calculation.');
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    }, 500);
+  }
+
+  const getNavButtonClasses = (viewName: ActiveView) => {
     const baseClasses = "px-4 py-3 text-sm font-semibold transition-colors focus:outline-none";
     if (activeView === viewName) {
       return `${baseClasses} text-emerald-600 border-b-2 border-emerald-600`;
@@ -70,6 +95,41 @@ const App: React.FC = () => {
   }
   
   const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+  const renderContent = () => {
+    if (isLoading) {
+        return (
+            <div className="flex justify-center items-center h-full bg-white rounded-xl shadow-md p-8">
+                <div className="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12 mb-4 animate-spin border-t-emerald-500"></div>
+            </div>
+        );
+    }
+    if (error) {
+        return (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl relative shadow" role="alert">
+                <strong className="font-bold">Error: </strong>
+                <span className="block sm:inline">{error}</span>
+            </div>
+        );
+    }
+    if (activeView === 'calculator' && payrollResult) {
+        return <PayrollResult result={payrollResult} />;
+    }
+    if (activeView === 'pensionCalculator' && pensionResult) {
+        return <PensionResult result={pensionResult} />;
+    }
+    
+    // Default welcome message for both calculators
+    return (
+        <div className="bg-white rounded-xl shadow-md p-8 text-center h-full flex flex-col justify-center">
+            <h2 className="text-2xl font-semibold text-gray-700 mb-4">{t('welcomeTitle')}</h2>
+            <p className="text-gray-500 max-w-md mx-auto">
+                {activeView === 'pensionCalculator' ? t('welcomePensionMessage') : t('welcomeMessage')}
+            </p>
+        </div>
+    );
+  }
+
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800">
@@ -93,6 +153,9 @@ const App: React.FC = () => {
           <button onClick={() => setActiveView('calculator')} className={getNavButtonClasses('calculator')}>
             {t('payrollCalculator')}
           </button>
+           <button onClick={() => setActiveView('pensionCalculator')} className={getNavButtonClasses('pensionCalculator')}>
+            {t('pensionCalculator')}
+          </button>
           <button onClick={() => setActiveView('goViewer')} className={getNavButtonClasses('goViewer')}>
             {t('goViewer')}
           </button>
@@ -100,35 +163,27 @@ const App: React.FC = () => {
       </nav>
 
       <main className="container mx-auto p-4 md:p-6 lg:p-8">
-         {activeView === 'calculator' ? (
+         {activeView === 'calculator' && (
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
               <div className="lg:col-span-2">
                 <PayrollForm onCalculate={handleCalculate} isLoading={isLoading} />
               </div>
               <div className="lg:col-span-3">
-                {isLoading && (
-                  <div className="flex justify-center items-center h-full bg-white rounded-xl shadow-md p-8">
-                    <div className="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12 mb-4 animate-spin border-t-emerald-500"></div>
-                  </div>
-                )}
-                {error && (
-                  <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl relative shadow" role="alert">
-                    <strong className="font-bold">Error: </strong>
-                    <span className="block sm:inline">{error}</span>
-                  </div>
-                )}
-                {payrollResult && <PayrollResult result={payrollResult} />}
-                {!payrollResult && !isLoading && !error && (
-                     <div className="bg-white rounded-xl shadow-md p-8 text-center h-full flex flex-col justify-center">
-                        <h2 className="text-2xl font-semibold text-gray-700 mb-4">{t('welcomeTitle')}</h2>
-                        <p className="text-gray-500 max-w-md mx-auto">
-                            {t('welcomeMessage')}
-                        </p>
-                    </div>
-                )}
+                 {renderContent()}
               </div>
             </div>
-          ) : (
+          )}
+          {activeView === 'pensionCalculator' && (
+             <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+              <div className="lg:col-span-2">
+                <PensionForm onCalculate={handlePensionCalculate} isLoading={isLoading} />
+              </div>
+              <div className="lg:col-span-3">
+                {renderContent()}
+              </div>
+            </div>
+          )}
+          {activeView === 'goViewer' && (
             <GoViewer goData={activeGoData} onGoDataUpdate={setActiveGoData} />
           )}
       </main>

@@ -223,3 +223,42 @@ export interface GovernmentOrder {
   remarks: { en: string; ta: string };
   rule?: RuleType;
 }
+
+// --- Pension Calculator Types ---
+export interface LastTenMonthsPay {
+  id: string;
+  month: string; // e.g., "YYYY-MM"
+  basicPay: number | undefined;
+}
+
+export interface PensionInput {
+  employeeName: string;
+  dateOfBirth: string;
+  dateOfJoining: string;
+  retirementDate: string;
+  lastTenMonthsPay: LastTenMonthsPay[];
+  commutationPercentage: '0' | '33.33';
+  qualifyingServiceYears?: number;
+  qualifyingServiceMonths?: number;
+}
+
+export interface PensionResult {
+  inputs: {
+    retirementDate: string;
+    ageAtRetirement: number;
+    ageForCommutation: number;
+  };
+  calculations: {
+    averageEmoluments: number;
+    qualifyingService: string;
+    daRateOnRetirement: number;
+    lastPayPlusDA: number;
+  };
+  benefits: {
+    fullPension: number;
+    dcrg: number;
+    commutedValue?: number;
+    residuaryPension?: number;
+    totalLumpSum: number;
+  };
+}
