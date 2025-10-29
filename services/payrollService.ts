@@ -3,7 +3,7 @@ import {
     PAY_MATRIX, GRADE_PAY_TO_LEVEL, HRA_SLABS_7TH_PC, 
     PAY_SCALES_6TH_PC, HRA_SLABS_6TH_PC, HRA_SLABS_6TH_PC_PRE_2009, HRA_SLABS_5TH_PC, HRA_SLABS_4TH_PC, POSTS,
     PAY_REVISIONS_2010, PAY_SCALES_5TH_PC, PAY_SCALES_4TH_PC,
-    DA_RATES_4TH_PC, DA_RATES_5TH_PC, DA_RATES_6TH_PC
+    DA_RATES_4TH_PC, DA_RATES_5TH_PC, DA_RATES_6TH_PC, DA_RATES_7TH_PC
 } from '../constants';
 
 const FITMENT_FACTOR_6TH_PC = 1.86;
@@ -152,19 +152,7 @@ export const calculateFullPayroll = (data: EmployeeInput, activeGoData: Governme
     // --- 1. SETUP & INITIALIZATION ---
     
     // --- Build Rule Sets from G.O. Data ---
-    const DA_RATES_7TH_PC_FROM_GO = activeGoData
-        .filter(go => go.rule?.type === 'DA_REVISION' && go.rule.commission === 7)
-        .map(go => {
-            const rule = go.rule as { type: 'DA_REVISION'; rate: number; commission: 7 };
-            return { date: parseDateUTC(go.effectiveFrom)!, rate: rule.rate, commission: 7, goRef: go.goNumberAndDate.en };
-        });
-    // Add the initial 0% rate if not present in a GO.
-    if (!DA_RATES_7TH_PC_FROM_GO.some(r => r.date.getTime() === new Date('2016-01-01T00:00:00Z').getTime())) {
-        DA_RATES_7TH_PC_FROM_GO.push({
-             date: new Date('2016-01-01T00:00:00Z'), rate: 0, commission: 7, goRef: '7th Pay Commission Implementation'
-        });
-    }
-    const ALL_DA_RATES = [...DA_RATES_4TH_PC, ...DA_RATES_5TH_PC, ...DA_RATES_6TH_PC, ...DA_RATES_7TH_PC_FROM_GO].sort((a, b) => a.date.getTime() - b.date.getTime());
+    const ALL_DA_RATES = [...DA_RATES_4TH_PC, ...DA_RATES_5TH_PC, ...DA_RATES_6TH_PC, ...DA_RATES_7TH_PC].sort((a, b) => a.date.getTime() - b.date.getTime());
     const hraRevisionGO = activeGoData.find(go => go.rule?.type === 'HRA_REVISION_DA_50_PERCENT');
     const promotionRule22bGO = activeGoData.find(go => go.rule?.type === 'PROMOTION_RULE' && (go.rule as any).rule === '22(b)');
     const payCommission7thGO = activeGoData.find(go => go.rule?.type === 'PAY_COMMISSION_FIXATION' && go.effectiveFrom.startsWith('2016'));
@@ -356,8 +344,8 @@ export const calculateFullPayroll = (data: EmployeeInput, activeGoData: Governme
 
             if(event.type === 'DA_CHANGE' && event.data.commission === currentCommission) {
                 currentDaRate = event.data.rate;
-                if (event.data.goRef && !event.data.goRef.includes('Implementation')) {
-                    remarks.push(`DA revised to ${currentDaRate}% as per ${event.data.goRef}.`);
+                if (currentDate >= new Date('2016-07-01T00:00:00Z')) {
+                    remarks.push(`DA revised to ${currentDaRate}%.`);
                 }
             }
             
@@ -487,14 +475,8 @@ export const calculateFullPayroll = (data: EmployeeInput, activeGoData: Governme
             const year = currentDate.getUTCFullYear();
             if (!yearlyCalculationsMap.has(year)) yearlyCalculationsMap.set(year, []);
 
-            // MINIMAL FIX: Enforce 0% DA for the first 6 months of the 7th Pay Commission.
-            const is7thPcDaResetPeriod = currentCommission === 7 &&
-                                         currentDate >= new Date('2016-01-01T00:00:00Z') &&
-                                         currentDate < new Date('2016-07-01T00:00:00Z');
-            const effectiveDaRate = is7thPcDaResetPeriod ? 0 : currentDaRate;
-
-            const daAmount = Math.round(currentPay * (effectiveDaRate / 100));
-            const { hra, revised: hraRevised, goRef: hraGoRef } = getHra(currentPay, cityGrade, currentDate, effectiveDaRate, hraRevisionGO);
+            const daAmount = Math.round(currentPay * (currentDaRate / 100));
+            const { hra, revised: hraRevised, goRef: hraGoRef } = getHra(currentPay, cityGrade, currentDate, currentDaRate, hraRevisionGO);
             if (hraRevised && hraGoRef) {
                 remarks.push(`HRA revised as per ${hraGoRef} (DA>=50%).`);
             }
@@ -503,7 +485,7 @@ export const calculateFullPayroll = (data: EmployeeInput, activeGoData: Governme
             yearlyCalculationsMap.get(year)!.push({
                 period: currentDate.toLocaleString('en-GB', { month: 'short', year: 'numeric', timeZone: 'UTC' }),
                 basicPay: currentPay,
-                daRate: effectiveDaRate,
+                daRate: currentDaRate,
                 daAmount,
                 hra,
                 grossPay,

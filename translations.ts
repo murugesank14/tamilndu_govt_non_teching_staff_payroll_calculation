@@ -150,7 +150,7 @@ export const translations = {
     promotionFixation: "Promotion Fixation Summary",
     reference: "Reference",
     promotionFixationMethodLabel: "Fixation Method",
-    complianceFootnote: "Calculations as per TN Revised Pay Rules, 2017 (GO Ms No.303, 11.10.2017) & Rule 22(b); read with GO Ms No.40 (26.02.2021) for matrix clarifications.",
+    complianceFootnote: "As per TN Revised Pay Rules, 2017 (GO Ms No.303) & GO Ms No.40 (matrix clarifications).",
 
 
     // Result Table
@@ -314,7 +314,7 @@ export const translations = {
     promotionFixation: "பதவி உயர்வு ஊதிய நிர்ணயச் சுருக்கம்",
     reference: "ஆதாரம்",
     promotionFixationMethodLabel: "நிர்ணய முறை",
-    complianceFootnote: "கணக்கீடுகள் தமிழ்நாடு திருத்திய ஊதிய விதிகள், 2017 (அ.ஆ.(நிலை) எண் 303, 11.10.2017) & விதி 22(பி); மேலும் அ.ஆ.(நிலை) எண் 40 (26.02.2021) உடன் படிக்கவும்.",
+    complianceFootnote: "தமிழ்நாடு திருத்திய ஊதிய விதிகள், 2017 (அரசாணை (நிலை) எண் 303) மற்றும் அரசாணை (நிலை) எண் 40 (ஊதிய அணி தெளிவுரைகள்) ஆகியவற்றின்படி.",
 
 
     // Result Table

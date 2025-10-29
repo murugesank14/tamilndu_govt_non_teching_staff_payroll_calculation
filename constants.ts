@@ -239,6 +239,27 @@ export const DA_RATES_6TH_PC = [
   { date: new Date('2015-07-01T00:00:00Z'), rate: 119, commission: 6 },
 ];
 
+export const DA_RATES_7TH_PC = [
+  // 7th Pay Commission - DA is reset to 0% on migration
+  { date: new Date('2016-01-01T00:00:00Z'), rate: 0, commission: 7 },
+  { date: new Date('2016-07-01T00:00:00Z'), rate: 2, commission: 7 },
+  { date: new Date('2017-01-01T00:00:00Z'), rate: 4, commission: 7 },
+  { date: new Date('2017-07-01T00:00:00Z'), rate: 5, commission: 7 },
+  { date: new Date('2018-01-01T00:00:00Z'), rate: 7, commission: 7 },
+  { date: new Date('2018-07-01T00:00:00Z'), rate: 9, commission: 7 },
+  { date: new Date('2019-01-01T00:00:00Z'), rate: 12, commission: 7 },
+  { date: new Date('2019-07-01T00:00:00Z'), rate: 17, commission: 7 },
+  { date: new Date('2021-07-01T00:00:00Z'), rate: 28, commission: 7 },
+  { date: new Date('2022-01-01T00:00:00Z'), rate: 31, commission: 7 },
+  { date: new Date('2022-07-01T00:00:00Z'), rate: 34, commission: 7 },
+  { date: new Date('2023-01-01T00:00:00Z'), rate: 38, commission: 7 },
+  { date: new Date('2023-04-01T00:00:00Z'), rate: 42, commission: 7 },
+  { date: new Date('2023-07-01T00:00:00Z'), rate: 46, commission: 7 },
+  { date: new Date('2024-01-01T00:00:00Z'), rate: 50, commission: 7 },
+  { date: new Date('2024-07-01T00:00:00Z'), rate: 53, commission: 7 },
+];
+
+
 type HraSlab = {
   payRange: [number, number];
   rates: { [key in CityGrade]: number };
@@ -313,23 +334,6 @@ export const GO_DATA: GovernmentOrder[] = [
     remarks: { en: 'Works in conjunction with G.O.Ms.No.303.', ta: 'அ.ஆ.(நிலை) எண் 303 உடன் இணைந்து செயல்படும்.' }, 
     rule: { type: 'PROMOTION_RULE', rule: '22(b)', details: 'Allows option for fixation from date of promotion or date of next increment.' } 
   },
-
-  // 7th PC DA Revisions
-  { id: 'go-da-2', department: { en: 'Finance Dept', ta: 'நிதித் துறை' }, goNumberAndDate: { en: 'G.O.Ms.No.303, 11.10.2017', ta: 'அ.ஆ.(நிலை) எண் 303, 11.10.2017' }, subject: { en: 'DA Revision to 2%', ta: 'அகவிலைப்படி 2% ஆக உயர்வு' }, keyPoints: { en: 'DA revised', ta: 'அ.ப. திருத்தம்' }, effectiveFrom: '2016-07-01', category: 'Establishment', remarks: { en: '', ta: '' }, rule: { type: 'DA_REVISION', rate: 2, commission: 7 } },
-  { id: 'go-da-4', department: { en: 'Finance Dept', ta: 'நிதித் துறை' }, goNumberAndDate: { en: 'G.O.Ms.No.303, 11.10.2017', ta: 'அ.ஆ.(நிலை) எண் 303, 11.10.2017' }, subject: { en: 'DA Revision to 4%', ta: 'அகவிலைப்படி 4% ஆக உயர்வு' }, keyPoints: { en: 'DA revised', ta: 'அ.ப. திருத்தம்' }, effectiveFrom: '2017-01-01', category: 'Establishment', remarks: { en: '', ta: '' }, rule: { type: 'DA_REVISION', rate: 4, commission: 7 } },
-  { id: 'go-da-5', department: { en: 'Finance Dept', ta: 'நிதித் துறை' }, goNumberAndDate: { en: 'G.O.Ms.No.303, 11.10.2017', ta: 'அ.ஆ.(நிலை) எண் 303, 11.10.2017' }, subject: { en: 'DA Revision to 5%', ta: 'அகவிலைப்படி 5% ஆக உயர்வு' }, keyPoints: { en: 'DA revised', ta: 'அ.ப. திருத்தம்' }, effectiveFrom: '2017-07-01', category: 'Establishment', remarks: { en: '', ta: '' }, rule: { type: 'DA_REVISION', rate: 5, commission: 7 } },
-  { id: 'go-da-7', department: { en: 'Finance Dept', ta: 'நிதித் துறை' }, goNumberAndDate: { en: 'G.O.Ms.No.123, 10.04.2018', ta: 'அ.ஆ.(நிலை) எண் 123, 10.04.2018' }, subject: { en: 'DA Revision to 7%', ta: 'அகவிலைப்படி 7% ஆக உயர்வு' }, keyPoints: { en: 'DA revised', ta: 'அ.ப. திருத்தம்' }, effectiveFrom: '2018-01-01', category: 'Establishment', remarks: { en: '', ta: '' }, rule: { type: 'DA_REVISION', rate: 7, commission: 7 } },
-  { id: 'go-da-9', department: { en: 'Finance Dept', ta: 'நிதித் துறை' }, goNumberAndDate: { en: 'G.O.Ms.No.313, 18.09.2018', ta: 'அ.ஆ.(நிலை) எண் 313, 18.09.2018' }, subject: { en: 'DA Revision to 9%', ta: 'அகவிலைப்படி 9% ஆக உயர்வு' }, keyPoints: { en: 'DA revised', ta: 'அ.ப. திருத்தம்' }, effectiveFrom: '2018-07-01', category: 'Establishment', remarks: { en: '', ta: '' }, rule: { type: 'DA_REVISION', rate: 9, commission: 7 } },
-  { id: 'go-da-12', department: { en: 'Finance Dept', ta: 'நிதித் துறை' }, goNumberAndDate: { en: 'G.O.Ms.No.89, 11.03.2019', ta: 'அ.ஆ.(நிலை) எண் 89, 11.03.2019' }, subject: { en: 'DA Revision to 12%', ta: 'அகவிலைப்படி 12% ஆக உயர்வு' }, keyPoints: { en: 'DA revised', ta: 'அ.ப. திருத்தம்' }, effectiveFrom: '2019-01-01', category: 'Establishment', remarks: { en: '', ta: '' }, rule: { type: 'DA_REVISION', rate: 12, commission: 7 } },
-  { id: 'go-da-17', department: { en: 'Finance Dept', ta: 'நிதித் துறை' }, goNumberAndDate: { en: 'G.O.Ms.No.325, 27.09.2019', ta: 'அ.ஆ.(நிலை) எண் 325, 27.09.2019' }, subject: { en: 'DA Revision to 17%', ta: 'அகவிலைப்படி 17% ஆக உயர்வு' }, keyPoints: { en: 'DA revised', ta: 'அ.ப. திருத்தம்' }, effectiveFrom: '2019-07-01', category: 'Establishment', remarks: { en: '', ta: '' }, rule: { type: 'DA_REVISION', rate: 17, commission: 7 } },
-  { id: 'go-da-28', department: { en: 'Finance Dept', ta: 'நிதித் துறை' }, goNumberAndDate: { en: 'G.O.Ms.No.283, 01.11.2021', ta: 'அ.ஆ.(நிலை) எண் 283, 01.11.2021' }, subject: { en: 'DA Revision to 28%', ta: 'அகவிலைப்படி 28% ஆக உயர்வு' }, keyPoints: { en: 'DA revised after freeze', ta: 'முடக்கத்திற்குப் பிறகு அ.ப. திருத்தம்' }, effectiveFrom: '2021-07-01', category: 'Establishment', remarks: { en: '', ta: '' }, rule: { type: 'DA_REVISION', rate: 28, commission: 7 } },
-  { id: 'go-da-31', department: { en: 'Finance Dept', ta: 'நிதித் துறை' }, goNumberAndDate: { en: 'G.O.Ms.No.3, 01.01.2022', ta: 'அ.ஆ.(நிலை) எண் 3, 01.01.2022' }, subject: { en: 'DA Revision to 31%', ta: 'அகவிலைப்படி 31% ஆக உயர்வு' }, keyPoints: { en: 'DA revised from 17% to 31%', ta: 'அ.ப. 17%லிருந்து 31%ஆக உயர்வு' }, effectiveFrom: '2022-01-01', category: 'Establishment', remarks: { en: '', ta: '' }, rule: { type: 'DA_REVISION', rate: 31, commission: 7 } },
-  { id: 'go-da-34', department: { en: 'Finance Dept', ta: 'நிதித் துறை' }, goNumberAndDate: { en: 'G.O.Ms.No.230, 01.08.2022', ta: 'அ.ஆ.(நிலை) எண் 230, 01.08.2022' }, subject: { en: 'DA Revision to 34%', ta: 'அகவிலைப்படி 34% ஆக உயர்வு' }, keyPoints: { en: 'DA revised', ta: 'அ.ப. திருத்தம்' }, effectiveFrom: '2022-07-01', category: 'Establishment', remarks: { en: '', ta: '' }, rule: { type: 'DA_REVISION', rate: 34, commission: 7 } },
-  { id: 'go-da-38', department: { en: 'Finance Dept', ta: 'நிதித் துறை' }, goNumberAndDate: { en: 'G.O.Ms.No.3, 02.01.2023', ta: 'அ.ஆ.(நிலை) எண் 3, 02.01.2023' }, subject: { en: 'DA Revision to 38%', ta: 'அகவிலைப்படி 38% ஆக உயர்வு' }, keyPoints: { en: 'DA revised', ta: 'அ.ப. திருத்தம்' }, effectiveFrom: '2023-01-01', category: 'Establishment', remarks: { en: '', ta: '' }, rule: { type: 'DA_REVISION', rate: 38, commission: 7 } },
-  { id: 'go-da-42', department: { en: 'Finance Dept', ta: 'நிதித் துறை' }, goNumberAndDate: { en: 'G.O.Ms.No.126, 17.05.2023', ta: 'அ.ஆ.(நிலை) எண் 126, 17.05.2023' }, subject: { en: 'DA Revision to 42%', ta: 'அகவிலைப்படி 42% ஆக உயர்வு' }, keyPoints: { en: 'DA revised', ta: 'அ.ப. திருத்தம்' }, effectiveFrom: '2023-04-01', category: 'Establishment', remarks: { en: '', ta: '' }, rule: { type: 'DA_REVISION', rate: 42, commission: 7 } },
-  { id: 'go-da-46', department: { en: 'Finance Dept', ta: 'நிதித் துறை' }, goNumberAndDate: { en: 'G.O.Ms.No.289, 23.10.2023', ta: 'அ.ஆ.(நிலை) எண் 289, 23.10.2023' }, subject: { en: 'DA Revision to 46%', ta: 'அகவிலைப்படி 46% ஆக உயர்வு' }, keyPoints: { en: 'DA revised', ta: 'அ.ப. திருத்தம்' }, effectiveFrom: '2023-07-01', category: 'Establishment', remarks: { en: '', ta: '' }, rule: { type: 'DA_REVISION', rate: 46, commission: 7 } },
-  { id: 'go-da-50', department: { en: 'Finance Dept', ta: 'நிதித் துறை' }, goNumberAndDate: { en: 'G.O.Ms.No. 40, 10.02.2024', ta: 'அ.ஆ.(நிலை) எண் 40, 10.02.2024' }, subject: { en: 'DA Revision to 50%', ta: 'அகவிலைப்படி 50% ஆக உயர்வு' }, keyPoints: { en: 'DA revised', ta: 'அ.ப. திருத்தம்' }, effectiveFrom: '2024-01-01', category: 'Establishment', remarks: { en: '', ta: '' }, rule: { type: 'DA_REVISION', rate: 50, commission: 7 } },
-  { id: 'go-da-53', department: { en: 'Finance Department', ta: 'நிதித் துறை' }, goNumberAndDate: { en: 'G.O.Ms.No.317, 27.09.2024', ta: 'அ.ஆ.(நிலை) எண் 317, 27.09.2024' }, subject: { en: 'Dearness Allowance - Revision from 50% to 53%', ta: 'அகவிலைப்படி - 50% லிருந்து 53% ஆக உயர்த்துதல்' }, keyPoints: { en: 'DA for TN Govt employees revised from 50% to 53% of Basic Pay.', ta: 'தமிழ்நாடு அரசு ஊழியர்களுக்கான அகவிலைப்படி 50% லிருந்து 53% ஆக உயர்த்தப்பட்டுள்ளது.' }, effectiveFrom: '2024-07-01', category: 'Establishment', remarks: { en: 'Aligns with Central Govt 7th CPC.', ta: 'மத்திய அரசு 7வது ஊதியக் குழு பரிந்துரைகளுடன் இணங்குகிறது.' }, rule: { type: 'DA_REVISION', rate: 53, commission: 7 } },
   
   // HRA Revision Rule
   { id: 'go-hra-rev', department: { en: 'Finance Department', ta: 'நிதித் துறை' }, goNumberAndDate: { en: 'G.O.(Ms) No. 83, 21.03.2024', ta: 'அ.ஆ.(நிலை) எண் 83, 21.03.2024' }, subject: { en: 'House Rent Allowance - Revision of rates on DA crossing 50%', ta: 'வீட்டு வாடகைப்படி - அகவிலைப்படி 50% ஐ தாண்டும்போது விகிதங்கள் திருத்தம்' }, keyPoints: { en: 'HRA rates for Y and Z class cities are revised to 20% and 10% of basic pay respectively, once DA reaches 50%.', ta: 'அகவிலைப்படி 50% ஐ எட்டியவுடன், Y மற்றும் Z வகுப்பு நகரங்களுக்கான வீட்டு வாடகைப்படி விகிதங்கள் அடிப்படை ஊதியத்தில் முறையே 20% மற்றும் 10% ஆக திருத்தப்படுகின்றன.' }, effectiveFrom: '2024-01-01', category: 'Establishment', remarks: { en: 'This order is triggered when DA reaches 50%.', ta: 'அகவிலைப்படி 50% ஐ எட்டும்போது இந்த ஆணை செயல்படுத்தப்படும்.' }, rule: { type: 'HRA_REVISION_DA_50_PERCENT' } },
