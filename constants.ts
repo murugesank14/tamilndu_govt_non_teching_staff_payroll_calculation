@@ -347,4 +347,15 @@ export const GO_DATA: GovernmentOrder[] = [
   // Other G.O.s
   { id: 'go-2', department: { en: 'Public Works Department (PWD)', ta: 'பொதுப்பணித் துறை (பொ.ப.து)' }, goNumberAndDate: { en: 'G.O.(Ms) No. 142, 15.05.2024', ta: 'அ.ஆ.(நிலை) எண் 142, 15.05.2024' }, subject: { en: 'Service Rules - Amendment to Tamil Nadu Engineering Service Rules', ta: 'பணி விதிகள் - தமிழ்நாடு பொறியியல் பணி விதிகளில் திருத்தம்' }, keyPoints: { en: 'A new promotion quota has been introduced for the post of Assistant Executive Engineer (AEE) from the feeder category of Assistant Engineer (AE).', ta: 'உதவிப் பொறியாளர் (உ.பொ) பதவியிலிருந்து உதவி செயற் பொறியாளர் (உ.செ.பொ) பதவிக்கு புதிய பதவி உயர்வு ஒதுக்கீடு அறிமுகப்படுத்தப்பட்டுள்ளது.' }, effectiveFrom: '2024-06-01', category: 'Technical', remarks: { en: 'Supersedes G.O. Ms. No. 112/2021.', ta: 'அ.ஆ.(நிலை) எண் 112/2021-ஐ இது ரத்து செய்கிறது.' }, rule: { type: 'SERVICE_RULE_AMENDMENT', details: 'AE to AEE promotion quota amendment' } },
   { id: 'go-3', department: { en: 'P & AR Department', ta: 'பணியாளர் மற்றும் நிர்வாக சீர்திருத்தத் துறை' }, goNumberAndDate: { en: 'G.O.(Ms) No. 88, 12.08.2024', ta: 'அ.ஆ.(நிலை) எண் 88, 12.08.2024' }, subject: { en: 'Leave Rules - Enhancement of Unearned Leave on Private Affairs', ta: 'விடுப்பு விதிகள் - சொந்த விவகாரங்களுக்கான ஈட்டா விடுப்பு உயர்வு' }, keyPoints: { en: 'The maximum limit for Unearned Leave on Private Affairs for permanent Government servants is enhanced from 180 days to 360 days in the entire service.', ta: 'நிரந்தர அரசு ஊழியர்களுக்கான சொந்த விவகாரங்களுக்கான ஈட்டா விடுப்பின் அதிகபட்ச வரம்பு முழுப் பணிக்காலத்திற்கும் 180 நாட்களில் இருந்து 360 நாட்களாக உயர்த்தப்பட்டுள்ளது.' }, effectiveFrom: '2024-08-12', category: 'Service', remarks: { en: 'Applicable to all permanent government employees.', ta: 'அனைத்து நிரந்தர அரசு ஊழியர்களுக்கும் பொருந்தும்.' }, rule: { type: 'LEAVE_RULE_CHANGE', leaveType: 'UnearnedLeavePrivateAffairs', maxDays: 360 } },
+  { 
+    id: 'go-95-grade-fixation', 
+    department: { en: 'Finance Department', ta: 'நிதித் துறை' }, 
+    goNumberAndDate: { en: 'G.O.Ms.No. 95, 20.11.2024', ta: 'அ.ஆ.(நிலை) எண் 95, 20.11.2024' }, 
+    subject: { en: 'Modification to Selection/Special Grade Fixation for Levels 1-10', ta: 'நிலை 1-10-க்கான தேர்வு/சிறப்பு நிலை ஊதிய நிர்ணயத்தில் மாற்றம்' }, 
+    keyPoints: { en: 'For Levels 1-10, grade award fixation will be one notional increment in the same level and fixation in the next higher level. For Levels 11+, the existing rule of two increments in the same level continues.', ta: 'நிலை 1-10-க்கு, தேர்வு/சிறப்பு நிலை ஊதிய நிர்ணயம் என்பது தற்போதைய நிலையில் ஒரு ஊதிய உயர்வு பெற்று, அடுத்த உயர் நிலையில் ஊதியம் நிர்ணயிக்கப்படும். நிலை 11+ க்கு, தற்போதைய விதியே (அதே நிலையில் இரண்டு ஊதிய உயர்வுகள்) தொடரும்.' }, 
+    effectiveFrom: '2025-01-01', 
+    category: 'Establishment', 
+    remarks: { en: 'This modifies the rule established by G.O.Ms.No.40/2021 for specific pay levels.', ta: 'இது அ.ஆ.எண் 40/2021-ல் உள்ள விதியை குறிப்பிட்ட ஊதிய நிலைகளுக்கு மாற்றியமைக்கிறது.' }, 
+    rule: { type: 'PROMOTION_RULE', rule: 'GradeFixationLevelSplit', details: { splitLevel: 10 } } 
+  },
 ];

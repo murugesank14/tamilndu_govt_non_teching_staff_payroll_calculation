@@ -169,6 +169,7 @@ export const calculateFullPayroll = (data: EmployeeInput, activeGoData: Governme
     const hraRevisionGO = activeGoData.find(go => go.rule?.type === 'HRA_REVISION_DA_50_PERCENT');
     const promotionRule22bGO = activeGoData.find(go => go.rule?.type === 'PROMOTION_RULE' && (go.rule as any).rule === '22(b)');
     const payCommission7thGO = activeGoData.find(go => go.rule?.type === 'PAY_COMMISSION_FIXATION' && go.effectiveFrom.startsWith('2016'));
+    const gradeFixationSplitGO = activeGoData.find(go => go.rule?.type === 'PROMOTION_RULE' && (go.rule as any).rule === 'GradeFixationLevelSplit');
 
 
     const { dateOfJoining, calculationStartDate, calculationEndDate, promotions, annualIncrementChanges, breaksInService, selectionGradeDate, specialGradeDate, superGradeDate, stagnationIncrementDate, cityGrade, incrementEligibilityMonths, joiningPostId, joiningPostCustomName, selectionGradeTwoIncrements, specialGradeTwoIncrements, probationDeclarationDate, accountTestPassDate, departmentTestPassDate, ...employeeDetails } = data;
@@ -407,25 +408,45 @@ export const calculateFullPayroll = (data: EmployeeInput, activeGoData: Governme
                 const gradeType = event.type === 'SELECTION_GRADE' ? 'Selection Grade' : 'Special Grade';
 
                 if (isPost2016 && currentCommission === 7) {
-                    // As per G.O.Ms.No.40/2021: move two cells forward in the same level.
-                    const levelPayScale = PAY_MATRIX[currentLevel];
-                    if (!levelPayScale) {
-                        remarks.push(`Cannot apply ${gradeType}: Invalid pay matrix level ${currentLevel}.`);
-                    } else {
-                        const currentIndex = levelPayScale.indexOf(currentPay);
-                        if (currentIndex === -1) {
-                            remarks.push(`Cannot apply ${gradeType}: Current pay ${currentPay} not found in Level ${currentLevel} matrix.`);
-                        } else {
-                            const newIndex = Math.min(currentIndex + 2, levelPayScale.length - 1);
-                            const newPay = levelPayScale[newIndex];
+                    const splitLevel = gradeFixationSplitGO ? (gradeFixationSplitGO.rule as any).details.splitLevel : null;
+                    const isNewRuleApplicable = gradeFixationSplitGO && event.date >= parseDateUTC(gradeFixationSplitGO.effectiveFrom)!;
 
-                            if (newPay > currentPay) {
-                                currentPay = newPay;
-                                remarks.push(`${gradeType} awarded. Pay fixed two cells ahead in Level ${currentLevel}. Ref: G.O.Ms.No.40/2021`);
-                            } else {
-                                remarks.push(`${gradeType} awarded, but already at maximum pay in Level ${currentLevel}.`);
-                            }
+                    if (isNewRuleApplicable && currentLevel <= splitLevel) {
+                        // New logic: 1 notional increment + fix in next level
+                        const { newPay: payAfterNotionalInc } = getIncrement(currentPay, currentLevel, 1, 7);
+                        const newLevel = currentLevel + 1;
+                        
+                        if (PAY_MATRIX[newLevel]) {
+                            const newPay = findPayInMatrix(payAfterNotionalInc, newLevel);
+                            currentPay = newPay;
+                            currentLevel = newLevel;
+                            remarks.push(`${gradeType} awarded. Pay fixed in next level (Lvl ${newLevel}) as per ${gradeFixationSplitGO.goNumberAndDate.en}.`);
                             didIncrementThisMonth = true;
+                        } else {
+                            remarks.push(`Cannot apply new ${gradeType} rule: Next level ${newLevel} does not exist. Please review rules.`);
+                        }
+
+                    } else {
+                        // Existing logic (G.O.Ms.No.40/2021): move two cells forward in the same level.
+                        const levelPayScale = PAY_MATRIX[currentLevel];
+                        if (!levelPayScale) {
+                            remarks.push(`Cannot apply ${gradeType}: Invalid pay matrix level ${currentLevel}.`);
+                        } else {
+                            const currentIndex = levelPayScale.indexOf(currentPay);
+                            if (currentIndex === -1) {
+                                remarks.push(`Cannot apply ${gradeType}: Current pay ${currentPay} not found in Level ${currentLevel} matrix.`);
+                            } else {
+                                const newIndex = Math.min(currentIndex + 2, levelPayScale.length - 1);
+                                const newPay = levelPayScale[newIndex];
+
+                                if (newPay > currentPay) {
+                                    currentPay = newPay;
+                                    remarks.push(`${gradeType} awarded. Pay fixed two cells ahead in Level ${currentLevel}. Ref: G.O.Ms.No.40/2021`);
+                                } else {
+                                    remarks.push(`${gradeType} awarded, but already at maximum pay in Level ${currentLevel}.`);
+                                }
+                                didIncrementThisMonth = true;
+                            }
                         }
                     }
                 } else {
