@@ -353,3 +353,13 @@ export interface AuditPara {
   complianceStatus: 'Not Submitted' | 'Submitted' | 'Dropped';
   remarks: string;
 }
+
+// --- Pay Slip Types ---
+export type DeductionCategory = 'statutory' | 'non-statutory';
+
+export interface PaySlipDeduction {
+  name: string;
+  nameTa: string;
+  amount: number;
+  category: DeductionCategory;
+}

@@ -99,7 +99,8 @@ const GPFForm: React.FC<GPFFormProps> = ({ onCalculate, isLoading }) => {
           </CardHeader>
           <CardContent className="space-y-4">
               <div>
-                  <Label htmlFor="openingBalance">{t('openingBalance')}</Label>
+                  {/* FIX: Use the new, non-conflicting translation key 'gpfOpeningBalance'. */}
+                  <Label htmlFor="openingBalance">{t('gpfOpeningBalance')}</Label>
                   <Input type="number" name="openingBalance" id="openingBalance" value={formData.openingBalance ?? ''} onChange={handleChange} required />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

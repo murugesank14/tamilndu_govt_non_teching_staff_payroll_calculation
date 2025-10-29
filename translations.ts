@@ -18,8 +18,11 @@ export const translations = {
     pensionCalculator: "Pension Calculator",
     gpfCalculator: "GPF Calculator",
     leaveCalculator: "Leave Calculator",
-    goViewer: "G.O. Viewer",
     auditTracker: "Audit Para & Recovery",
+    goViewer: "G.O. Viewer",
+    paySlipOutput: "Pay Slip",
+    yearlyLeaveBalance: "Leave Balance",
+
 
     // G.O. Viewer
     goViewerTitle: "Tamil Nadu Government Orders (G.O.)",
@@ -151,7 +154,8 @@ export const translations = {
     years: "Years",
     months: "Months",
     financialYear: "Financial Year",
-    openingBalance: "Opening Balance (as on April 1st)",
+    // FIX: Renamed 'openingBalance' to 'gpfOpeningBalance' to avoid duplicate key.
+    gpfOpeningBalance: "Opening Balance (as on April 1st)",
     monthlySubscription: "Monthly Subscription",
     subscriptionAmount: "Subscription Amount",
     subscriptionPercentage: "% of Basic Pay",
@@ -298,6 +302,45 @@ export const translations = {
     el: "EL",
     hpl: "HPL",
     
+    // Pay Slip
+    paySlipTitle: "Pay Slip",
+    paySlipMonth: "Pay Slip – {month}",
+    paySlipMonthTa: "ஊதியச் சீட்டு – {month}",
+    post: "Post",
+    officeName: "Office Name",
+    regime: "Regime (Income Tax)",
+    payDetails: "Pay Details",
+    statutoryDeductions: "Statutory Deductions",
+    nonStatutoryDeductions: "Non-Statutory Deductions",
+    dutyPay: "Duty Pay",
+    dearnessAllowance: "Dearness Allowance",
+    houseRentAllowance: "House Rent Allowance",
+    medicalAllowance: "Medical Allowance",
+    totalSD: "Total SD",
+    totalNSD: "Total NSD",
+    netPayCredited: "Net Pay Credited",
+    tokenNumber: "Token Number / Token Date",
+    settlementDate: "Settlement Date",
+    bankName: "Bank Name",
+    ifsc: "IFSC",
+    accountNumber: "Account Number",
+    systemGenerated: "This is a system generated report, hence does not require a signature.",
+    printPaySlip: "Print / Export PDF",
+
+    // Leave Balance
+    yearlyLeaveBalanceTitle: "Yearly Leave Balance Details",
+    yearlyLeaveBalanceDesc: "Summary of leave account for the financial year.",
+    leaveCategory: "Leave Category",
+    // FIX: Renamed 'openingBalance' to 'leaveOpeningBalance' to avoid duplicate key.
+    leaveOpeningBalance: "Opening Balance",
+    availedDuringYear: "Availed During Year",
+    credited: "Credited",
+    balanceAtYearEnd: "Balance at Year-End",
+    unearnedLeavePrivate: "Unearned Leave on Private Affairs (UL)",
+    unearnedLeaveMedical: "Unearned Leave on Medical Certificate (UMC)",
+    specialCasualLeave: "Special Casual Leave (SCL)",
+    compensatoryLeave: "Compensatory Leave (CL)",
+    exportLeaveBalance: "Export Balance",
   },
   ta: {
     // App Header
@@ -317,8 +360,10 @@ export const translations = {
     pensionCalculator: "ஓய்வூதியக் கணக்கிடு",
     gpfCalculator: "GPF கணக்கிடு",
     leaveCalculator: "விடுப்புக் கணக்கிடு",
-    goViewer: "அரசாணைகள்",
     auditTracker: "தணிக்கை & மீட்பு",
+    goViewer: "அரசாணைகள்",
+    paySlipOutput: "ஊதியச் சீட்டு",
+    yearlyLeaveBalance: "விடுப்பு இருப்பு",
 
     // G.O. Viewer
     goViewerTitle: "தமிழ்நாடு அரசாணைகள் (G.O.)",
@@ -451,7 +496,8 @@ export const translations = {
     years: "ஆண்டுகள்",
     months: "மாதங்கள்",
     financialYear: "நிதியாண்டு",
-    openingBalance: "தொடக்க இருப்பு (ஏப்ரல் 1 ஆம் தேதி)",
+    // FIX: Renamed 'openingBalance' to 'gpfOpeningBalance' to avoid duplicate key.
+    gpfOpeningBalance: "தொடக்க இருப்பு (ஏப்ரல் 1 ஆம் தேதி)",
     monthlySubscription: "மாதாந்திர சந்தா",
     subscriptionAmount: "சந்தா தொகை",
     subscriptionPercentage: "% அடிப்படை ஊதியம்",
@@ -599,6 +645,45 @@ export const translations = {
     el: "ஈ.வி",
     hpl: "அ.ச.வி",
     
+    // Pay Slip
+    paySlipTitle: "ஊதியச் சீட்டு",
+    paySlipMonth: "ஊதியச் சீட்டு – {month}",
+    paySlipMonthTa: "Pay Slip – {month}",
+    post: "பதவி",
+    officeName: "அலுவலகம்",
+    regime: "வரி விதிப்பு",
+    payDetails: "ஊதிய விவரம்",
+    statutoryDeductions: "கட்டாய பிடித்தம்",
+    nonStatutoryDeductions: "கட்டாயமற்ற பிடித்தம்",
+    dutyPay: "பணி ஊதியம்",
+    dearnessAllowance: "அகவிலைப்படி",
+    houseRentAllowance: "வீட்டு வாடகைப்படி",
+    medicalAllowance: "மருத்துவப்படி",
+    totalSD: "மொத்த கட்டாய பிடித்தம்",
+    totalNSD: "மொத்த கட்டாயமற்ற பிடித்தம்",
+    netPayCredited: "நிகர ஊதியம் வரவு",
+    tokenNumber: "டோக்கன் எண் / டோக்கன் தேதி",
+    settlementDate: "செட்டில்மென்ட் தேதி",
+    bankName: "வங்கி பெயர்",
+    ifsc: "IFSC குறியீடு",
+    accountNumber: "கணக்கு எண்",
+    systemGenerated: "இது கணினி மூலம் உருவாக்கப்பட்ட அறிக்கை, எனவே கையொப்பம் தேவையில்லை.",
+    printPaySlip: "அச்சிடுக / PDF ஆக ஏற்றுமதி செய்க",
+
+    // Leave Balance
+    yearlyLeaveBalanceTitle: "ஆண்டு விடுப்பு இருப்பு விவரங்கள்",
+    yearlyLeaveBalanceDesc: "நிதியாண்டிற்கான விடுப்புக் கணக்கின் சுருக்கம்.",
+    leaveCategory: "விடுப்பு வகை",
+    // FIX: Renamed 'openingBalance' to 'leaveOpeningBalance' to avoid duplicate key.
+    leaveOpeningBalance: "தொடக்க இருப்பு",
+    availedDuringYear: "ஆண்டில் எடுத்தது",
+    credited: "வரவு வைக்கப்பட்டது",
+    balanceAtYearEnd: "ஆண்டு இறுதி இருப்பு",
+    unearnedLeavePrivate: "சொந்த விவகாரங்களுக்கான ஈட்டா விடுப்பு (UL)",
+    unearnedLeaveMedical: "மருத்துவச் சான்றிதழ் மீதான ஈட்டா விடுப்பு (UMC)",
+    specialCasualLeave: "சிறப்பு தற்செயல் விடுப்பு (SCL)",
+    compensatoryLeave: "ஈடுசெய் விடுப்பு (CL)",
+    exportLeaveBalance: "இருப்பை ஏற்றுமதி செய்",
   }
 };
 

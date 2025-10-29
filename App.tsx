@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import { EmployeeInput, PayrollResult as PayrollResultType, GovernmentOrder, PensionInput, PensionResult as PensionResultType, GPFInput, GPFResult as GPFResultType, LeaveInput, LeaveResult as LeaveResultType, AuditPara } from './types';
 import { calculateFullPayroll, calculatePension, calculateGPF, calculateLeave } from './services/payrollService';
@@ -16,6 +17,8 @@ import LeaveForm from './components/LeaveForm';
 import LeaveResult from './components/LeaveResult';
 import AuditParaForm from './components/AuditParaForm';
 import AuditParaResult from './components/AuditParaResult';
+import PaySlipResult from './components/PaySlipResult';
+import LeaveBalanceResult from './components/LeaveBalanceResult';
 import { CalendarDaysIcon, CircleDollarSignIcon, SheetIcon, LandmarkIcon, AlertTriangleIcon } from './components/ui/Icons';
 
 
@@ -42,7 +45,7 @@ const LanguageSwitcher: React.FC = () => {
     )
 }
 
-type ActiveView = 'calculator' | 'pensionCalculator' | 'gpfCalculator' | 'leaveCalculator' | 'auditTracker' | 'goViewer';
+type ActiveView = 'calculator' | 'pensionCalculator' | 'gpfCalculator' | 'leaveCalculator' | 'auditTracker' | 'goViewer' | 'paySlip' | 'leaveBalance';
 
 const App: React.FC = () => {
   const [payrollResult, setPayrollResult] = useState<PayrollResultType | null>(null);
@@ -167,8 +170,11 @@ const App: React.FC = () => {
   };
 
 
-  const getNavButtonClasses = (viewName: ActiveView) => {
+  const getNavButtonClasses = (viewName: ActiveView, disabled = false) => {
     const baseClasses = "flex items-center gap-2 px-4 py-3 text-sm font-semibold transition-colors focus:outline-none";
+    if(disabled) {
+        return `${baseClasses} text-gray-300 cursor-not-allowed`;
+    }
     if (activeView === viewName) {
       return `${baseClasses} text-emerald-600 border-b-2 border-emerald-600`;
     }
@@ -218,10 +224,6 @@ const App: React.FC = () => {
     if (activeView === 'pensionCalculator') welcomeMessage = t('welcomePensionMessage');
     if (activeView === 'gpfCalculator') welcomeMessage = t('welcomeGpfMessage');
     if (activeView === 'leaveCalculator') welcomeMessage = t('welcomeLeaveMessage');
-    // FIX: This comparison is invalid because the `activeView` type has been narrowed by the early return for 'auditTracker' above.
-    // The AuditParaResult component handles its own empty state, so this welcome message is not needed here.
-    // if (activeView === 'auditTracker') welcomeMessage = t('welcomeAuditTrackerMessage');
-
 
     return (
         <div className="bg-white rounded-xl shadow-md p-8 text-center h-full flex flex-col justify-center">
@@ -252,7 +254,7 @@ const App: React.FC = () => {
       </header>
 
       <nav className="bg-white border-b border-gray-200">
-        <div className="container mx-auto px-4 md:px-6 lg:px-8 flex">
+        <div className="container mx-auto px-4 md:px-6 lg:px-8 flex overflow-x-auto">
           <button onClick={() => setActiveView('calculator')} className={getNavButtonClasses('calculator')}>
             <SheetIcon className="w-4 h-4" /> {t('payrollCalculator')}
           </button>
@@ -265,6 +267,12 @@ const App: React.FC = () => {
           <button onClick={() => setActiveView('leaveCalculator')} className={getNavButtonClasses('leaveCalculator')}>
              <CalendarDaysIcon className="w-4 h-4" />{t('leaveCalculator')}
           </button>
+           <button onClick={() => payrollResult && setActiveView('paySlip')} className={getNavButtonClasses('paySlip', !payrollResult)} disabled={!payrollResult}>
+                <SheetIcon className="w-4 h-4" /> {t('paySlipOutput')}
+            </button>
+            <button onClick={() => leaveResult && setActiveView('leaveBalance')} className={getNavButtonClasses('leaveBalance', !leaveResult)} disabled={!leaveResult}>
+                <CalendarDaysIcon className="w-4 h-4" /> {t('yearlyLeaveBalance')}
+            </button>
           <button onClick={() => setActiveView('auditTracker')} className={getNavButtonClasses('auditTracker')}>
             <AlertTriangleIcon className="w-4 h-4" />{t('auditTracker')}
           </button>
@@ -332,6 +340,12 @@ const App: React.FC = () => {
           {activeView === 'goViewer' && (
             <GoViewer goData={activeGoData} onGoDataUpdate={setActiveGoData} />
           )}
+           {activeView === 'paySlip' && payrollResult && (
+                <PaySlipResult payrollResult={payrollResult} />
+            )}
+            {activeView === 'leaveBalance' && leaveResult && (
+                <LeaveBalanceResult leaveResult={leaveResult} />
+            )}
       </main>
 
        <footer className="text-center p-4 mt-8 text-xs text-gray-500 space-y-2">
