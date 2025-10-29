@@ -525,7 +525,10 @@ const PayrollResult: React.FC<PayrollResultProps> = ({ result }) => {
             {employeeDetails.selectionGradeDate && <div><p className="text-gray-500">{t('selectionGradeDate')}</p><p className="font-semibold">{employeeDetails.selectionGradeDate}</p></div>}
             {employeeDetails.specialGradeDate && <div><p className="text-gray-500">{t('specialGradeDate')}</p><p className="font-semibold">{employeeDetails.specialGradeDate}</p></div>}
             {employeeDetails.superGradeDate && <div><p className="text-gray-500">{t('superGradeDate')}</p><p className="font-semibold">{employeeDetails.superGradeDate}</p></div>}
+            {employeeDetails.probationPeriod && <div><p className="text-gray-500">{t('probationPeriod')}</p><p className="font-semibold">{employeeDetails.probationPeriod} Year(s)</p></div>}
             {employeeDetails.probationDeclarationDate && <div><p className="text-gray-500">{t('probationDeclarationDate')}</p><p className="font-semibold">{employeeDetails.probationDeclarationDate}</p></div>}
+            {employeeDetails.accountTestPassDate && <div><p className="text-gray-500">{t('accountTest')}</p><p className="font-semibold">{employeeDetails.accountTestPassDate}</p></div>}
+            {employeeDetails.departmentTestPassDate && <div><p className="text-gray-500">{t('departmentTest')}</p><p className="font-semibold">{employeeDetails.departmentTestPassDate}</p></div>}
             {employeeDetails.stagnationIncrementDates && employeeDetails.stagnationIncrementDates.length > 0 && 
               <div className="col-span-full"><p className="text-gray-500">{t('stagnationIncrementDate')}</p><p className="font-semibold">{employeeDetails.stagnationIncrementDates.join(', ')}</p></div>
             }

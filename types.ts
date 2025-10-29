@@ -65,6 +65,9 @@ export interface EmployeeInput {
   superGradeDate: string;
   probationDeclarationDate?: string;
   stagnationIncrementDate?: string;
+  probationPeriod?: number;
+  accountTestPassDate?: string;
+  departmentTestPassDate?: string;
 
   promotions: Promotion[];
   breaksInService: BreakInService[];
@@ -147,6 +150,9 @@ export interface EmployeeDetails {
     specialGradeDate?: string;
     superGradeDate?: string;
     probationDeclarationDate?: string;
+    probationPeriod?: number;
+    accountTestPassDate?: string;
+    departmentTestPassDate?: string;
     stagnationIncrementDates?: string[];
     // For Last Pay Certificate (LPC)
     festivalAdvance?: number;

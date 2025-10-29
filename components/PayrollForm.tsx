@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { EmployeeInput, CityGrade, Promotion, AnnualIncrementChange, BreakInService } from '../types';
-import { PAY_SCALES_6TH_PC, LEVELS, GRADE_PAY_OPTIONS, POSTS, PAY_SCALES_5TH_PC, PAY_SCALES_4TH_PC } from '../constants';
+import { PAY_SCALES_6TH_PC, LEVELS, GRADE_PAY_OPTIONS, POSTS, PAY_SCALES_5TH_PC, PAY_SCALES_4TH_PC, PROBATION_PERIOD_OPTIONS } from '../constants';
 import { Input } from './ui/Input';
 import { Button } from './ui/Button';
 import { Select } from './ui/Select';
@@ -45,6 +45,9 @@ const initialFormData: Omit<EmployeeInput, 'promotions' | 'annualIncrementChange
     superGradeDate: '',
     probationDeclarationDate: '',
     stagnationIncrementDate: '',
+    probationPeriod: 2,
+    accountTestPassDate: '',
+    departmentTestPassDate: '',
     
     incrementEligibilityMonths: 6,
 
@@ -92,7 +95,7 @@ const PayrollForm: React.FC<PayrollFormProps> = ({ onCalculate, isLoading }) => 
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    const isNumberInput = ['joiningBasicPay4thPC', 'joiningBasicPay5thPC', 'joiningPayInPayBand', 'festivalAdvance', 'carAdvance', 'twoWheelerAdvance', 'computerAdvance', 'otherPayables', 'incrementEligibilityMonths'].includes(name);
+    const isNumberInput = ['joiningBasicPay4thPC', 'joiningBasicPay5thPC', 'joiningPayInPayBand', 'festivalAdvance', 'carAdvance', 'twoWheelerAdvance', 'computerAdvance', 'otherPayables', 'incrementEligibilityMonths', 'probationPeriod'].includes(name);
     
     if (type === 'checkbox') {
         const { checked } = e.target as HTMLInputElement;
@@ -377,8 +380,8 @@ const PayrollForm: React.FC<PayrollFormProps> = ({ onCalculate, isLoading }) => 
               <CardTitle>{t('careerEventsHRA')}</CardTitle>
               <CardDescription>{t('careerEventsHRADesc')}</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-4">
+          <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-6">
                 <div>
                   <Label htmlFor="selectionGradeDate">{t('selectionGradeDate')}</Label>
                   <Input type="date" name="selectionGradeDate" id="selectionGradeDate" value={formData.selectionGradeDate} onChange={handleChange} />
@@ -393,11 +396,7 @@ const PayrollForm: React.FC<PayrollFormProps> = ({ onCalculate, isLoading }) => 
                   <Label htmlFor="superGradeDate">{t('superGradeDate')}</Label>
                   <Input type="date" name="superGradeDate" id="superGradeDate" value={formData.superGradeDate} onChange={handleChange} />
                 </div>
-                <div>
-                  <Label htmlFor="probationDeclarationDate">{t('probationDeclarationDate')}</Label>
-                  <Input type="date" name="probationDeclarationDate" id="probationDeclarationDate" value={formData.probationDeclarationDate ?? ''} onChange={handleChange} />
-                  <p className="text-xs text-gray-500 mt-1">{t('probationHelpText')}</p>
-                </div>
+                
                  <div>
                   <Label htmlFor="stagnationIncrementDate">{t('stagnationIncrementDate')}</Label>
                   <Input type="date" name="stagnationIncrementDate" id="stagnationIncrementDate" value={formData.stagnationIncrementDate ?? ''} onChange={handleChange} />
@@ -419,6 +418,32 @@ const PayrollForm: React.FC<PayrollFormProps> = ({ onCalculate, isLoading }) => 
                     <Input type="number" name="incrementEligibilityMonths" id="incrementEligibilityMonths" value={formData.incrementEligibilityMonths} onChange={handleChange} required />
                     <p className="text-xs text-gray-500 mt-1">{t('incrementEligibilityHelpText')}</p>
                  </div>
+              </div>
+              <div className="pt-6 border-t">
+                  <h4 className="text-md font-semibold text-gray-800 mb-2">{t('probationServiceTests')}</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-6">
+                       <div>
+                          <Label htmlFor="probationPeriod">{t('probationPeriod')}</Label>
+                           <Select name="probationPeriod" id="probationPeriod" value={formData.probationPeriod} onChange={handleChange}>
+                               {PROBATION_PERIOD_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                           </Select>
+                       </div>
+                       <div>
+                          <Label htmlFor="probationDeclarationDate">{t('probationDeclarationDate')}</Label>
+                          <Input type="date" name="probationDeclarationDate" id="probationDeclarationDate" value={formData.probationDeclarationDate ?? ''} onChange={handleChange} />
+                          <p className="text-xs text-gray-500 mt-1">{t('probationHelpText')}</p>
+                       </div>
+                       <div>
+                          <Label htmlFor="accountTestPassDate">{t('accountTest')}</Label>
+                          <Input type="date" name="accountTestPassDate" id="accountTestPassDate" value={formData.accountTestPassDate ?? ''} onChange={handleChange} />
+                          <p className="text-xs text-gray-500 mt-1">{t('passDateHelpText')}</p>
+                       </div>
+                       <div>
+                          <Label htmlFor="departmentTestPassDate">{t('departmentTest')}</Label>
+                          <Input type="date" name="departmentTestPassDate" id="departmentTestPassDate" value={formData.departmentTestPassDate ?? ''} onChange={handleChange} />
+                          <p className="text-xs text-gray-500 mt-1">{t('passDateHelpText')}</p>
+                       </div>
+                  </div>
               </div>
           </CardContent>
       </Card>

@@ -56,6 +56,7 @@ export const translations = {
     payAtJoiningDesc7thPC: "Post 2016 (7th Pay Commission) / 2016க்குப் பின் (7வது ஊதியக் குழு)",
     careerEventsHRA: "Career Events & HRA / பணி நிகழ்வுகள் & வீட்டு வாடகைப்படி",
     careerEventsHRADesc: "Enter dates for grade awards, transfers, and HRA classification.",
+    probationServiceTests: "Probation & Service Tests",
     advancesLPC: "Advances & Payables for LPC / LPCக்கான முன்பணம் & செலுத்த வேண்டியவைகள்",
     advancesLPCDesc: "Enter outstanding balances as on the date of relief.",
     promotions: "Promotions / பதவி உயர்வுகள்",
@@ -92,6 +93,9 @@ export const translations = {
     superGradeDate: "Super Grade (Bonus) Date / சூப்பர் கிரேடு (போனஸ்) தேதி",
     stagnationIncrementDate: "Stagnation Increment Start Date / தேக்கநிலை ஊதிய உயர்வு தொடக்க தேதி",
     probationDeclarationDate: "Probation Declaration Date / தகுதிகாண் பருவம் முடிந்த தேதி",
+    probationPeriod: "Probation Period",
+    accountTest: "Account Test",
+    departmentTest: "Departmental Test",
     dateOfRelief: "Date of Relief (Transfer) / விடுவிப்பு தேதி (இடமாற்றம்)",
     cityGradeHRA: "City/Town Grade for HRA / வீட்டு வாடகைப்படிக்கான நகரம்/நகராட்சி தரம்",
     incrementEligibility: "Increment Eligibility (Months) / ஊதிய உயர்வு தகுதி (மாதங்கள்)",
@@ -117,6 +121,7 @@ export const translations = {
     enterFatherName: "Enter father's name / தந்தை பெயரை உள்ளிடவும்",
     stagnationHelpText: "Date entered post at Level 24+. / நிலை 24+ பதவியில் நுழைந்த தேதி.",
     probationHelpText: "The first increment is granted only after this date.",
+    passDateHelpText: "Date of passing the test. An increment will be granted on this date.",
     reliefHelpText: "Calculation will end on this date. / இந்த தேதியில் கணக்கீடு முடிவடையும்.",
     incrementEligibilityHelpText: "Months of service required in a year to be eligible for the annual increment (default is 6).",
     incrementScheduleHelpText: "First entry defaults to joining date. Add changes if the schedule is modified.",
@@ -150,7 +155,7 @@ export const translations = {
     promotionFixation: "Promotion Fixation Summary",
     reference: "Reference",
     promotionFixationMethodLabel: "Fixation Method",
-    complianceFootnote: "As per TN Revised Pay Rules, 2017 (G.O.Ms.No.303) & G.O.Ms.No.40 — 7th CPC DA reset applied from 01-01-2016.",
+    complianceFootnote: "As per Fundamental Rule 26 and Tamil Nadu Government Servants (Conditions of Service) Act 2016; Account / Department Test increment admitted vide G.O. orders in force.",
 
 
     // Result Table
@@ -220,6 +225,7 @@ export const translations = {
     payAtJoiningDesc7thPC: "2016க்குப் பின் (7வது ஊதியக் குழு) / Post 2016 (7th Pay Commission)",
     careerEventsHRA: "பணி நிகழ்வுகள் & வீட்டு வாடகைப்படி / Career Events & HRA",
     careerEventsHRADesc: "தர உயர்வு, இடமாற்றம் மற்றும் வீட்டு வாடகைப்படி வகைப்பாட்டிற்கான தேதிகளை உள்ளிடவும்.",
+    probationServiceTests: "தகுதிகாண் பருவம் & துறைத் தேர்வுகள்",
     advancesLPC: "LPCக்கான முன்பணம் & செலுத்த வேண்டியவைகள் / Advances & Payables for LPC",
     advancesLPCDesc: "விடுவிப்பு தேதியில் நிலுவையில் உள்ள மீதத்தொகையை உள்ளிடவும்.",
     promotions: "பதவி உயர்வுகள் / Promotions",
@@ -256,6 +262,9 @@ export const translations = {
     superGradeDate: "சூப்பர் கிரேடு (போனஸ்) தேதி / Super Grade (Bonus) Date",
     stagnationIncrementDate: "தேக்கநிலை ஊதிய உயர்வு தொடக்க தேதி / Stagnation Increment Start Date",
     probationDeclarationDate: "தகுதிகாண் பருவம் முடிந்த தேதி / Probation Declaration Date",
+    probationPeriod: "தகுதிகாண் பருவம்",
+    accountTest: "கணக்குத் தேர்வு",
+    departmentTest: "துறைத் தேர்வு",
     dateOfRelief: "விடுவிப்பு தேதி (இடமாற்றம்) / Date of Relief (Transfer)",
     cityGradeHRA: "வீட்டு வாடகைப்படிக்கான நகரம்/நகராட்சி தரம் / City/Town Grade for HRA",
     incrementEligibility: "ஊதிய உயர்வு தகுதி (மாதங்கள்) / Increment Eligibility (Months)",
@@ -281,6 +290,7 @@ export const translations = {
     enterFatherName: "தந்தை பெயரை உள்ளிடவும் / Enter father's name",
     stagnationHelpText: "நிலை 24+ பதவியில் நுழைந்த தேதி. / Date entered post at Level 24+.",
     probationHelpText: "இந்த தேதிக்குப் பிறகுதான் முதல் ஊதிய உயர்வு வழங்கப்படும்.",
+    passDateHelpText: "தேர்வில் தேர்ச்சி பெற்ற தேதி. இந்த தேதியில் ஒரு ஊதிய உயர்வு வழங்கப்படும்.",
     reliefHelpText: "இந்த தேதியில் கணக்கீடு முடிவடையும். / Calculation will end on this date.",
     incrementEligibilityHelpText: "ஆண்டு ஊதிய உயர்வு பெற ஒரு வருடத்தில் தேவைப்படும் சேவை மாதங்கள் (இயல்பாக 6).",
     incrementScheduleHelpText: "முதல் பதிவு சேரும் தேதியாக இருக்கும். அட்டவணை மாற்றப்பட்டால் மாற்றங்களைச் சேர்க்கவும்.",
@@ -314,7 +324,7 @@ export const translations = {
     promotionFixation: "பதவி உயர்வு ஊதிய நிர்ணயச் சுருக்கம்",
     reference: "ஆதாரம்",
     promotionFixationMethodLabel: "நிர்ணய முறை",
-    complianceFootnote: "தமிழ்நாடு திருத்திய ஊதிய விதிகள், 2017 (அ.ஆ. எண் 303) & அ.ஆ. எண் 40 படி, 01-01-2016 முதல் அ.ப. 0% என நிர்ணயம் செய்யப்பட்டது.",
+    complianceFootnote: "அடிப்படை விதி 26 மற்றும் தமிழ்நாடு அரசுப் பணியாளர் (பணி நிபந்தனைகள்) சட்டம் 2016-ன்படி; கணக்கு/துறைத் தேர்வுக்கான ஊதிய உயர்வு நடைமுறையில் உள்ள அரசாணைகளின்படி அனுமதிக்கப்பட்டது.",
 
 
     // Result Table

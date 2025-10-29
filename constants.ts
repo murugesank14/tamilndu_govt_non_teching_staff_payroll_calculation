@@ -309,6 +309,12 @@ export const HRA_SLABS_4TH_PC: HraSlab[] = [
     { payRange: [1501, 999999], rates: { 'Grade I(a)': 350, 'Grade I(b)': 200, 'Grade II': 150, 'Grade III': 80, 'Grade IV (Unclassified)': 50 } },
 ];
 
+export const PROBATION_PERIOD_OPTIONS = [
+  { value: 1, label: '1 Year (Group C / D)' },
+  { value: 2, label: '2 Years (Group A / B)' },
+  { value: 5, label: '5 Years (Local Body / RD)' }
+];
+
 
 export const GO_DATA: GovernmentOrder[] = [
   // Core 7th PC Rules

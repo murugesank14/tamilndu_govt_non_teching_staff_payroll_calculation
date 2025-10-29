@@ -171,7 +171,7 @@ export const calculateFullPayroll = (data: EmployeeInput, activeGoData: Governme
     const payCommission7thGO = activeGoData.find(go => go.rule?.type === 'PAY_COMMISSION_FIXATION' && go.effectiveFrom.startsWith('2016'));
 
 
-    const { dateOfJoining, calculationStartDate, calculationEndDate, promotions, annualIncrementChanges, breaksInService, selectionGradeDate, specialGradeDate, superGradeDate, stagnationIncrementDate, cityGrade, incrementEligibilityMonths, joiningPostId, joiningPostCustomName, selectionGradeTwoIncrements, specialGradeTwoIncrements, probationDeclarationDate, ...employeeDetails } = data;
+    const { dateOfJoining, calculationStartDate, calculationEndDate, promotions, annualIncrementChanges, breaksInService, selectionGradeDate, specialGradeDate, superGradeDate, stagnationIncrementDate, cityGrade, incrementEligibilityMonths, joiningPostId, joiningPostCustomName, selectionGradeTwoIncrements, specialGradeTwoIncrements, probationDeclarationDate, accountTestPassDate, departmentTestPassDate, ...employeeDetails } = data;
     
     const doj = parseDateUTC(dateOfJoining);
     const calcStartDate = parseDateUTC(calculationStartDate);
@@ -270,6 +270,8 @@ export const calculateFullPayroll = (data: EmployeeInput, activeGoData: Governme
     if (selectionGradeDate) events.push({ date: parseDateUTC(selectionGradeDate)!, type: 'SELECTION_GRADE', data: { twoIncrements: selectionGradeTwoIncrements }, priority: 3 });
     if (specialGradeDate) events.push({ date: parseDateUTC(specialGradeDate)!, type: 'SPECIAL_GRADE', data: { twoIncrements: specialGradeTwoIncrements }, priority: 3 });
     if (superGradeDate) events.push({ date: parseDateUTC(superGradeDate)!, type: 'SUPER_GRADE', priority: 3 });
+    if (accountTestPassDate) events.push({ date: parseDateUTC(accountTestPassDate)!, type: 'ACCOUNT_TEST_INCREMENT', priority: 4 });
+    if (departmentTestPassDate) events.push({ date: parseDateUTC(departmentTestPassDate)!, type: 'DEPARTMENTAL_TEST_INCREMENT', priority: 4 });
     promotions.forEach(p => p.date && events.push({ date: parseDateUTC(p.date)!, type: 'PROMOTION', data: p, priority: 3 }));
     PAY_REVISIONS_2010.forEach(rev => events.push({ date: new Date('2010-08-01T00:00:00Z'), type: 'PAY_REVISION_2010', data: rev, priority: 3 }));
     let lastStagnationCheckDate = stagnationIncrementDate ? parseDateUTC(stagnationIncrementDate) : null;
@@ -384,6 +386,22 @@ export const calculateFullPayroll = (data: EmployeeInput, activeGoData: Governme
                 }
                  // Handle promotions for other commissions if necessary...
             }
+            
+            if (event.type === 'ACCOUNT_TEST_INCREMENT' || event.type === 'DEPARTMENTAL_TEST_INCREMENT') {
+                const steps = 1;
+                const eventName = event.type === 'ACCOUNT_TEST_INCREMENT' ? 'Account Test Increment' : 'Departmental Test Increment';
+                if(currentCommission <= 5) {
+                    const scale = currentCommission === 4 ? current4thPCScaleString! : current5thPCScaleString!;
+                    currentPay = getIncrementForSlabScale(currentPay, scale, steps);
+                } else {
+                    const { newPay, newPipb } = getIncrement(currentPay, currentLevel, steps, currentCommission as 6 | 7, currentGradePay);
+                    currentPay = newPay;
+                    if(newPipb !== undefined) currentPipb = newPipb;
+                }
+                remarks.push(`${eventName} granted.`);
+                // Note: We do NOT set didIncrementThisMonth = true, as test increments are additional.
+            }
+
 
             let steps = 0;
             let eventName = '';
@@ -522,6 +540,9 @@ export const calculateFullPayroll = (data: EmployeeInput, activeGoData: Governme
     return {
         employeeDetails: {
             ...employeeDetails,
+            probationPeriod: data.probationPeriod,
+            accountTestPassDate: data.accountTestPassDate ? parseDateUTC(data.accountTestPassDate)!.toLocaleDateString('en-GB', { timeZone: 'UTC' }) : undefined,
+            departmentTestPassDate: data.departmentTestPassDate ? parseDateUTC(data.departmentTestPassDate)!.toLocaleDateString('en-GB', { timeZone: 'UTC' }) : undefined,
             dateOfBirth: parseDateUTC(employeeDetails.dateOfBirth)!.toLocaleDateString('en-GB', { timeZone: 'UTC' }),
             dateOfJoining: doj.toLocaleDateString('en-GB', { timeZone: 'UTC' }),
             dateOfJoiningInOffice: parseDateUTC(employeeDetails.dateOfJoiningInOffice)!.toLocaleDateString('en-GB', { timeZone: 'UTC' }),
