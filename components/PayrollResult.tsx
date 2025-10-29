@@ -54,13 +54,18 @@ const PromotionFixationCard: React.FC<{ fixations: PromotionFixation[] }> = ({ f
                     
                     <div><p className="text-gray-500">Old Basic (Lvl {fix.oldLevel})</p><p className="font-medium">{formatCurrency(fix.oldBasic)}</p></div>
                     
-                    {fix.payAfterAnnualIncrement && 
+                    {fix.optionUnderRule22b === 'Date of Next Increment' && fix.payAfterAnnualIncrement &&
                         <div><p className="text-gray-500">After Annual Inc.</p><p className="font-medium">{formatCurrency(fix.payAfterAnnualIncrement)}</p></div>
                     }
-
-                    <div><p className="text-gray-500">After Notional Inc.</p><p className="font-medium">{formatCurrency(fix.payAfterNotionalIncrement)}</p></div>
+                    {fix.optionUnderRule22b === 'Date of Promotion' &&
+                        <div><p className="text-gray-500">After Notional Inc.</p><p className="font-medium">{formatCurrency(fix.payAfterNotionalIncrement)}</p></div>
+                    }
                     
                     <div><p className="text-gray-500">New Basic (Lvl {fix.newLevel})</p><p className="font-bold text-lg text-blue-700">{formatCurrency(fix.newBasic)}</p></div>
+                </div>
+                 <div className="mt-3 pt-3 border-t border-gray-200">
+                    <p className="text-xs text-gray-500 font-semibold">{t('promotionFixationMethodLabel')}</p>
+                    <p className="text-xs text-gray-600">{fix.fixationMethod}</p>
                 </div>
                 <p className="text-xs text-gray-400 mt-2">Ref: {fix.goReference}</p>
             </div>
@@ -168,10 +173,12 @@ const PayrollResult: React.FC<PayrollResultProps> = ({ result }) => {
                      ['Effective Date of Fixation', fix.effectiveDate],
                      ['Basic Pay before fixation (Lvl ' + fix.oldLevel + ')', formatCurrencyForExport(fix.oldBasic)],
                  ];
-                 if(fix.payAfterAnnualIncrement) {
+                 if(fix.optionUnderRule22b === 'Date of Next Increment' && fix.payAfterAnnualIncrement) {
                       fixationBody.push(['Pay after Annual Increment', formatCurrencyForExport(fix.payAfterAnnualIncrement)]);
                  }
-                 fixationBody.push(['Pay after Notional Increment', formatCurrencyForExport(fix.payAfterNotionalIncrement)]);
+                 if(fix.optionUnderRule22b === 'Date of Promotion') {
+                    fixationBody.push(['Pay after Notional Increment', formatCurrencyForExport(fix.payAfterNotionalIncrement)]);
+                 }
                  fixationBody.push([{ content: 'New Basic Pay (Lvl ' + fix.newLevel + ')', styles: { fontStyle: 'bold' } }, { content: formatCurrencyForExport(fix.newBasic), styles: { fontStyle: 'bold' } }]);
                  fixationBody.push([t('reference'), fix.goReference]);
                  
@@ -565,6 +572,14 @@ const PayrollResult: React.FC<PayrollResultProps> = ({ result }) => {
       </div>
 
       <YearlyPayrollAccordion yearlyCalculations={yearlyCalculations} />
+
+      <Card className="mt-6 bg-gray-50 border-dashed">
+        <CardContent className="p-4">
+            <p className="text-xs text-center text-gray-600 italic">
+                {t('complianceFootnote')}
+            </p>
+        </CardContent>
+      </Card>
     </div>
   );
 };

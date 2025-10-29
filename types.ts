@@ -168,6 +168,7 @@ export interface PromotionFixation {
     payAfterAnnualIncrement?: number;
     newBasic: number;
     goReference: string;
+    fixationMethod: string;
 }
 
 export interface PayrollResult {

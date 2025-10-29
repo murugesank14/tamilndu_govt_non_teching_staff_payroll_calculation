@@ -149,6 +149,9 @@ export const translations = {
     payRevisionDesc: "Pay scale revisions applied as per the 2010 One Man Commission G.O.s.",
     promotionFixation: "Promotion Fixation Summary",
     reference: "Reference",
+    promotionFixationMethodLabel: "Fixation Method",
+    complianceFootnote: "Calculations as per TN Revised Pay Rules, 2017 (GO Ms No.303, 11.10.2017) & Rule 22(b); read with GO Ms No.40 (26.02.2021) for matrix clarifications.",
+
 
     // Result Table
     payrollForYear: "Payroll for {year} / {year}க்கான ஊதியம்",
@@ -310,6 +313,9 @@ export const translations = {
     payRevisionDesc: "2010 ஒரு நபர் ஆணையத்தின் அரசாணைகளின்படி ஊதிய விகிதத் திருத்தங்கள் பயன்படுத்தப்பட்டன.",
     promotionFixation: "பதவி உயர்வு ஊதிய நிர்ணயச் சுருக்கம்",
     reference: "ஆதாரம்",
+    promotionFixationMethodLabel: "நிர்ணய முறை",
+    complianceFootnote: "கணக்கீடுகள் தமிழ்நாடு திருத்திய ஊதிய விதிகள், 2017 (அ.ஆ.(நிலை) எண் 303, 11.10.2017) & விதி 22(பி); மேலும் அ.ஆ.(நிலை) எண் 40 (26.02.2021) உடன் படிக்கவும்.",
+
 
     // Result Table
     payrollForYear: "{year}க்கான ஊதியம் / Payroll for {year}",

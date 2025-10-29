@@ -385,6 +385,7 @@ export const calculateFullPayroll = (data: EmployeeInput, activeGoData: Governme
                             effectiveDate: currentDate.toLocaleDateString('en-GB', { timeZone: 'UTC' }),
                             oldBasic, payAfterNotionalIncrement: payAfterNotionalInc, newBasic,
                             goReference: `Rule 22(b), TNRPR 2017 (${promotionRule22bGO.goNumberAndDate.en})`,
+                            fixationMethod: 'One notional increment granted in lower level; fixed at next higher cell in new level.'
                         });
                     }
                 }
@@ -436,11 +437,8 @@ export const calculateFullPayroll = (data: EmployeeInput, activeGoData: Governme
                     const { newPay: payAfterAnnualInc } = getIncrement(oldBasic, oldLevel, 1, 7);
                     remarks.push('Annual Increment applied in lower post.');
 
-                    // 2. Grant notional promotion increment
-                    const { newPay: payForFixation } = getIncrement(payAfterAnnualInc, oldLevel, 1, 7);
-                    
-                    // 3. Fix pay in higher level
-                    const newBasic = findPayInMatrix(payForFixation, newLevel);
+                    // 2. Fix pay in higher level based on pay after annual increment
+                    const newBasic = findPayInMatrix(payAfterAnnualInc, newLevel);
 
                     currentPay = newBasic;
                     currentLevel = newLevel;
@@ -452,8 +450,10 @@ export const calculateFullPayroll = (data: EmployeeInput, activeGoData: Governme
                         optionUnderRule22b: 'Date of Next Increment',
                         effectiveDate: currentDate.toLocaleDateString('en-GB', { timeZone: 'UTC' }),
                         oldBasic, payAfterAnnualIncrement: payAfterAnnualInc,
-                        payAfterNotionalIncrement: payForFixation, newBasic,
+                        payAfterNotionalIncrement: payAfterAnnualInc, 
+                        newBasic,
                         goReference: `Rule 22(b), TNRPR 2017 (${promotionRule22bGO?.goNumberAndDate.en})`,
+                        fixationMethod: 'One annual increment granted in lower level; pay fixed at next higher cell in new level.'
                     });
 
                     deferredPromotionFixation = null; // Clear the flag
