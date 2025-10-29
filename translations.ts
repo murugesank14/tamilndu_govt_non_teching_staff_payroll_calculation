@@ -150,7 +150,7 @@ export const translations = {
     promotionFixation: "Promotion Fixation Summary",
     reference: "Reference",
     promotionFixationMethodLabel: "Fixation Method",
-    complianceFootnote: "As per TN Revised Pay Rules, 2017 (GO Ms No.303) & GO Ms No.40 (matrix clarifications).",
+    complianceFootnote: "As per TN Revised Pay Rules, 2017 (G.O.Ms.No.303) & G.O.Ms.No.40 — 7th CPC DA reset applied from 01-01-2016.",
 
 
     // Result Table
@@ -314,7 +314,7 @@ export const translations = {
     promotionFixation: "பதவி உயர்வு ஊதிய நிர்ணயச் சுருக்கம்",
     reference: "ஆதாரம்",
     promotionFixationMethodLabel: "நிர்ணய முறை",
-    complianceFootnote: "தமிழ்நாடு திருத்திய ஊதிய விதிகள், 2017 (அரசாணை (நிலை) எண் 303) மற்றும் அரசாணை (நிலை) எண் 40 (ஊதிய அணி தெளிவுரைகள்) ஆகியவற்றின்படி.",
+    complianceFootnote: "தமிழ்நாடு திருத்திய ஊதிய விதிகள், 2017 (அ.ஆ. எண் 303) & அ.ஆ. எண் 40 படி, 01-01-2016 முதல் அ.ப. 0% என நிர்ணயம் செய்யப்பட்டது.",
 
 
     // Result Table

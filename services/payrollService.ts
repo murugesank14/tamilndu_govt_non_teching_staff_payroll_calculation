@@ -476,12 +476,7 @@ export const calculateFullPayroll = (data: EmployeeInput, activeGoData: Governme
             const year = currentDate.getUTCFullYear();
             if (!yearlyCalculationsMap.has(year)) yearlyCalculationsMap.set(year, []);
 
-            let currentDaRate = getDARate(currentDate, currentCommission);
-
-            // MINIMAL FIX: Explicitly enforce DA=0% for the first 6 months of 7th CPC.
-            if (currentCommission === 7 && currentDate.getUTCFullYear() === 2016 && currentDate.getUTCMonth() < 6) { // Jan is 0, Jun is 5
-                currentDaRate = 0;
-            }
+            const currentDaRate = getDARate(currentDate, currentCommission);
             
             // Add remark for DA change
             const previousMonthDate = new Date(currentDate);
