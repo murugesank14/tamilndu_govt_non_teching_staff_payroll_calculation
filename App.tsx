@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { EmployeeInput, PayrollResult as PayrollResultType, GovernmentOrder, PensionInput, PensionResult as PensionResultType } from './types';
-import { calculateFullPayroll, calculatePension } from './services/payrollService';
+import { EmployeeInput, PayrollResult as PayrollResultType, GovernmentOrder, PensionInput, PensionResult as PensionResultType, GPFInput, GPFResult as GPFResultType } from './types';
+import { calculateFullPayroll, calculatePension, calculateGPF } from './services/payrollService';
 import PayrollForm from './components/PayrollForm';
 import PayrollResult from './components/PayrollResult';
 import { HeroIcon } from './components/ui/HeroIcon';
@@ -9,6 +9,9 @@ import GoViewer from './components/GoViewer';
 import { GO_DATA } from './constants';
 import PensionForm from './components/PensionForm';
 import PensionResult from './components/PensionResult';
+import GPFForm from './components/GPFForm';
+import GPFResult from './components/GPFResult';
+
 
 const LanguageSwitcher: React.FC = () => {
     const { language, setLanguage } = useLanguage();
@@ -33,11 +36,12 @@ const LanguageSwitcher: React.FC = () => {
     )
 }
 
-type ActiveView = 'calculator' | 'pensionCalculator' | 'goViewer';
+type ActiveView = 'calculator' | 'pensionCalculator' | 'gpfCalculator' | 'goViewer';
 
 const App: React.FC = () => {
   const [payrollResult, setPayrollResult] = useState<PayrollResultType | null>(null);
   const [pensionResult, setPensionResult] = useState<PensionResultType | null>(null);
+  const [gpfResult, setGpfResult] = useState<GPFResultType | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [activeView, setActiveView] = useState<ActiveView>('calculator');
@@ -85,6 +89,28 @@ const App: React.FC = () => {
         }
     }, 500);
   }
+  
+   const handleGpfCalculate = (data: GPFInput) => {
+    setIsLoading(true);
+    setError(null);
+    setGpfResult(null);
+
+    setTimeout(() => {
+        try {
+            const result = calculateGPF(data);
+            setGpfResult(result);
+        } catch (e) {
+            if (e instanceof Error) {
+                setError(e.message);
+            } else {
+                setError('An unknown error occurred during GPF calculation.');
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    }, 500);
+  }
+
 
   const getNavButtonClasses = (viewName: ActiveView) => {
     const baseClasses = "px-4 py-3 text-sm font-semibold transition-colors focus:outline-none";
@@ -118,13 +144,20 @@ const App: React.FC = () => {
     if (activeView === 'pensionCalculator' && pensionResult) {
         return <PensionResult result={pensionResult} />;
     }
+    if (activeView === 'gpfCalculator' && gpfResult) {
+        return <GPFResult result={gpfResult} />;
+    }
     
-    // Default welcome message for both calculators
+    // Default welcome message for all calculators
+    let welcomeMessage = t('welcomeMessage');
+    if (activeView === 'pensionCalculator') welcomeMessage = t('welcomePensionMessage');
+    if (activeView === 'gpfCalculator') welcomeMessage = t('welcomeGpfMessage');
+
     return (
         <div className="bg-white rounded-xl shadow-md p-8 text-center h-full flex flex-col justify-center">
             <h2 className="text-2xl font-semibold text-gray-700 mb-4">{t('welcomeTitle')}</h2>
             <p className="text-gray-500 max-w-md mx-auto">
-                {activeView === 'pensionCalculator' ? t('welcomePensionMessage') : t('welcomeMessage')}
+                {welcomeMessage}
             </p>
         </div>
     );
@@ -156,6 +189,9 @@ const App: React.FC = () => {
            <button onClick={() => setActiveView('pensionCalculator')} className={getNavButtonClasses('pensionCalculator')}>
             {t('pensionCalculator')}
           </button>
+           <button onClick={() => setActiveView('gpfCalculator')} className={getNavButtonClasses('gpfCalculator')}>
+            {t('gpfCalculator')}
+          </button>
           <button onClick={() => setActiveView('goViewer')} className={getNavButtonClasses('goViewer')}>
             {t('goViewer')}
           </button>
@@ -177,6 +213,16 @@ const App: React.FC = () => {
              <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
               <div className="lg:col-span-2">
                 <PensionForm onCalculate={handlePensionCalculate} isLoading={isLoading} />
+              </div>
+              <div className="lg:col-span-3">
+                {renderContent()}
+              </div>
+            </div>
+          )}
+          {activeView === 'gpfCalculator' && (
+             <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+              <div className="lg:col-span-2">
+                <GPFForm onCalculate={handleGpfCalculate} isLoading={isLoading} />
               </div>
               <div className="lg:col-span-3">
                 {renderContent()}

@@ -8,10 +8,12 @@ export const translations = {
     welcomeTitle: "Welcome!",
     welcomeMessage: 'Enter employee details on the left and click "Calculate Full Payroll" to see the detailed breakdown.',
     welcomePensionMessage: 'Enter retirement details on the left and click "Calculate Pension" to see the benefit breakdown.',
+    welcomeGpfMessage: 'Enter GPF account details and click "Calculate GPF Statement" to generate the annual report.',
 
     // Navigation
     payrollCalculator: "Payroll Calculator",
     pensionCalculator: "Pension Calculator",
+    gpfCalculator: "GPF Calculator",
     goViewer: "G.O. Viewer",
 
     // G.O. Viewer
@@ -72,7 +74,12 @@ export const translations = {
     commutation: "Commutation of Pension",
     qualifyingService: "Qualifying Service (Optional Override)",
     qualifyingServiceDesc: "Leave blank for auto-calculation from service dates.",
-    
+    gpfCalculatorTitle: "GPF Annual Statement Calculator",
+    gpfCalculatorDesc: "Generate the annual statement of accounts for General Provident Fund.",
+    gpfAccountDetails: "GPF Account Details",
+    gpfTransactions: "Transactions during the Year",
+    gpfTransactionsDesc: "Add any withdrawals, advances, or refunds made in the financial year.",
+
     // Form Labels
     employeeName: "Employee Name / ஊழியர் பெயர்",
     fatherName: "Father's Name / தந்தை பெயர்",
@@ -131,7 +138,21 @@ export const translations = {
     commuteOneThird: "Commute 1/3rd of Pension",
     years: "Years",
     months: "Months",
-
+    financialYear: "Financial Year",
+    openingBalance: "Opening Balance (as on April 1st)",
+    monthlySubscription: "Monthly Subscription",
+    subscriptionAmount: "Subscription Amount",
+    subscriptionPercentage: "% of Basic Pay",
+    currentBasicPay: "Current Basic Pay",
+    interestRate: "Annual Interest Rate (%)",
+    transactionType: "Transaction Type",
+    transactionDate: "Transaction Date",
+    transactionAmount: "Amount",
+    installments: "Installments",
+    temporaryAdvance: "Temporary Advance (Refundable)",
+    partialWithdrawal: "Partial Withdrawal (Non-Refundable)",
+    refundOfAdvance: "Refund of Advance",
+    
     // Form Placeholders & Help Text
     enterFullName: "Enter full name / முழு பெயரை உள்ளிடவும்",
     enterFatherName: "Enter father's name / தந்தை பெயரை உள்ளிடவும்",
@@ -145,15 +166,18 @@ export const translations = {
     selectDatePrompt: "Please select a Date of Joining to enter pay details.",
     typeOrSelectPost: "Type or select a post",
     gradeFixationNotePost2016: "Pay will be fixed two cells ahead in the same level as per G.O.Ms.No.40/2021.",
+    gpfInstallmentsHelp: "For temporary advance only.",
 
     // Form Buttons
     addChange: "+ Add Change / + மாற்றம் சேர்",
     add: "+ Add / + சேர்",
     addPromotion: "+ Add Promotion / + பதவி உயர்வு சேர்",
     addBreak: "+ Add Break / + இடைவெளி சேர்",
+    addTransaction: "+ Add Transaction",
     resetForm: "Reset Form / படிவத்தை மீட்டமை",
     calculatePayroll: "Calculate Full Payroll / முழு ஊதியத்தைக் கணக்கிடுக",
     calculatePension: "Calculate Pension",
+    calculateGpf: "Calculate GPF Statement",
     calculating: "Calculating... / கணக்கிடப்படுகிறது...",
 
     // Result Section
@@ -184,7 +208,16 @@ export const translations = {
     commutedValue: "Commuted Value of Pension (CVP)",
     residuaryPension: "Residuary Pension (per month, after commutation)",
     totalLumpSum: "Total Lump Sum Receivable",
-
+    gpfStatementForYear: "GPF Statement for {year}",
+    gpfStatementDesc: "Annual account statement for your General Provident Fund.",
+    gpfSummary: "GPF Summary",
+    totalSubscriptions: "Total Subscriptions",
+    totalWithdrawals: "Total Withdrawals",
+    totalRefunds: "Total Refunds",
+    interestEarned: "Interest Earned",
+    closingBalance: "Closing Balance (as on March 31st)",
+    gpfMonthlyBreakdown: "Monthly Breakdown",
+    exportGpfStatement: "Export Statement",
 
     // Result Table
     payrollForYear: "Payroll for {year} / {year}க்கான ஊதியம்",
@@ -195,6 +228,12 @@ export const translations = {
     hra: "HRA / வீட்டு வாடகைப்படி",
     grossPay: "Gross Pay / மொத்த ஊதியம்",
     note: "Note / குறிப்பு",
+    opening: "Opening",
+    subscription: "Subscription",
+    withdrawal: "Withdrawal",
+    refund: "Refund",
+    closing: "Closing",
+    
   },
   ta: {
     // App Header
@@ -205,10 +244,12 @@ export const translations = {
     welcomeTitle: "வருக!",
     welcomeMessage: "இடதுபுறத்தில் பணியாளர் விவரங்களை உள்ளிட்டு, விரிவான முறிவைக் காண 'முழு ஊதியத்தைக் கணக்கிடுக' என்பதைக் கிளிக் செய்யவும்.",
     welcomePensionMessage: "இடதுபுறத்தில் ஓய்வூதிய விவரங்களை உள்ளிட்டு, பலன்களின் முறிவைக் காண 'ஓய்வூதியத்தைக் கணக்கிடுக' என்பதைக் கிளிக் செய்யவும்.",
+    welcomeGpfMessage: "GPF கணக்கு விவரங்களை உள்ளிட்டு, ஆண்டு அறிக்கையை உருவாக்க 'GPF அறிக்கையைக் கணக்கிடுக' என்பதைக் கிளிக் செய்யவும்.",
 
     // Navigation
     payrollCalculator: "ஊதியக் கணக்கிடு",
     pensionCalculator: "ஓய்வூதியக் கணக்கிடு",
+    gpfCalculator: "GPF கணக்கிடு",
     goViewer: "அரசாணைகள்",
 
     // G.O. Viewer
@@ -269,6 +310,12 @@ export const translations = {
     commutation: "ஓய்வூதியப் commutation",
     qualifyingService: "தகுதியான சேவை (விருப்பத்தேர்வு மேலெழுதல்)",
     qualifyingServiceDesc: "சேவை தேதிகளிலிருந்து தானாக கணக்கிட, காலியாக விடவும்.",
+    gpfCalculatorTitle: "GPF ஆண்டு அறிக்கை கணக்கிடு",
+    gpfCalculatorDesc: "பொது வருங்கால வைப்பு நிதிக்கான ஆண்டு கணக்கு அறிக்கையை உருவாக்கவும்.",
+    gpfAccountDetails: "GPF கணக்கு விவரங்கள்",
+    gpfTransactions: "ஆண்டின் போது பரிவர்த்தனைகள்",
+    gpfTransactionsDesc: "நிதியாண்டில் செய்யப்பட்ட முன்பணம், திரும்பப் பெறுதல் அல்லது திரும்பச் செலுத்துதல் ஆகியவற்றைச் சேர்க்கவும்.",
+
 
     // Form Labels
     employeeName: "ஊழியர் பெயர் / Employee Name",
@@ -328,6 +375,20 @@ export const translations = {
     commuteOneThird: "1/3 பங்கு Commutation",
     years: "ஆண்டுகள்",
     months: "மாதங்கள்",
+    financialYear: "நிதியாண்டு",
+    openingBalance: "தொடக்க இருப்பு (ஏப்ரல் 1 ஆம் தேதி)",
+    monthlySubscription: "மாதாந்திர சந்தா",
+    subscriptionAmount: "சந்தா தொகை",
+    subscriptionPercentage: "% அடிப்படை ஊதியம்",
+    currentBasicPay: "தற்போதைய அடிப்படை ஊதியம்",
+    interestRate: "ஆண்டு வட்டி விகிதம் (%)",
+    transactionType: "பரிவர்த்தனை வகை",
+    transactionDate: "பரிவர்த்தனை தேதி",
+    transactionAmount: "தொகை",
+    installments: "தவணைகள்",
+    temporaryAdvance: "தற்காலிக முன்பணம் (திரும்பச் செலுத்தக்கூடியது)",
+    partialWithdrawal: "பகுதி திரும்பப் பெறுதல் (திரும்பச் செலுத்த முடியாதது)",
+    refundOfAdvance: "முன்பணம் திரும்பச் செலுத்துதல்",
 
     // Form Placeholders & Help Text
     enterFullName: "முழு பெயரை உள்ளிடவும் / Enter full name",
@@ -342,15 +403,18 @@ export const translations = {
     selectDatePrompt: "ஊதிய விவரங்களை உள்ளிட, பணியில் சேரும் தேதியைத் தேர்ந்தெடுக்கவும்.",
     typeOrSelectPost: "ஒரு பதவியைத் தட்டச்சு செய்யவும் அல்லது தேர்ந்தெடுக்கவும்",
     gradeFixationNotePost2016: "அ.ஆ.எண் 40/2021-ன்படி, ஊதியம் அதே நிலையில் இரண்டு செல்கள் முன்னோக்கி நிர்ணயிக்கப்படும்.",
+    gpfInstallmentsHelp: "தற்காலிக முன்பணத்திற்கு மட்டும்.",
 
     // Form Buttons
     addChange: "+ மாற்றம் சேர் / + Add Change",
     add: "+ சேர் / + Add",
     addPromotion: "+ பதவி உயர்வு சேர் / + Add Promotion",
     addBreak: "+ இடைவெளி சேர் / + Add Break",
+    addTransaction: "+ பரிவர்த்தனை சேர்",
     resetForm: "படிவத்தை மீட்டமை / Reset Form",
     calculatePayroll: "முழு ஊதியத்தைக் கணக்கிடுக / Calculate Full Payroll",
     calculatePension: "ஓய்வூதியத்தைக் கணக்கிடு",
+    calculateGpf: "GPF அறிக்கையைக் கணக்கிடு",
     calculating: "கணக்கிடப்படுகிறது... / Calculating...",
     
     // Result Section
@@ -381,6 +445,17 @@ export const translations = {
     commutedValue: "ஓய்வூதியத்தின் மாற்றப்பட்ட மதிப்பு (CVP)",
     residuaryPension: "மீதமுள்ள ஓய்வூதியம் (மாதந்தோறும், commutation பிறகு)",
     totalLumpSum: "மொத்தமாகப் பெறக்கூடிய தொகை",
+    gpfStatementForYear: "{year}க்கான GPF அறிக்கை",
+    gpfStatementDesc: "உங்கள் பொது வருங்கால வைப்பு நிதிக்கான ஆண்டு கணக்கு அறிக்கை.",
+    gpfSummary: "GPF சுருக்கம்",
+    totalSubscriptions: "மொத்த சந்தாக்கள்",
+    totalWithdrawals: "மொத்த திரும்பப் பெறுதல்",
+    totalRefunds: "மொத்த திரும்பச் செலுத்துதல்",
+    interestEarned: "பெற்ற வட்டி",
+    closingBalance: "இறுதி இருப்பு (மார்ச் 31 ஆம் தேதி)",
+    gpfMonthlyBreakdown: "மாதாந்திர விவரம்",
+    exportGpfStatement: "அறிக்கையை ஏற்றுமதி செய்",
+
 
     // Result Table
     payrollForYear: "{year}க்கான ஊதியம் / Payroll for {year}",
@@ -391,6 +466,11 @@ export const translations = {
     hra: "வீ.வா.ப / HRA",
     grossPay: "மொத்த ஊதியம் / Gross Pay",
     note: "குறிப்பு / Note",
+    opening: "தொடக்க இருப்பு",
+    subscription: "சந்தா",
+    withdrawal: "திரும்பப் பெறுதல்",
+    refund: "திரும்பச் செலுத்துதல்",
+    closing: "இறுதி இருப்பு",
   }
 };
 

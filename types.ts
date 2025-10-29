@@ -262,3 +262,49 @@ export interface PensionResult {
     totalLumpSum: number;
   };
 }
+
+// --- GPF Calculator Types ---
+export interface GPFTransaction {
+  id: string;
+  type: 'advance' | 'withdrawal' | 'refund';
+  date: string; // YYYY-MM-DD
+  amount: number | undefined;
+  installments?: number | undefined; // For temporary advance
+}
+
+export interface GPFInput {
+  employeeName: string;
+  basicPay: number | undefined;
+  openingBalance: number | undefined;
+  subscription: number | undefined;
+  isSubscriptionPercentage: boolean;
+  transactions: GPFTransaction[];
+  interestRate: number;
+  calculationYear: string; // e.g., "2023" for FY 2023-24
+}
+
+export interface GPFMonthlyCalculation {
+  month: string; // e.g., "April 2023"
+  opening: number;
+  subscription: number;
+  withdrawals: number;
+  refunds: number;
+  closingForInterest: number;
+  runningTotal: number;
+}
+
+export interface GPFResult {
+  inputs: {
+    financialYear: string;
+    interestRate: number;
+    openingBalance: number;
+  };
+  yearlyBreakdown: GPFMonthlyCalculation[];
+  totals: {
+    totalSubscriptions: number;
+    totalWithdrawals: number;
+    totalRefunds: number;
+    totalInterest: number;
+  };
+  closingBalance: number;
+}

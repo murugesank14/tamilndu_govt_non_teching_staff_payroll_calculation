@@ -1,4 +1,4 @@
-import { EmployeeInput, PayrollResult, PayrollYear, PayrollPeriod, CityGrade, Promotion, Post, PayRevision2010, PayScale, GovernmentOrder, PromotionFixation, PensionInput, PensionResult } from '../types';
+import { EmployeeInput, PayrollResult, PayrollYear, PayrollPeriod, CityGrade, Promotion, Post, PayRevision2010, PayScale, GovernmentOrder, PromotionFixation, PensionInput, PensionResult, GPFInput, GPFResult, GPFMonthlyCalculation } from '../types';
 import { 
     PAY_MATRIX, GRADE_PAY_TO_LEVEL, HRA_SLABS_7TH_PC, 
     PAY_SCALES_6TH_PC, HRA_SLABS_6TH_PC, HRA_SLABS_6TH_PC_PRE_2009, HRA_SLABS_5TH_PC, HRA_SLABS_4TH_PC, POSTS,
@@ -729,5 +729,86 @@ export const calculatePension = (data: PensionInput): PensionResult => {
             lastPayPlusDA,
         },
         benefits,
+    };
+};
+
+export const calculateGPF = (data: GPFInput): GPFResult => {
+    const { openingBalance = 0, subscription = 0, basicPay = 0, isSubscriptionPercentage, transactions, interestRate, calculationYear } = data;
+
+    if (!calculationYear) throw new Error("Please select a financial year.");
+    
+    const startYear = parseInt(calculationYear, 10);
+    const financialYear = `${startYear}-${(startYear + 1).toString().slice(-2)}`;
+
+    const monthlySubscription = isSubscriptionPercentage 
+        ? Math.round((basicPay * subscription) / 100) 
+        : subscription;
+
+    let runningBalance = openingBalance;
+    let progressiveTotal = 0;
+    const yearlyBreakdown: GPFMonthlyCalculation[] = [];
+    
+    let totalSubscriptions = 0;
+    let totalWithdrawals = 0;
+    let totalRefunds = 0;
+
+    for (let monthIndex = 0; monthIndex < 12; monthIndex++) {
+        const currentMonth = (monthIndex + 3) % 12; // 0=Jan, 3=Apr
+        const currentYear = monthIndex < 9 ? startYear : startYear + 1;
+        
+        const monthDate = new Date(Date.UTC(currentYear, currentMonth, 1));
+        const monthLabel = monthDate.toLocaleString('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+
+        const monthlyTransactions = transactions.filter(t => {
+            const tDate = parseDateUTC(t.date);
+            return tDate && tDate.getUTCFullYear() === currentYear && tDate.getUTCMonth() === currentMonth;
+        });
+
+        const monthlyWithdrawals = monthlyTransactions
+            .filter(t => (t.type === 'advance' || t.type === 'withdrawal') && t.amount)
+            .reduce((sum, t) => sum + t.amount!, 0);
+
+        const monthlyRefunds = monthlyTransactions
+            .filter(t => t.type === 'refund' && t.amount)
+            .reduce((sum, t) => sum + t.amount!, 0);
+
+        const openingForMonth = runningBalance;
+        const closingForInterest = openingForMonth + monthlySubscription + monthlyRefunds - monthlyWithdrawals;
+        
+        progressiveTotal += closingForInterest;
+        runningBalance = closingForInterest;
+        
+        totalSubscriptions += monthlySubscription;
+        totalWithdrawals += monthlyWithdrawals;
+        totalRefunds += monthlyRefunds;
+
+        yearlyBreakdown.push({
+            month: monthLabel,
+            opening: openingForMonth,
+            subscription: monthlySubscription,
+            withdrawals: monthlyWithdrawals,
+            refunds: monthlyRefunds,
+            closingForInterest: closingForInterest,
+            runningTotal: progressiveTotal,
+        });
+    }
+    
+    const totalInterest = Math.floor(progressiveTotal * (interestRate / 100) / 12);
+    const closingBalance = runningBalance + totalInterest;
+
+    return {
+        inputs: {
+            financialYear,
+            interestRate,
+            openingBalance,
+        },
+        yearlyBreakdown,
+        totals: {
+            totalSubscriptions,
+            totalWithdrawals,
+            totalRefunds,
+            totalInterest,
+        },
+        closingBalance
     };
 };
