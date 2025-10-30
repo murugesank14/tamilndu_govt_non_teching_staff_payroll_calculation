@@ -327,7 +327,8 @@ export const translations = {
     ifsc: "IFSC",
     accountNumber: "Account Number",
     systemGenerated: "This is a system generated report, hence does not require a signature.",
-    printPaySlip: "Print / Export PDF",
+    printPaySlip: "Print Pay Slip",
+    exportPDF: "Export as PDF",
 
     // Leave Balance
     yearlyLeaveBalanceTitle: "Yearly Leave Balance Details",
@@ -672,7 +673,8 @@ export const translations = {
     ifsc: "IFSC குறியீடு",
     accountNumber: "கணக்கு எண்",
     systemGenerated: "இது கணினி மூலம் உருவாக்கப்பட்ட அறிக்கை, எனவே கையொப்பம் தேவையில்லை.",
-    printPaySlip: "அச்சிடுக / PDF ஆக ஏற்றுமதி செய்க",
+    printPaySlip: "ஊதியச்சீட்டை அச்சிடு",
+    exportPDF: "PDF ஆக பதிவிறக்கு",
 
     // Leave Balance
     yearlyLeaveBalanceTitle: "ஆண்டு விடுப்பு இருப்பு விவரங்கள்",

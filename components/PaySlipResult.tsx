@@ -5,6 +5,14 @@ import { Button } from './ui/Button';
 // FIX: Import TranslationKey for correct type casting.
 import { TranslationKey } from '../translations';
 
+// Declare CDN libraries for TypeScript
+declare global {
+    interface Window {
+        jspdf: any;
+        html2canvas: any;
+    }
+}
+
 interface PaySlipResultProps {
     payrollResult: PayrollResult;
 }
@@ -65,6 +73,41 @@ const PaySlipResult: React.FC<PaySlipResultProps> = ({ payrollResult }) => {
     // FIX: Parse year string to an integer for the Date constructor to avoid potential runtime errors.
     const slipDate = new Date(parseInt(lastPeriod.period.split(' ')[1], 10), ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].indexOf(lastPeriod.period.split(' ')[0]));
     
+    const handleDownloadPDF = () => {
+        const { jsPDF } = window.jspdf;
+        const input = document.getElementById('payslip-print-area');
+        if (!input) return;
+
+        window.html2canvas(input, { scale: 2 }).then((canvas: any) => { // Increased scale for better quality
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = pdf.internal.pageSize.getHeight();
+            const canvasWidth = canvas.width;
+            const canvasHeight = canvas.height;
+            const ratio = canvasWidth / canvasHeight;
+            const imgWidth = pdfWidth - 20; // with margin
+            const imgHeight = imgWidth / ratio;
+            
+            let finalHeight = imgHeight;
+            let y = 10; // top margin
+            if (imgHeight > pdfHeight - 20) { // check with margin
+                finalHeight = pdfHeight - 20;
+            }
+
+            pdf.addImage(imgData, 'PNG', 10, y, imgWidth, finalHeight);
+            
+            // Add footer
+            const today = new Date().toLocaleString();
+            pdf.setFontSize(8);
+            pdf.setTextColor(150);
+            pdf.text(`Exported on: ${today}`, 10, pdfHeight - 10);
+            
+            const fileName = `PaySlip_${employeeDetails.employeeName.replace(/\s/g, '')}_${lastPeriod.period.replace(/\s/g, '')}.pdf`;
+            pdf.save(fileName);
+        });
+    };
+
     return (
         <div className="bg-white p-4 sm:p-8 rounded-xl shadow-lg">
              <style>{`
@@ -75,6 +118,10 @@ const PaySlipResult: React.FC<PaySlipResultProps> = ({ payrollResult }) => {
                     .no-print { display: none; }
                 }
             `}</style>
+             <div className="flex justify-end gap-3 mb-4 no-print">
+                <Button onClick={() => window.print()} variant="outline" size="sm">{t('printPaySlip')}</Button>
+                <Button onClick={handleDownloadPDF} variant="default" size="sm">{t('exportPDF')}</Button>
+            </div>
             <div id="payslip-print-area">
                 <div className="text-center mb-6">
                     <h1 className="text-xl font-bold">GOVERNMENT OF TAMIL NADU</h1>
@@ -169,9 +216,6 @@ const PaySlipResult: React.FC<PaySlipResultProps> = ({ payrollResult }) => {
                     <p>ASSISTANT DIRECTOR OF LOCAL FUND AUDIT, SIVAGANGAI</p>
                     <p className="italic mt-2">{t('systemGenerated')}</p>
                 </div>
-            </div>
-            <div className="text-center mt-8 no-print">
-                <Button onClick={() => window.print()}>{t('printPaySlip')}</Button>
             </div>
         </div>
     );
