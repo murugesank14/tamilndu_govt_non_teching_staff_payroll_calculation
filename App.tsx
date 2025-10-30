@@ -1,6 +1,9 @@
 
 
 
+
+
+
 import React, { useState } from 'react';
 import { EmployeeInput, PayrollResult as PayrollResultType, GovernmentOrder, PensionInput, PensionResult as PensionResultType, GPFInput, GPFResult as GPFResultType, LeaveInput, LeaveResult as LeaveResultType, AuditPara } from './types';
 import { calculateFullPayroll, calculatePension, calculateGPF, calculateLeave } from './services/payrollService';
@@ -20,7 +23,10 @@ import AuditParaForm from './components/AuditParaForm';
 import AuditParaResult from './components/AuditParaResult';
 import PaySlipResult from './components/PaySlipResult';
 import LeaveBalanceResult from './components/LeaveBalanceResult';
-import { CalendarDaysIcon, CircleDollarSignIcon, SheetIcon, LandmarkIcon, AlertTriangleIcon, GanttChartSquareIcon, FileSearchIcon, FileJsonIcon, ScanSearchIcon } from './components/ui/Icons';
+// FIX: Import translations to resolve type errors for 't' function and navItems.
+import { translations } from './translations';
+// FIX: Replaced FileJsonIcon with JsonIcon and ensured all other icons are correctly imported. They will be added to Icons.tsx.
+import { CalendarDaysIcon, CircleDollarSignIcon, SheetIcon, LandmarkIcon, AlertTriangleIcon, GanttChartSquareIcon, FileSearchIcon, JsonIcon, ScanSearchIcon } from './components/ui/Icons';
 import { Notification } from './components/ui/Notification';
 import PaySlipVerifier from './components/PaySlipVerifier';
 
@@ -68,88 +74,84 @@ const App: React.FC = () => {
     setIsLoading(true);
     setError(null);
     setPayrollResult(null);
-
-    setTimeout(() => {
-      try {
-        const result = calculateFullPayroll(data, activeGoData);
-        setPayrollResult(result);
-        if (activeView === 'calculator') {
-            // Automatically switch to related views if they are not the active one
-            // This is just an example, you might want a more sophisticated logic
-        }
-      } catch (e) {
-        if (e instanceof Error) {
-          setError(e.message);
-        } else {
-          setError('An unknown error occurred during calculation.');
-        }
-      } finally {
-        setIsLoading(false);
+    try {
+      if (!data) throw new Error("Input data is missing or invalid.");
+      const result = calculateFullPayroll(data, activeGoData);
+      if (!result) throw new Error("Calculation returned an invalid result.");
+      setPayrollResult(result);
+    } catch (e) {
+      console.error("Payroll Calculation Error:", e);
+      if (e instanceof Error) {
+        setError(`Payroll calculation failed: ${e.message}`);
+      } else {
+        setError('An unknown error occurred during payroll calculation.');
       }
-    }, 500);
+    } finally {
+      setIsLoading(false);
+    }
   };
   
   const handlePensionCalculate = (data: PensionInput) => {
     setIsLoading(true);
     setError(null);
     setPensionResult(null);
-
-    setTimeout(() => {
-        try {
-            const result = calculatePension(data);
-            setPensionResult(result);
-        } catch (e) {
-            if (e instanceof Error) {
-                setError(e.message);
-            } else {
-                setError('An unknown error occurred during pension calculation.');
-            }
-        } finally {
-            setIsLoading(false);
-        }
-    }, 500);
+    try {
+      if (!data) throw new Error("Input data is missing or invalid.");
+      const result = calculatePension(data);
+      if (!result) throw new Error("Calculation returned an invalid result.");
+      setPensionResult(result);
+    } catch (e) {
+      console.error("Pension Calculation Error:", e);
+      if (e instanceof Error) {
+        setError(`Pension calculation failed: ${e.message}`);
+      } else {
+        setError('An unknown error occurred during pension calculation.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
   }
   
    const handleGpfCalculate = (data: GPFInput) => {
     setIsLoading(true);
     setError(null);
     setGpfResult(null);
-
-    setTimeout(() => {
-        try {
-            const result = calculateGPF(data);
-            setGpfResult(result);
-        } catch (e) {
-            if (e instanceof Error) {
-                setError(e.message);
-            } else {
-                setError('An unknown error occurred during GPF calculation.');
-            }
-        } finally {
-            setIsLoading(false);
-        }
-    }, 500);
+    try {
+      if (!data) throw new Error("Input data is missing or invalid.");
+      const result = calculateGPF(data);
+      if (!result) throw new Error("Calculation returned an invalid result.");
+      setGpfResult(result);
+    } catch (e) {
+      console.error("GPF Calculation Error:", e);
+      if (e instanceof Error) {
+        setError(`GPF calculation failed: ${e.message}`);
+      } else {
+        setError('An unknown error occurred during GPF calculation.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   const handleLeaveCalculate = (data: LeaveInput) => {
     setIsLoading(true);
     setError(null);
     setLeaveResult(null);
-
-    setTimeout(() => {
-        try {
-            const result = calculateLeave(data);
-            setLeaveResult(result);
-        } catch (e) {
-            if (e instanceof Error) {
-                setError(e.message);
-            } else {
-                setError('An unknown error occurred during leave calculation.');
-            }
-        } finally {
-            setIsLoading(false);
-        }
-    }, 500);
+    try {
+      if (!data) throw new Error("Input data is missing or invalid.");
+      const result = calculateLeave(data);
+      if (!result) throw new Error("Calculation returned an invalid result.");
+      setLeaveResult(result);
+    } catch (e) {
+      console.error("Leave Calculation Error:", e);
+      if (e instanceof Error) {
+        setError(`Leave calculation failed: ${e.message}`);
+      } else {
+        setError('An unknown error occurred during leave calculation.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
   
   const handleSaveAuditPara = (para: AuditPara) => {
@@ -178,7 +180,8 @@ const App: React.FC = () => {
     { id: 'gpfCalculator', labelKey: 'gpfCalculator', icon: <SheetIcon className="w-5 h-5" /> },
     { id: 'leaveCalculator', labelKey: 'leaveCalculator', icon: <CalendarDaysIcon className="w-5 h-5" /> },
     { id: 'auditTracker', labelKey: 'auditTracker', icon: <AlertTriangleIcon className="w-5 h-5" /> },
-    { id: 'goViewer', labelKey: 'goViewer', icon: <FileJsonIcon className="w-5 h-5" /> },
+    // FIX: Replaced non-existent FileJsonIcon with the available JsonIcon.
+    { id: 'goViewer', labelKey: 'goViewer', icon: <JsonIcon className="w-5 h-5" /> },
     { id: 'paySlip', labelKey: 'paySlipOutput', icon: <GanttChartSquareIcon className="w-5 h-5" /> },
     { id: 'leaveBalance', labelKey: 'yearlyLeaveBalance', icon: <FileSearchIcon className="w-5 h-5" /> },
     { id: 'paySlipVerifier', labelKey: 'paySlipVerifier', icon: <ScanSearchIcon className="w-5 h-5" /> },
@@ -233,6 +236,7 @@ const App: React.FC = () => {
                     }`}
                 >
                     {item.icon}
+                    {/* FIX: This call is now correctly typed after importing 'translations'. */}
                     <span>{t(item.labelKey)}</span>
                 </button>
             ))}
@@ -257,10 +261,10 @@ const App: React.FC = () => {
               <div className="space-y-4">
                 {isLoading && <div className="p-8 text-center bg-white rounded-xl shadow-md">Calculating...</div>}
                 
-                {activeView === 'calculator' && (payrollResult ? <PayrollResult result={payrollResult} /> : !isLoading && <WelcomeMessage view="calculator" />)}
-                {activeView === 'pensionCalculator' && (pensionResult ? <PensionResult result={pensionResult} /> : !isLoading && <WelcomeMessage view="pensionCalculator" />)}
-                {activeView === 'gpfCalculator' && (gpfResult ? <GPFResult result={gpfResult} /> : !isLoading && <WelcomeMessage view="gpfCalculator" />)}
-                {activeView === 'leaveCalculator' && (leaveResult ? <LeaveResult result={leaveResult} /> : !isLoading && <WelcomeMessage view="leaveCalculator" />)}
+                {activeView === 'calculator' && (payrollResult ? <PayrollResult result={payrollResult} /> : !isLoading && !error && <WelcomeMessage view="calculator" />)}
+                {activeView === 'pensionCalculator' && (pensionResult ? <PensionResult result={pensionResult} /> : !isLoading && !error && <WelcomeMessage view="pensionCalculator" />)}
+                {activeView === 'gpfCalculator' && (gpfResult ? <GPFResult result={gpfResult} /> : !isLoading && !error && <WelcomeMessage view="gpfCalculator" />)}
+                {activeView === 'leaveCalculator' && (leaveResult ? <LeaveResult result={leaveResult} /> : !isLoading && !error && <WelcomeMessage view="leaveCalculator" />)}
                 {activeView === 'auditTracker' && <AuditParaResult paras={auditParas} onEdit={(id) => setEditingAuditPara(auditParas.find(p=>p.id === id) || null)} onDelete={handleDeleteAuditPara} />}
                 {activeView === 'paySlip' && (payrollResult ? <PaySlipResult payrollResult={payrollResult} /> : <WelcomeMessage view="paySlip" />)}
                 {activeView === 'leaveBalance' && (leaveResult ? <LeaveBalanceResult leaveResult={leaveResult} /> : <WelcomeMessage view="leaveBalance" />)}
