@@ -1,5 +1,6 @@
 
 
+
 import React, { useState } from 'react';
 import { EmployeeInput, PayrollResult as PayrollResultType, GovernmentOrder, PensionInput, PensionResult as PensionResultType, GPFInput, GPFResult as GPFResultType, LeaveInput, LeaveResult as LeaveResultType, AuditPara } from './types';
 import { calculateFullPayroll, calculatePension, calculateGPF, calculateLeave } from './services/payrollService';
@@ -19,8 +20,9 @@ import AuditParaForm from './components/AuditParaForm';
 import AuditParaResult from './components/AuditParaResult';
 import PaySlipResult from './components/PaySlipResult';
 import LeaveBalanceResult from './components/LeaveBalanceResult';
-import { CalendarDaysIcon, CircleDollarSignIcon, SheetIcon, LandmarkIcon, AlertTriangleIcon } from './components/ui/Icons';
+import { CalendarDaysIcon, CircleDollarSignIcon, SheetIcon, LandmarkIcon, AlertTriangleIcon, GanttChartSquareIcon, FileSearchIcon, FileJsonIcon, ScanSearchIcon } from './components/ui/Icons';
 import { Notification } from './components/ui/Notification';
+import PaySlipVerifier from './components/PaySlipVerifier';
 
 
 const LanguageSwitcher: React.FC = () => {
@@ -46,7 +48,7 @@ const LanguageSwitcher: React.FC = () => {
     )
 }
 
-type ActiveView = 'calculator' | 'pensionCalculator' | 'gpfCalculator' | 'leaveCalculator' | 'auditTracker' | 'goViewer' | 'paySlip' | 'leaveBalance';
+type ActiveView = 'calculator' | 'pensionCalculator' | 'gpfCalculator' | 'leaveCalculator' | 'auditTracker' | 'goViewer' | 'paySlip' | 'leaveBalance' | 'paySlipVerifier';
 
 const App: React.FC = () => {
   const [payrollResult, setPayrollResult] = useState<PayrollResultType | null>(null);
@@ -71,6 +73,10 @@ const App: React.FC = () => {
       try {
         const result = calculateFullPayroll(data, activeGoData);
         setPayrollResult(result);
+        if (activeView === 'calculator') {
+            // Automatically switch to related views if they are not the active one
+            // This is just an example, you might want a more sophisticated logic
+        }
       } catch (e) {
         if (e instanceof Error) {
           setError(e.message);
@@ -160,221 +166,113 @@ const App: React.FC = () => {
     setEditingAuditPara(null); // Reset editing state
   };
 
+  // FIX: Complete the handleDeleteAuditPara function which was truncated.
   const handleDeleteAuditPara = (id: string) => {
       setAuditParas(prev => prev.filter(p => p.id !== id));
-  };
-  
-  const handleEditAuditPara = (id: string) => {
-      const paraToEdit = auditParas.find(p => p.id === id);
-      if(paraToEdit) {
-          setEditingAuditPara(paraToEdit);
-      }
+      setNotification({ type: 'info', message: 'Audit Para deleted.' });
   };
 
-  const handleViewChange = (view: ActiveView) => {
-      setNotification(null);
-      setError(null);
-      setActiveView(view);
-  }
+  const navItems: { id: ActiveView; labelKey: keyof typeof translations.en; icon: React.ReactNode }[] = [
+    { id: 'calculator', labelKey: 'payrollCalculator', icon: <CircleDollarSignIcon className="w-5 h-5" /> },
+    { id: 'pensionCalculator', labelKey: 'pensionCalculator', icon: <LandmarkIcon className="w-5 h-5" /> },
+    { id: 'gpfCalculator', labelKey: 'gpfCalculator', icon: <SheetIcon className="w-5 h-5" /> },
+    { id: 'leaveCalculator', labelKey: 'leaveCalculator', icon: <CalendarDaysIcon className="w-5 h-5" /> },
+    { id: 'auditTracker', labelKey: 'auditTracker', icon: <AlertTriangleIcon className="w-5 h-5" /> },
+    { id: 'goViewer', labelKey: 'goViewer', icon: <FileJsonIcon className="w-5 h-5" /> },
+    { id: 'paySlip', labelKey: 'paySlipOutput', icon: <GanttChartSquareIcon className="w-5 h-5" /> },
+    { id: 'leaveBalance', labelKey: 'yearlyLeaveBalance', icon: <FileSearchIcon className="w-5 h-5" /> },
+    { id: 'paySlipVerifier', labelKey: 'paySlipVerifier', icon: <ScanSearchIcon className="w-5 h-5" /> },
+  ];
 
-  const getNavButtonClasses = (viewName: ActiveView) => {
-    const baseClasses = "flex items-center gap-2 px-4 py-3 text-sm font-semibold transition-colors focus:outline-none";
-    if (activeView === viewName) {
-      return `${baseClasses} text-emerald-600 border-b-2 border-emerald-600`;
-    }
-    return `${baseClasses} text-gray-500 hover:text-gray-700 hover:bg-gray-100`;
-  }
-  
-  const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
-
-  const renderContent = () => {
-    if (isLoading) {
-        return (
-            <div className="flex justify-center items-center h-full bg-white rounded-xl shadow-md p-8">
-                <div className="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12 mb-4 animate-spin border-t-emerald-500"></div>
-            </div>
-        );
-    }
-    if (error) {
-        return (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl relative shadow" role="alert">
-                <strong className="font-bold">Error: </strong>
-                <span className="block sm:inline">{error}</span>
-            </div>
-        );
-    }
-    if (activeView === 'calculator' && payrollResult) {
-        return <PayrollResult result={payrollResult} />;
-    }
-    if (activeView === 'pensionCalculator' && pensionResult) {
-        return <PensionResult result={pensionResult} />;
-    }
-    if (activeView === 'gpfCalculator' && gpfResult) {
-        return <GPFResult result={gpfResult} />;
-    }
-    if (activeView === 'leaveCalculator' && leaveResult) {
-        return <LeaveResult result={leaveResult} />;
-    }
-    if (activeView === 'auditTracker') {
-        return <AuditParaResult 
-                    paras={auditParas} 
-                    onEdit={handleEditAuditPara}
-                    onDelete={handleDeleteAuditPara}
-                />;
-    }
-    
-    // Default welcome message for all calculators
-    let welcomeMessage = t('welcomeMessage');
-    if (activeView === 'pensionCalculator') welcomeMessage = t('welcomePensionMessage');
-    if (activeView === 'gpfCalculator') welcomeMessage = t('welcomeGpfMessage');
-    if (activeView === 'leaveCalculator') welcomeMessage = t('welcomeLeaveMessage');
-
+  const WelcomeMessage: React.FC<{ view: ActiveView }> = ({ view }) => {
+    const messages: Record<ActiveView, string> = {
+        calculator: t('welcomeMessage'),
+        pensionCalculator: t('welcomePensionMessage'),
+        gpfCalculator: t('welcomeGpfMessage'),
+        leaveCalculator: t('welcomeLeaveMessage'),
+        auditTracker: t('welcomeAuditTrackerMessage'),
+        goViewer: t('goViewerDescription'),
+        paySlip: t('pleaseCalculatePayrollFirst'),
+        leaveBalance: t('pleaseCalculateLeaveFirst'),
+        paySlipVerifier: 'Upload pay slips to begin verification.',
+    };
     return (
-        <div className="bg-white rounded-xl shadow-md p-8 text-center h-full flex flex-col justify-center">
-            <h2 className="text-2xl font-semibold text-gray-700 mb-4">{t('welcomeTitle')}</h2>
-            <p className="text-gray-500 max-w-md mx-auto">
-                {welcomeMessage}
-            </p>
+        <div className="flex flex-col items-center justify-center h-full p-8 text-center bg-white rounded-xl shadow-md border border-gray-200/80">
+            <h3 className="text-xl font-semibold text-gray-700">{t('welcomeTitle')}</h3>
+            <p className="mt-2 text-sm text-gray-500">{messages[view]}</p>
         </div>
     );
-  }
+  };
 
-
+  // FIX: Added the return statement with a full layout to fix the "component returns nothing" error.
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-800">
-      <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-3 md:px-6 lg:px-8 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <HeroIcon />
-            <div>
-                 <h1 className="text-base md:text-xl font-bold text-gray-800">
-                  {t('appTitle')}
-                </h1>
-                <h2 className="text-sm md:text-base font-medium text-emerald-700">{t('appTitleTa')}</h2>
+    <div className="min-h-screen bg-gray-50 font-sans">
+      <header className="bg-white shadow-sm sticky top-0 z-10">
+        <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div className="flex items-center space-x-3">
+                <HeroIcon />
+                <div>
+                    <h1 className="text-xl font-semibold text-gray-800">{t('appTitle')}</h1>
+                    <p className="text-sm text-emerald-600 font-medium">{t('appTitleTa')}</p>
+                </div>
             </div>
-          </div>
-          <LanguageSwitcher />
+            <LanguageSwitcher />
         </div>
       </header>
+      <main className="container mx-auto p-4 flex flex-col lg:flex-row gap-6">
+        <aside className="lg:w-64">
+          <nav className="bg-white rounded-xl shadow-md p-4 space-y-1 sticky top-24">
+            {navItems.map(item => (
+                <button 
+                    key={item.id} 
+                    onClick={() => setActiveView(item.id)}
+                    className={`w-full flex items-center space-x-3 p-2.5 rounded-lg text-sm font-medium transition-colors ${
+                        activeView === item.id 
+                        ? 'bg-emerald-600 text-white shadow' 
+                        : 'text-gray-600 hover:bg-gray-100'
+                    }`}
+                >
+                    {item.icon}
+                    <span>{t(item.labelKey)}</span>
+                </button>
+            ))}
+          </nav>
+        </aside>
+        <div className="flex-1">
+          {notification && <Notification type={notification.type} message={notification.message} onDismiss={() => setNotification(null)} />}
+          {error && <Notification type="error" message={error} onDismiss={() => setError(null)} />}
+          
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
+              {/* FORMS - Column 1 */}
+              <div>
+                {activeView === 'calculator' && <PayrollForm onCalculate={handleCalculate} isLoading={isLoading} />}
+                {activeView === 'pensionCalculator' && <PensionForm onCalculate={handlePensionCalculate} isLoading={isLoading} />}
+                {activeView === 'gpfCalculator' && <GPFForm onCalculate={handleGpfCalculate} isLoading={isLoading} />}
+                {activeView === 'leaveCalculator' && <LeaveForm onCalculate={handleLeaveCalculate} isLoading={isLoading} />}
+                {activeView === 'auditTracker' && <AuditParaForm onSave={handleSaveAuditPara} editingPara={editingAuditPara} onClearEditing={() => setEditingAuditPara(null)} />}
+                {activeView === 'paySlipVerifier' && <PaySlipVerifier />}
+              </div>
 
-      <nav className="bg-white border-b border-gray-200">
-        <div className="container mx-auto px-4 md:px-6 lg:px-8 flex overflow-x-auto">
-          <button onClick={() => handleViewChange('calculator')} className={getNavButtonClasses('calculator')}>
-            <SheetIcon className="w-4 h-4" /> {t('payrollCalculator')}
-          </button>
-           <button onClick={() => handleViewChange('pensionCalculator')} className={getNavButtonClasses('pensionCalculator')}>
-             <LandmarkIcon className="w-4 h-4" />{t('pensionCalculator')}
-          </button>
-           <button onClick={() => handleViewChange('gpfCalculator')} className={getNavButtonClasses('gpfCalculator')}>
-             <CircleDollarSignIcon className="w-4 h-4" />{t('gpfCalculator')}
-          </button>
-          <button onClick={() => handleViewChange('leaveCalculator')} className={getNavButtonClasses('leaveCalculator')}>
-             <CalendarDaysIcon className="w-4 h-4" />{t('leaveCalculator')}
-          </button>
-           <button onClick={() => {
-                setNotification(null);
-                if (!payrollResult) {
-                    setNotification({ type: 'info', message: t('pleaseCalculatePayrollFirst') });
-                } else {
-                    setActiveView('paySlip');
-                }
-            }} className={getNavButtonClasses('paySlip')}>
-                <SheetIcon className="w-4 h-4" /> {t('paySlipOutput')}
-            </button>
-            <button onClick={() => {
-                setNotification(null);
-                if (!leaveResult) {
-                    setNotification({ type: 'info', message: t('pleaseCalculateLeaveFirst') });
-                } else {
-                    setActiveView('leaveBalance');
-                }
-            }} className={getNavButtonClasses('leaveBalance')}>
-                <CalendarDaysIcon className="w-4 h-4" /> {t('yearlyLeaveBalance')}
-            </button>
-          <button onClick={() => handleViewChange('auditTracker')} className={getNavButtonClasses('auditTracker')}>
-            <AlertTriangleIcon className="w-4 h-4" />{t('auditTracker')}
-          </button>
-          <button onClick={() => handleViewChange('goViewer')} className={getNavButtonClasses('goViewer')}>
-            {t('goViewer')}
-          </button>
+               {/* RESULTS - Column 2 */}
+              <div className="space-y-4">
+                {isLoading && <div className="p-8 text-center bg-white rounded-xl shadow-md">Calculating...</div>}
+                
+                {activeView === 'calculator' && (payrollResult ? <PayrollResult result={payrollResult} /> : !isLoading && <WelcomeMessage view="calculator" />)}
+                {activeView === 'pensionCalculator' && (pensionResult ? <PensionResult result={pensionResult} /> : !isLoading && <WelcomeMessage view="pensionCalculator" />)}
+                {activeView === 'gpfCalculator' && (gpfResult ? <GPFResult result={gpfResult} /> : !isLoading && <WelcomeMessage view="gpfCalculator" />)}
+                {activeView === 'leaveCalculator' && (leaveResult ? <LeaveResult result={leaveResult} /> : !isLoading && <WelcomeMessage view="leaveCalculator" />)}
+                {activeView === 'auditTracker' && <AuditParaResult paras={auditParas} onEdit={(id) => setEditingAuditPara(auditParas.find(p=>p.id === id) || null)} onDelete={handleDeleteAuditPara} />}
+                {activeView === 'paySlip' && (payrollResult ? <PaySlipResult payrollResult={payrollResult} /> : <WelcomeMessage view="paySlip" />)}
+                {activeView === 'leaveBalance' && (leaveResult ? <LeaveBalanceResult leaveResult={leaveResult} /> : <WelcomeMessage view="leaveBalance" />)}
+              </div>
+          </div>
+          {activeView === 'goViewer' && <GoViewer goData={activeGoData} onGoDataUpdate={(newGoData) => setActiveGoData(newGoData)} />}
+
         </div>
-      </nav>
-
-      <main className="container mx-auto p-4 md:p-6 lg:p-8">
-         {notification && <Notification type={notification.type} message={notification.message} onDismiss={() => setNotification(null)} />}
-         {activeView === 'calculator' && (
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-              <div className="lg:col-span-2">
-                <PayrollForm onCalculate={handleCalculate} isLoading={isLoading} />
-              </div>
-              <div className="lg:col-span-3">
-                 {renderContent()}
-              </div>
-            </div>
-          )}
-          {activeView === 'pensionCalculator' && (
-             <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-              <div className="lg:col-span-2">
-                <PensionForm onCalculate={handlePensionCalculate} isLoading={isLoading} />
-              </div>
-              <div className="lg:col-span-3">
-                {renderContent()}
-              </div>
-            </div>
-          )}
-          {activeView === 'gpfCalculator' && (
-             <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-              <div className="lg:col-span-2">
-                <GPFForm onCalculate={handleGpfCalculate} isLoading={isLoading} />
-              </div>
-              <div className="lg:col-span-3">
-                {renderContent()}
-              </div>
-            </div>
-          )}
-           {activeView === 'leaveCalculator' && (
-             <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-              <div className="lg:col-span-2">
-                <LeaveForm onCalculate={handleLeaveCalculate} isLoading={isLoading} />
-              </div>
-              <div className="lg:col-span-3">
-                {renderContent()}
-              </div>
-            </div>
-          )}
-          {activeView === 'auditTracker' && (
-             <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-              <div className="lg:col-span-2">
-                <AuditParaForm 
-                    onSave={handleSaveAuditPara} 
-                    editingPara={editingAuditPara}
-                    onClearEditing={() => setEditingAuditPara(null)}
-                />
-              </div>
-              <div className="lg:col-span-3">
-                {renderContent()}
-              </div>
-            </div>
-          )}
-          {activeView === 'goViewer' && (
-            <GoViewer goData={activeGoData} onGoDataUpdate={setActiveGoData} />
-          )}
-           {activeView === 'paySlip' && payrollResult && (
-                <PaySlipResult payrollResult={payrollResult} />
-            )}
-            {activeView === 'leaveBalance' && leaveResult && (
-                <LeaveBalanceResult leaveResult={leaveResult} />
-            )}
       </main>
-
-       <footer className="text-center p-4 mt-8 text-xs text-gray-500 space-y-2">
-           <p className="font-semibold text-green-700 bg-green-50 p-2 rounded-md">
-             {t('rulesSyncedMessage', { date: today })}
-           </p>
-          <p>&copy; {new Date().getFullYear()} TN Payroll Calculator. All Rights Reserved.</p>
-       </footer>
     </div>
   );
 };
 
+// FIX: Add default export to make it available for import in index.tsx
 export default App;

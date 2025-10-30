@@ -24,6 +24,7 @@ export const translations = {
     goViewer: "G.O. Viewer",
     paySlipOutput: "Pay Slip",
     yearlyLeaveBalance: "Leave Balance",
+    paySlipVerifier: "Pay Slip Verifier",
 
 
     // G.O. Viewer
@@ -344,6 +345,15 @@ export const translations = {
     specialCasualLeave: "Special Casual Leave (SCL)",
     compensatoryLeave: "Compensatory Leave (CL)",
     exportLeaveBalance: "Export Balance",
+
+    // Pay Slip Verifier
+    paySlipFormatVerifier: "Pay Slip Format Checker",
+    uploadGovtSlip: "Upload Official Pay Slip (Govt)",
+    uploadAppSlip: "Upload Generated Pay Slip",
+    compareNow: "Compare Format",
+    matched: "Matched Fields",
+    mismatched: "Mismatched Fields",
+    autoFixSuggestions: "Auto-Fix Suggestions",
   },
   ta: {
     // App Header
@@ -369,6 +379,7 @@ export const translations = {
     goViewer: "அரசாணைகள்",
     paySlipOutput: "ஊதியச் சீட்டு",
     yearlyLeaveBalance: "விடுப்பு இருப்பு",
+    paySlipVerifier: "ஊதியச்சீட்டு சரிபார்ப்பு",
 
     // G.O. Viewer
     goViewerTitle: "தமிழ்நாடு அரசாணைகள் (G.O.)",
@@ -690,6 +701,15 @@ export const translations = {
     specialCasualLeave: "சிறப்பு தற்செயல் விடுப்பு (SCL)",
     compensatoryLeave: "ஈடுசெய் விடுப்பு (CL)",
     exportLeaveBalance: "இருப்பை ஏற்றுமதி செய்",
+
+    // Pay Slip Verifier
+    paySlipFormatVerifier: "ஊதியச்சீட்டு வடிவமைப்பு சரிபார்ப்பு",
+    uploadGovtSlip: "அதிகாரப்பூர்வ ஊதியச்சீட்டை பதிவேற்றவும் (அரசு)",
+    uploadAppSlip: "உருவாக்கப்பட்ட ஊதியச்சீட்டை பதிவேற்றவும்",
+    compareNow: "வடிவமைப்பை ஒப்பிடுக",
+    matched: "பொருந்திய புலங்கள்",
+    mismatched: "பொருந்தாத புலங்கள்",
+    autoFixSuggestions: "தானியங்கு திருத்தப் பரிந்துரைகள்",
   }
 };
 
