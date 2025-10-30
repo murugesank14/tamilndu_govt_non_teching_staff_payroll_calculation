@@ -20,6 +20,7 @@ import AuditParaResult from './components/AuditParaResult';
 import PaySlipResult from './components/PaySlipResult';
 import LeaveBalanceResult from './components/LeaveBalanceResult';
 import { CalendarDaysIcon, CircleDollarSignIcon, SheetIcon, LandmarkIcon, AlertTriangleIcon } from './components/ui/Icons';
+import { Notification } from './components/ui/Notification';
 
 
 const LanguageSwitcher: React.FC = () => {
@@ -58,6 +59,7 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [activeView, setActiveView] = useState<ActiveView>('calculator');
   const [activeGoData, setActiveGoData] = useState<GovernmentOrder[]>(GO_DATA);
+  const [notification, setNotification] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
   const { t } = useLanguage();
 
   const handleCalculate = (data: EmployeeInput) => {
@@ -169,6 +171,11 @@ const App: React.FC = () => {
       }
   };
 
+  const handleViewChange = (view: ActiveView) => {
+      setNotification(null);
+      setError(null);
+      setActiveView(view);
+  }
 
   const getNavButtonClasses = (viewName: ActiveView) => {
     const baseClasses = "flex items-center gap-2 px-4 py-3 text-sm font-semibold transition-colors focus:outline-none";
@@ -252,21 +259,22 @@ const App: React.FC = () => {
 
       <nav className="bg-white border-b border-gray-200">
         <div className="container mx-auto px-4 md:px-6 lg:px-8 flex overflow-x-auto">
-          <button onClick={() => setActiveView('calculator')} className={getNavButtonClasses('calculator')}>
+          <button onClick={() => handleViewChange('calculator')} className={getNavButtonClasses('calculator')}>
             <SheetIcon className="w-4 h-4" /> {t('payrollCalculator')}
           </button>
-           <button onClick={() => setActiveView('pensionCalculator')} className={getNavButtonClasses('pensionCalculator')}>
+           <button onClick={() => handleViewChange('pensionCalculator')} className={getNavButtonClasses('pensionCalculator')}>
              <LandmarkIcon className="w-4 h-4" />{t('pensionCalculator')}
           </button>
-           <button onClick={() => setActiveView('gpfCalculator')} className={getNavButtonClasses('gpfCalculator')}>
+           <button onClick={() => handleViewChange('gpfCalculator')} className={getNavButtonClasses('gpfCalculator')}>
              <CircleDollarSignIcon className="w-4 h-4" />{t('gpfCalculator')}
           </button>
-          <button onClick={() => setActiveView('leaveCalculator')} className={getNavButtonClasses('leaveCalculator')}>
+          <button onClick={() => handleViewChange('leaveCalculator')} className={getNavButtonClasses('leaveCalculator')}>
              <CalendarDaysIcon className="w-4 h-4" />{t('leaveCalculator')}
           </button>
            <button onClick={() => {
+                setNotification(null);
                 if (!payrollResult) {
-                    alert(t('pleaseCalculatePayrollFirst') || "Please calculate payroll before viewing pay slip.");
+                    setNotification({ type: 'info', message: t('pleaseCalculatePayrollFirst') });
                 } else {
                     setActiveView('paySlip');
                 }
@@ -274,24 +282,26 @@ const App: React.FC = () => {
                 <SheetIcon className="w-4 h-4" /> {t('paySlipOutput')}
             </button>
             <button onClick={() => {
+                setNotification(null);
                 if (!leaveResult) {
-                    alert(t('pleaseCalculateLeaveFirst') || "Please calculate leave before viewing yearly balance.");
+                    setNotification({ type: 'info', message: t('pleaseCalculateLeaveFirst') });
                 } else {
                     setActiveView('leaveBalance');
                 }
             }} className={getNavButtonClasses('leaveBalance')}>
                 <CalendarDaysIcon className="w-4 h-4" /> {t('yearlyLeaveBalance')}
             </button>
-          <button onClick={() => setActiveView('auditTracker')} className={getNavButtonClasses('auditTracker')}>
+          <button onClick={() => handleViewChange('auditTracker')} className={getNavButtonClasses('auditTracker')}>
             <AlertTriangleIcon className="w-4 h-4" />{t('auditTracker')}
           </button>
-          <button onClick={() => setActiveView('goViewer')} className={getNavButtonClasses('goViewer')}>
+          <button onClick={() => handleViewChange('goViewer')} className={getNavButtonClasses('goViewer')}>
             {t('goViewer')}
           </button>
         </div>
       </nav>
 
       <main className="container mx-auto p-4 md:p-6 lg:p-8">
+         {notification && <Notification type={notification.type} message={notification.message} onDismiss={() => setNotification(null)} />}
          {activeView === 'calculator' && (
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
               <div className="lg:col-span-2">
