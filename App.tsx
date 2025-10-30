@@ -170,11 +170,8 @@ const App: React.FC = () => {
   };
 
 
-  const getNavButtonClasses = (viewName: ActiveView, disabled = false) => {
+  const getNavButtonClasses = (viewName: ActiveView) => {
     const baseClasses = "flex items-center gap-2 px-4 py-3 text-sm font-semibold transition-colors focus:outline-none";
-    if(disabled) {
-        return `${baseClasses} text-gray-300 cursor-not-allowed`;
-    }
     if (activeView === viewName) {
       return `${baseClasses} text-emerald-600 border-b-2 border-emerald-600`;
     }
@@ -267,10 +264,22 @@ const App: React.FC = () => {
           <button onClick={() => setActiveView('leaveCalculator')} className={getNavButtonClasses('leaveCalculator')}>
              <CalendarDaysIcon className="w-4 h-4" />{t('leaveCalculator')}
           </button>
-           <button onClick={() => payrollResult && setActiveView('paySlip')} className={getNavButtonClasses('paySlip', !payrollResult)} disabled={!payrollResult}>
+           <button onClick={() => {
+                if (!payrollResult) {
+                    alert(t('pleaseCalculatePayrollFirst') || "Please calculate payroll before viewing pay slip.");
+                } else {
+                    setActiveView('paySlip');
+                }
+            }} className={getNavButtonClasses('paySlip')}>
                 <SheetIcon className="w-4 h-4" /> {t('paySlipOutput')}
             </button>
-            <button onClick={() => leaveResult && setActiveView('leaveBalance')} className={getNavButtonClasses('leaveBalance', !leaveResult)} disabled={!leaveResult}>
+            <button onClick={() => {
+                if (!leaveResult) {
+                    alert(t('pleaseCalculateLeaveFirst') || "Please calculate leave before viewing yearly balance.");
+                } else {
+                    setActiveView('leaveBalance');
+                }
+            }} className={getNavButtonClasses('leaveBalance')}>
                 <CalendarDaysIcon className="w-4 h-4" /> {t('yearlyLeaveBalance')}
             </button>
           <button onClick={() => setActiveView('auditTracker')} className={getNavButtonClasses('auditTracker')}>

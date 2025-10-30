@@ -11,6 +11,8 @@ export const translations = {
     welcomeGpfMessage: 'Enter GPF account details and click "Calculate GPF Statement" to generate the annual report.',
     welcomeLeaveMessage: 'Enter current leave balances and add transactions to calculate your updated leave account.',
     welcomeAuditTrackerMessage: 'Use the form on the left to add or edit audit paras. The dashboard will show all entries and recovery progress.',
+    pleaseCalculatePayrollFirst: "Please calculate payroll before viewing pay slip.",
+    pleaseCalculateLeaveFirst: "Please calculate leave before viewing yearly leave balance.",
 
 
     // Navigation
@@ -354,6 +356,8 @@ export const translations = {
     welcomeGpfMessage: "GPF கணக்கு விவரங்களை உள்ளிட்டு, ஆண்டு அறிக்கையை உருவாக்க 'GPF அறிக்கையைக் கணக்கிடுக' என்பதைக் கிளிக் செய்யவும்.",
     welcomeLeaveMessage: "தற்போதைய விடுப்பு இருப்புகளை உள்ளிட்டு, உங்கள் புதுப்பிக்கப்பட்ட விடுப்பு கணக்கைக் கணக்கிட பரிவர்த்தனைகளைச் சேர்க்கவும்.",
     welcomeAuditTrackerMessage: "தணிக்கைக் குறிப்புகளைச் சேர்க்க அல்லது திருத்த இடதுபுறத்தில் உள்ள படிவத்தைப் பயன்படுத்தவும். டாஷ்போர்டு அனைத்து பதிவுகளையும் மீட்பு முன்னேற்றத்தையும் காண்பிக்கும்.",
+    pleaseCalculatePayrollFirst: "ஊதியச் சீட்டைப் பார்ப்பதற்கு முன், ஊதியத்தைக் கணக்கிடவும்.",
+    pleaseCalculateLeaveFirst: "ஆண்டு விடுப்பு இருப்பைப் பார்ப்பதற்கு முன், விடுப்பைக் கணக்கிடவும்.",
 
     // Navigation
     payrollCalculator: "ஊதியக் கணக்கிடு",

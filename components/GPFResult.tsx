@@ -89,7 +89,8 @@ const GPFResult: React.FC<GPFResultProps> = ({ result }) => {
           </div>
         </CardHeader>
         <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-2 text-sm">
-            <div><p className="text-gray-500">{t('openingBalance')}</p><p className="font-semibold">{formatCurrency(inputs.openingBalance)}</p></div>
+            {/* FIX: Corrected translation key from 'openingBalance' to 'gpfOpeningBalance' */}
+            <div><p className="text-gray-500">{t('gpfOpeningBalance')}</p><p className="font-semibold">{formatCurrency(inputs.openingBalance)}</p></div>
             <div><p className="text-gray-500">{t('totalSubscriptions')}</p><p className="font-semibold text-green-600">{formatCurrency(totals.totalSubscriptions)}</p></div>
             <div><p className="text-gray-500">{t('interestRate')}</p><p className="font-semibold">{inputs.interestRate}%</p></div>
             <div><p className="text-gray-500">{t('totalWithdrawals')}</p><p className="font-semibold text-red-600">{formatCurrency(totals.totalWithdrawals)}</p></div>
